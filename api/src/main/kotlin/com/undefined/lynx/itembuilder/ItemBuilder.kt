@@ -154,11 +154,14 @@ class ItemBuilder {
         this.maxDamage = maxDamage
     }
 
-    fun <T: ItemBuildMeta> meta(): T =
-        itemMeta as? T ?: run {
+    fun <T: ItemBuildMeta> meta(consumer: T.() -> Unit): ItemBuilder {
+        val meta = itemMeta as? T ?: run {
             itemMeta = getItemMeta()
             itemMeta as T
         }
+        consumer(meta)
+        return this
+    }
 
     fun build(): ItemStack {
         val item = itemStack ?: ItemStack(material!!)
@@ -222,6 +225,7 @@ class ItemBuilder {
         material!! == Material.SHIELD -> ShieldMeta()
         material!! == Material.SUSPICIOUS_STEW -> SuspiciousStewMeta()
         material!! == Material.TROPICAL_FISH_BUCKET -> TropicalFishBucketMeta()
+        material!! == Material.PLAYER_HEAD -> SkullMeta()
         else -> null
     }
 

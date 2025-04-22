@@ -1,6 +1,7 @@
 package com.undefined.lynx.server
 
 import com.undefined.lynx.itembuilder.ItemBuilder
+import com.undefined.lynx.itembuilder.meta.SkullMeta
 import com.undefined.stellar.StellarCommand
 import com.undefined.stellar.StellarConfig
 import com.undefined.stellar.argument.entity.EntityDisplayType
@@ -55,8 +56,13 @@ class Main : JavaPlugin() {
 
         StellarCommand("item")
             .addExecution<Player> {
-                sender.inventory.addItem(ItemBuilder(Material.STONE).setDamage(10).setMaxDamage(100).build())
+                sender.inventory.addItem()
             }.register()
+
+        ItemBuilder(Material.PLAYER_HEAD)
+            .meta<SkullMeta> {
+
+            }.build()
 
         StellarCommand("yeet")
             .addEntityArgument("entity", EntityDisplayType.ENTITIES)
