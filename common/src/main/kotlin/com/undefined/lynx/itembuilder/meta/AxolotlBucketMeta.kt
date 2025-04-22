@@ -15,13 +15,13 @@ class AxolotlBucketMeta: ItemBuildMeta() {
     }
 
     @ApiStatus.Internal
-    private fun setItemCache(itemMeta: ItemMeta) {
+    override fun setItemCache(itemMeta: ItemMeta) {
         val axolotlMeta = itemMeta as org.bukkit.inventory.meta.AxolotlBucketMeta
         this.variant = axolotlMeta.variant
     }
 
     @ApiStatus.Internal
-    private fun setMetaFromCache(itemMeta: ItemMeta): ItemMeta {
+    override fun setMetaFromCache(itemMeta: ItemMeta): ItemMeta {
         if (variant != null) {
             val axolotlMeta = itemMeta as org.bukkit.inventory.meta.AxolotlBucketMeta
             axolotlMeta.variant = variant!!

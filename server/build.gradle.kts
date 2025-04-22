@@ -16,7 +16,7 @@ repositories {
 dependencies {
     compileOnly(libs.spigot)
 
-    implementation("com.undefined:stellar:0.1.49:spigot")
+    implementation("com.undefined:stellar:0.1.68")
 
     implementation(project(":api"))
     implementation(project(":common"))

@@ -1,10 +1,10 @@
-package com.undefined.lynx.itembuilder.meta
+package com.undefined.lynx.itembuilder.meta.book
 
 import org.bukkit.inventory.meta.BookMeta
 import org.bukkit.inventory.meta.BookMeta.Generation
 import org.bukkit.inventory.meta.ItemMeta
 
-class BookMeta : WritableBookMeta() {
+class BookMeta : AbstractWritableBookMeta<BookMeta>() {
 
     private var author: String? = null
     private var generation: Generation? = null

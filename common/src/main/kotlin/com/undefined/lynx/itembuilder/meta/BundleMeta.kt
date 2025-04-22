@@ -3,7 +3,6 @@ package com.undefined.lynx.itembuilder.meta
 import com.undefined.lynx.itembuilder.ItemBuildMeta
 import com.undefined.lynx.itembuilder.ItemBuilder
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.BannerMeta
 import org.bukkit.inventory.meta.BundleMeta
 import org.bukkit.inventory.meta.ItemMeta
 import org.jetbrains.annotations.ApiStatus
@@ -33,13 +32,13 @@ class BundleMeta : ItemBuildMeta() {
     }
 
     @ApiStatus.Internal
-    private fun setItemCache(itemMeta: ItemMeta) {
+    override fun setItemCache(itemMeta: ItemMeta) {
         val bundleMeta = itemMeta as BundleMeta
         items = bundleMeta.items
     }
 
     @ApiStatus.Internal
-    private fun setMetaFromCache(itemMeta: ItemMeta): ItemMeta {
+    override fun setMetaFromCache(itemMeta: ItemMeta): ItemMeta {
         val bundleMeta = itemMeta as? BundleMeta ?: return itemMeta
         bundleMeta.setItems(items)
         return bundleMeta

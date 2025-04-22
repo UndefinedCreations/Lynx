@@ -1,6 +1,15 @@
 package com.undefined.lynx.itembuilder
 
 import com.undefined.lynx.itembuilder.meta.*
+import com.undefined.lynx.itembuilder.meta.armor.ArmorMeta
+import com.undefined.lynx.itembuilder.meta.armor.LeatherArmorMeta
+import com.undefined.lynx.itembuilder.meta.banner.BannerMeta
+import com.undefined.lynx.itembuilder.meta.banner.ShieldMeta
+import com.undefined.lynx.itembuilder.meta.book.BookMeta
+import com.undefined.lynx.itembuilder.meta.book.KnowledgeBookMeta
+import com.undefined.lynx.itembuilder.meta.book.WriteableBookMeta
+import com.undefined.lynx.itembuilder.meta.firework.FireworkEffectMeta
+import com.undefined.lynx.itembuilder.meta.firework.FireworkMeta
 import com.undefined.lynx.util.component
 import com.undefined.lynx.util.legacyString
 import com.undefined.lynx.util.miniMessage
@@ -14,10 +23,11 @@ import org.bukkit.enchantments.EnchantmentTarget
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemRarity
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.BlockDataMeta
+import org.bukkit.inventory.meta.Damageable
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 
+@Suppress("UNCHECKED_CAST")
 class ItemBuilder {
 
     private var itemStack: ItemStack? = null
@@ -35,6 +45,8 @@ class ItemBuilder {
     private var hideToolTips: Boolean = false
     private var maxStackSize = -1
     private var itemRarity: ItemRarity? = null
+    private var damage: Int = -1
+    private var maxDamage: Int = -1
 
     private var itemMeta: ItemBuildMeta? = null
 
@@ -135,22 +147,25 @@ class ItemBuilder {
     fun setItemRarity(itemRarity: ItemRarity): ItemBuilder = apply {
         this.itemRarity = itemRarity
     }
+    fun setDamage(damage: Int) = apply {
+        this.damage = damage
+    }
+    fun setMaxDamage(maxDamage: Int) = apply {
+        this.maxDamage = maxDamage
+    }
 
-
-    @Suppress("UNCHECKED_CAST")
     fun <T: ItemBuildMeta> meta(): T =
         itemMeta as? T ?: run {
             itemMeta = getItemMeta()
             itemMeta as T
         }
 
-    @Suppress("UNCHECKED_CAST")
     fun build(): ItemStack {
         val item = itemStack ?: ItemStack(material!!)
         item.addUnsafeEnchantments(enchantments)
         item.amount = this.amount
 
-        val meta = item.itemMeta ?: return item
+        var meta = item.itemMeta ?: return item
 
         meta.setDisplayName(this.name?.legacyString())
         meta.lore = this.lore.map { it.legacyString() }
@@ -163,6 +178,12 @@ class ItemBuilder {
         meta.isHideTooltip = hideToolTips
         if (maxStackSize > 0) meta.setMaxStackSize(maxStackSize)
         if (itemRarity != null) meta.setRarity(itemRarity)
+
+        val damageable = meta as? Damageable
+        if (damage >= 0) damageable?.damage = damage
+        if (maxDamage >= 0) damageable?.setMaxDamage(maxDamage)
+
+        meta = damageable ?: meta
 
         item.itemMeta = itemMeta?.let { setMetaFromCache(it, meta) } ?: meta
         return item
@@ -183,11 +204,24 @@ class ItemBuilder {
     private fun getItemMeta(): ItemBuildMeta? = when {
         material!!.name.contains("LEATHER_") -> LeatherArmorMeta()
         material!!.name.contains("BANNER") -> BannerMeta()
-        EnchantmentTarget.ARMOR.includes(material!!) -> com.undefined.lynx.itembuilder.meta.ArmorMeta()
+        material!!.name.contains("SPAWN_EGG") -> SpawnEggMeta()
+        EnchantmentTarget.ARMOR.includes(material!!) -> ArmorMeta()
         material!! == Material.AXOLOTL_BUCKET -> AxolotlBucketMeta()
-        material!! == Material.WRITABLE_BOOK -> WritableBookMeta()
+        material!! == Material.WRITABLE_BOOK -> WriteableBookMeta()
         material!! == Material.WRITTEN_BOOK -> BookMeta()
         material!! == Material.BUNDLE -> BundleMeta()
+        material!! == Material.COMPASS -> CompassMeta()
+        material!! == Material.CROSSBOW -> CrossbowMeta()
+        material!! == Material.FIREWORK_STAR -> FireworkEffectMeta()
+        material!! == Material.FIREWORK_ROCKET -> FireworkMeta()
+        material!! == Material.KNOWLEDGE_BOOK -> KnowledgeBookMeta()
+        material!! == Material.MAP -> MapMeta()
+        material!! == Material.GOAT_HORN -> MusicInstrumentMeta()
+        material!! == Material.OMINOUS_BOTTLE -> OminousBottleMeta()
+        material!! == Material.POTION -> PotionMeta()
+        material!! == Material.SHIELD -> ShieldMeta()
+        material!! == Material.SUSPICIOUS_STEW -> SuspiciousStewMeta()
+        material!! == Material.TROPICAL_FISH_BUCKET -> TropicalFishBucketMeta()
         else -> null
     }
 

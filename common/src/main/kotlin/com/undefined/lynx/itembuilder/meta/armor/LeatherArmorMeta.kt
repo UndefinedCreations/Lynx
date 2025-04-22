@@ -1,10 +1,10 @@
-package com.undefined.lynx.itembuilder.meta
+package com.undefined.lynx.itembuilder.meta.armor
 
 import org.bukkit.Color
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.LeatherArmorMeta
 
-class LeatherArmorMeta : ArmorMeta() {
+class LeatherArmorMeta : AbstractArmorMeta<LeatherArmorMeta>() {
 
     private var color: Color? = null
 

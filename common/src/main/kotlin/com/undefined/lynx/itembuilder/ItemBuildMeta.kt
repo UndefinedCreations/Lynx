@@ -1,3 +1,14 @@
 package com.undefined.lynx.itembuilder
 
-abstract class ItemBuildMeta {}
+import org.bukkit.inventory.meta.ItemMeta
+import org.jetbrains.annotations.ApiStatus
+
+abstract class ItemBuildMeta {
+
+    @ApiStatus.Internal
+    protected abstract fun setItemCache(itemMeta: ItemMeta)
+
+    @ApiStatus.Internal
+    protected abstract fun setMetaFromCache(itemMeta: ItemMeta): ItemMeta
+
+}
