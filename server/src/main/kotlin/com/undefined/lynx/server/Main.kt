@@ -10,6 +10,8 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemRarity
+import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 
 @Suppress("UNUSED_VARIABLE")
@@ -54,15 +56,32 @@ class Main : JavaPlugin() {
 //        command.register()
 
 
+
+        val itemStack: ItemStack = ItemBuilder(Material.PLAYER_HEAD)
+            .setName("TEstingf")
+            .setLore("line 1", "line 2")
+            .setItemRarity(ItemRarity.RARE)
+            .meta<SkullMeta> {}
+            .build()
+
+
+        eve
+
+
+
+
+
+
+
+
+
+
+
         StellarCommand("item")
             .addExecution<Player> {
                 sender.inventory.addItem()
             }.register()
 
-        ItemBuilder(Material.PLAYER_HEAD)
-            .meta<SkullMeta> {
-
-            }.build()
 
         StellarCommand("yeet")
             .addEntityArgument("entity", EntityDisplayType.ENTITIES)
