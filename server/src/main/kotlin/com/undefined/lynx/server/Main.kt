@@ -8,6 +8,7 @@ import com.undefined.stellar.StellarCommand
 import com.undefined.stellar.StellarConfig
 import com.undefined.stellar.argument.entity.EntityDisplayType
 import com.undefined.stellar.argument.world.LocationType
+import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Entity
@@ -59,35 +60,28 @@ class Main : JavaPlugin() {
 //        command.register()
 
         val main = StellarCommand("nick")
-
         val nameSub= main.addArgument("name")
-
         nameSub.addArgument("set")
             .addStringArgument("name")
             .addExecution<Player> {
                 val name: String by args
-                sender.setName(name)
+                sender.setName(ChatColor.translateAlternateColorCodes('&', name))
             }
-
         nameSub.addArgument("reset")
             .addExecution<Player> {
                 sender.resetName()
             }
-
         val skinSub = main.addArgument("skin")
-
         skinSub.addArgument("reset")
             .addExecution<Player> {
                 sender.resetSkin()
             }
-
         skinSub.addArgument("set")
             .addOnlinePlayersArgument("player")
             .addExecution<Player> {
                 val player: Player by args
                 sender.setSkin(player.getSkin())
             }
-
         main.register()
 
 
