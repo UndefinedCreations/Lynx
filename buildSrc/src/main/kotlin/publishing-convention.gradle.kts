@@ -1,5 +1,6 @@
 plugins {
     `java-library`
+    id("com.gradleup.shadow")
     `maven-publish`
 }
 
@@ -7,11 +8,11 @@ publishing {
     publications {
         create<MavenPublication>("mavenJava") {
             artifactId = rootProject.name
-            from(components["java"])
+            from(components["shadow"])
 
             pom {
                 name = "Lynx"
-                description = " A simple spigot utils api."
+                description = "A general purpose API for Java and Kotlin."
                 url = "https://www.github.com/UndefinedCreations/Lynx"
                 licenses {
                     license {
@@ -22,10 +23,20 @@ publishing {
                 }
                 developers {
                     developer {
-                        id = "undefined"
-                        name = "UndefinedCreation"
-                        url = "https://github.com/UndefinedCreations/"
+                        id = "redmagic"
+                        name = "TheRedMagic"
+                        url = "https://github.com/TheRedMagic/"
                     }
+                    developer {
+                        id = "lutto"
+                        name = "StillLutto"
+                        url = "https://github.com/StillLutto/"
+                    }
+                }
+                scm {
+                    url = "https://github.com/UndefinedCreations/Lynx/"
+                    connection = "scm:git:git://github.com/UndefinedCreations/Lynx.git"
+                    developerConnection = "scm:git:ssh://git@github.com/UndefinedCreations/Lynx.git"
                 }
             }
         }
@@ -34,16 +45,19 @@ publishing {
         maven {
             name = "undefined-repo"
             url = uri("https://repo.undefinedcreations.com/releases")
-//            credentials(PasswordCredentials::class) {
-//                username = System.getenv("MAVEN_NAME") ?: property("mavenUser").toString()
-//                password = System.getenv("MAVEN_SECRET") ?: property("mavenPassword").toString()
-//            }
+            credentials(PasswordCredentials::class) {
+                username = System.getenv("MAVEN_NAME") ?: property("mavenUser").toString()
+                password = System.getenv("MAVEN_SECRET") ?: property("mavenPassword").toString()
+            }
         }
     }
 }
 
 tasks {
     jar {
+        archiveClassifier = "dev"
+    }
+    shadowJar {
         archiveClassifier = "dev"
     }
 }
