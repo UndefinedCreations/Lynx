@@ -1,5 +1,6 @@
 package com.undefined.lynx.server
 
+import com.undefined.lynx.event.event
 import com.undefined.lynx.itembuilder.ItemBuilder
 import com.undefined.lynx.itembuilder.meta.SkullMeta
 import com.undefined.stellar.StellarCommand
@@ -63,18 +64,6 @@ class Main : JavaPlugin() {
             .setItemRarity(ItemRarity.RARE)
             .meta<SkullMeta> {}
             .build()
-
-
-        eve
-
-
-
-
-
-
-
-
-
 
 
         StellarCommand("item")
