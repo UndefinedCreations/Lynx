@@ -1,8 +1,9 @@
 package com.undefined.lynx.server
 
+import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.event.event
 import com.undefined.lynx.itembuilder.ItemBuilder
-import com.undefined.lynx.itembuilder.meta.SkullMeta
+import com.undefined.lynx.nick.*
 import com.undefined.stellar.StellarCommand
 import com.undefined.stellar.StellarConfig
 import com.undefined.stellar.argument.entity.EntityDisplayType
@@ -21,6 +22,7 @@ class Main : JavaPlugin() {
     override fun onEnable() {
 
         StellarConfig.setPlugin(this)
+        LynxConfig.setPlugin(this)
 
         val playerData = PlayerData()
 
@@ -56,20 +58,38 @@ class Main : JavaPlugin() {
 //
 //        command.register()
 
+        val main = StellarCommand("nick")
 
+        val nameSub= main.addArgument("name")
 
-        val itemStack: ItemStack = ItemBuilder(Material.PLAYER_HEAD)
-            .setName("TEstingf")
-            .setLore("line 1", "line 2")
-            .setItemRarity(ItemRarity.RARE)
-            .meta<SkullMeta> {}
-            .build()
-
-
-        StellarCommand("item")
+        nameSub.addArgument("set")
+            .addStringArgument("name")
             .addExecution<Player> {
-                sender.inventory.addItem()
-            }.register()
+                val name: String by args
+                sender.setName(name)
+            }
+
+        nameSub.addArgument("reset")
+            .addExecution<Player> {
+                sender.resetName()
+            }
+
+        val skinSub = main.addArgument("skin")
+
+        skinSub.addArgument("reset")
+            .addExecution<Player> {
+                sender.resetSkin()
+            }
+
+        skinSub.addArgument("set")
+            .addOnlinePlayersArgument("player")
+            .addExecution<Player> {
+                val player: Player by args
+                sender.setSkin(player.getSkin())
+            }
+
+        main.register()
+
 
 
         StellarCommand("yeet")

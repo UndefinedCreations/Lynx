@@ -7,7 +7,7 @@ import org.bukkit.inventory.meta.BundleMeta
 import org.bukkit.inventory.meta.ItemMeta
 import org.jetbrains.annotations.ApiStatus
 
-class BundleMeta : ItemBuildMeta() {
+class BundleMeta : com.undefined.lynx.itembuilder.ItemBuildMeta() {
 
     private var items: MutableList<ItemStack> = mutableListOf()
 
@@ -15,7 +15,7 @@ class BundleMeta : ItemBuildMeta() {
         items.add(item)
     }
 
-    fun addItem(itemBuilder: ItemBuilder) = apply {
+    fun addItem(itemBuilder: com.undefined.lynx.itembuilder.ItemBuilder) = apply {
         items.add(itemBuilder.build())
     }
 
@@ -27,7 +27,7 @@ class BundleMeta : ItemBuildMeta() {
         this.items = items.toMutableList()
     }
 
-    fun setItem(items: List<ItemBuilder>) = apply {
+    fun setItem(items: List<com.undefined.lynx.itembuilder.ItemBuilder>) = apply {
         setItems(items.map { it.build() })
     }
 

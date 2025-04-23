@@ -5,7 +5,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.KnowledgeBookMeta
 
-class KnowledgeBookMeta : ItemBuildMeta() {
+class KnowledgeBookMeta : com.undefined.lynx.itembuilder.ItemBuildMeta() {
 
     private var recipes: MutableList<NamespacedKey> = mutableListOf()
 

@@ -2,7 +2,7 @@ package com.undefined.lynx.itembuilder.meta.armor
 
 import org.bukkit.inventory.meta.ItemMeta
 
-class ArmorMeta : AbstractArmorMeta<ArmorMeta>() {
+class ArmorMeta : com.undefined.lynx.itembuilder.meta.armor.AbstractArmorMeta<ArmorMeta>() {
 
     override fun setItemCache(itemMeta: ItemMeta) {
         super.setItemCache(itemMeta)

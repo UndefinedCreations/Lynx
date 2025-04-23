@@ -4,7 +4,7 @@ import org.bukkit.inventory.meta.BookMeta
 import org.bukkit.inventory.meta.BookMeta.Generation
 import org.bukkit.inventory.meta.ItemMeta
 
-class BookMeta : AbstractWritableBookMeta<BookMeta>() {
+class BookMeta : com.undefined.lynx.itembuilder.meta.book.AbstractWritableBookMeta<BookMeta>() {
 
     private var author: String? = null
     private var generation: Generation? = null

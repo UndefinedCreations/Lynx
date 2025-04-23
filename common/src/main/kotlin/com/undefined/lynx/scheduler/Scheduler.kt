@@ -26,7 +26,7 @@ fun delay(ticks: Int = 1, runnable: BukkitRunnable.() -> Unit): BukkitTask =
 
 
 fun delay(ticks: Int = 1, async: Boolean, runnable: BukkitRunnable.() -> Unit): BukkitTask =
-    delay(ticks, async, runnable)
+    delay(ticks, null, async, runnable)
 
 fun repeatingTask(delay: Int, period: Int, times: Int = -1, unit: TimeUnit? = null, async: Boolean = false, runnable: BukkitRunnable.() -> Unit): BukkitTask {
     return if (async) {

@@ -5,7 +5,7 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.WritableBookMeta
 
 @Suppress("UNCHECKED_CAST")
-open class AbstractWritableBookMeta<T> : ItemBuildMeta() {
+open class AbstractWritableBookMeta<T> : com.undefined.lynx.itembuilder.ItemBuildMeta() {
 
     private val pages: MutableList<String> = mutableListOf()
 

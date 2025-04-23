@@ -3,7 +3,7 @@ package com.undefined.lynx.itembuilder.meta.book
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.WritableBookMeta
 
-class WriteableBookMeta : AbstractWritableBookMeta<WritableBookMeta>() {
+class WriteableBookMeta : com.undefined.lynx.itembuilder.meta.book.AbstractWritableBookMeta<WritableBookMeta>() {
 
     override fun setItemCache(itemMeta: ItemMeta) {
         super.setItemCache(itemMeta)

@@ -1,4 +1,4 @@
-package com.undefined.lynx.itembuilder.meta
+package com.undefined.lynx.itembuilder
 
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.itembuilder.ItemBuildMeta
@@ -8,7 +8,7 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.profile.PlayerProfile
 
-class SkullMeta : ItemBuildMeta() {
+class SkullMeta : com.undefined.lynx.itembuilder.ItemBuildMeta() {
 
     private var noteBlockSound: NamespacedKey? = null
 
@@ -47,7 +47,7 @@ class SkullMeta : ItemBuildMeta() {
         skullMeta.owningPlayer = offlinePlayer
         skullMeta.ownerProfile = playerProfile
         skullMeta.owner = owner
-        texture?.let { NMSManager.nms.setSkullTexture(skullMeta, it) }
+        texture?.let { NMSManager.nms.itemBuilder.setSkullTexture(skullMeta, it) }
         return skullMeta
     }
 }

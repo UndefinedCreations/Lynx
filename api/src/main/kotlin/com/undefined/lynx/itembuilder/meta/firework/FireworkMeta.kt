@@ -5,7 +5,7 @@ import org.bukkit.FireworkEffect
 import org.bukkit.inventory.meta.FireworkMeta
 import org.bukkit.inventory.meta.ItemMeta
 
-class FireworkMeta : ItemBuildMeta() {
+class FireworkMeta : com.undefined.lynx.itembuilder.ItemBuildMeta() {
 
     private var effects: MutableList<FireworkEffect> = mutableListOf()
     private var power: Int = 1

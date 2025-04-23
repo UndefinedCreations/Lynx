@@ -7,7 +7,7 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.jetbrains.annotations.ApiStatus
 
 @Suppress("UNCHECKED_CAST")
-abstract class AbstractBannerMeta<T>: ItemBuildMeta() {
+abstract class AbstractBannerMeta<T>: com.undefined.lynx.itembuilder.ItemBuildMeta() {
 
     private var patterns: MutableList<Pattern> = mutableListOf()
 

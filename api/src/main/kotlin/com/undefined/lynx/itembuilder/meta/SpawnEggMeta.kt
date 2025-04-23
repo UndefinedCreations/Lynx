@@ -6,7 +6,7 @@ import org.bukkit.entity.EntityType
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.SpawnEggMeta
 
-class SpawnEggMeta : ItemBuildMeta() {
+class SpawnEggMeta : com.undefined.lynx.itembuilder.ItemBuildMeta() {
 
     private var entitySnapshot: EntitySnapshot? = null
     private var entityType: EntityType? = null

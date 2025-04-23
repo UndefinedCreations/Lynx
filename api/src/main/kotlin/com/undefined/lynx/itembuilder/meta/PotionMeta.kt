@@ -7,7 +7,7 @@ import org.bukkit.inventory.meta.PotionMeta
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionType
 
-class PotionMeta : ItemBuildMeta() {
+class PotionMeta : com.undefined.lynx.itembuilder.ItemBuildMeta() {
 
     private var customEffect: HashMap<PotionEffect, Boolean> = hashMapOf()
     private var basePotionType: PotionType? = null

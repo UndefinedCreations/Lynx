@@ -5,7 +5,7 @@ import org.bukkit.entity.Axolotl
 import org.bukkit.inventory.meta.ItemMeta
 import org.jetbrains.annotations.ApiStatus
 
-class AxolotlBucketMeta: ItemBuildMeta() {
+class AxolotlBucketMeta: com.undefined.lynx.itembuilder.ItemBuildMeta() {
 
     private var variant: Axolotl.Variant? = null
 

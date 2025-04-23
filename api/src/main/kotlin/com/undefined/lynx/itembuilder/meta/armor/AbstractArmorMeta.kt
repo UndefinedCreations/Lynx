@@ -8,7 +8,7 @@ import org.bukkit.inventory.meta.trim.TrimPattern
 import org.jetbrains.annotations.ApiStatus
 
 @Suppress("UNCHECKED_CAST")
-abstract class AbstractArmorMeta<T> : ItemBuildMeta() {
+abstract class AbstractArmorMeta<T> : com.undefined.lynx.itembuilder.ItemBuildMeta() {
 
     private var trimPattern: TrimPattern? = null
     private var materialPattern: TrimMaterial? = null

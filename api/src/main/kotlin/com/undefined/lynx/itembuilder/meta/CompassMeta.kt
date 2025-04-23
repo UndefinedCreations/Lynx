@@ -5,7 +5,7 @@ import org.bukkit.Location
 import org.bukkit.inventory.meta.CompassMeta
 import org.bukkit.inventory.meta.ItemMeta
 
-class CompassMeta : ItemBuildMeta() {
+class CompassMeta : com.undefined.lynx.itembuilder.ItemBuildMeta() {
 
     private var lodestoneTracked = false
     private var lodestone: Location? = null

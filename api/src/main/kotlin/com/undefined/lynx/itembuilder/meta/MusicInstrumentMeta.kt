@@ -5,7 +5,7 @@ import org.bukkit.MusicInstrument
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.MusicInstrumentMeta
 
-class MusicInstrumentMeta : ItemBuildMeta() {
+class MusicInstrumentMeta : com.undefined.lynx.itembuilder.ItemBuildMeta() {
 
     private var instrument: MusicInstrument? = null
 

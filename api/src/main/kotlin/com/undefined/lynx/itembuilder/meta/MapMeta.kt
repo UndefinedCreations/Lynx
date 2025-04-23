@@ -6,7 +6,7 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.MapMeta
 import org.bukkit.map.MapView
 
-class MapMeta : ItemBuildMeta() {
+class MapMeta : com.undefined.lynx.itembuilder.ItemBuildMeta() {
 
     private var color: Color? = null
     private var mapView: MapView? = null

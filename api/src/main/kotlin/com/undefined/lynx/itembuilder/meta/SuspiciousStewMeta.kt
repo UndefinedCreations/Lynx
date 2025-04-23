@@ -5,7 +5,7 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.SuspiciousStewMeta
 import org.bukkit.potion.PotionEffect
 
-class SuspiciousStewMeta : ItemBuildMeta() {
+class SuspiciousStewMeta : com.undefined.lynx.itembuilder.ItemBuildMeta() {
 
     private var customEffect: HashMap<PotionEffect, Boolean> = hashMapOf()
 

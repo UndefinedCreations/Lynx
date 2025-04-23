@@ -3,7 +3,7 @@ package com.undefined.lynx.itembuilder.meta.banner
 import org.bukkit.DyeColor
 import org.bukkit.inventory.meta.ItemMeta
 
-class ShieldMeta : AbstractBannerMeta<ShieldMeta>() {
+class ShieldMeta : com.undefined.lynx.itembuilder.meta.banner.AbstractBannerMeta<ShieldMeta>() {
 
     private var color: DyeColor? = null
 

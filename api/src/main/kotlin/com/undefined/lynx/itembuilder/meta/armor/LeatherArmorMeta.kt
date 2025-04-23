@@ -4,7 +4,7 @@ import org.bukkit.Color
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.LeatherArmorMeta
 
-class LeatherArmorMeta : AbstractArmorMeta<LeatherArmorMeta>() {
+class LeatherArmorMeta : com.undefined.lynx.itembuilder.meta.armor.AbstractArmorMeta<LeatherArmorMeta>() {
 
     private var color: Color? = null
 

@@ -4,7 +4,7 @@ import com.undefined.lynx.itembuilder.ItemBuildMeta
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.OminousBottleMeta
 
-class OminousBottleMeta : ItemBuildMeta() {
+class OminousBottleMeta : com.undefined.lynx.itembuilder.ItemBuildMeta() {
 
     private var amplifier: Int = 1
 

@@ -5,7 +5,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.CrossbowMeta
 import org.bukkit.inventory.meta.ItemMeta
 
-class CrossbowMeta : ItemBuildMeta() {
+class CrossbowMeta : com.undefined.lynx.itembuilder.ItemBuildMeta() {
 
     private var projectiles: MutableList<ItemStack> = mutableListOf()
 

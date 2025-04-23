@@ -6,7 +6,7 @@ import org.bukkit.entity.TropicalFish.Pattern
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.TropicalFishBucketMeta
 
-class TropicalFishBucketMeta : ItemBuildMeta() {
+class TropicalFishBucketMeta : com.undefined.lynx.itembuilder.ItemBuildMeta() {
 
     private var color: DyeColor = DyeColor.BLUE
     private var pattern: Pattern = Pattern.KOB

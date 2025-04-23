@@ -5,7 +5,7 @@ import org.bukkit.FireworkEffect
 import org.bukkit.inventory.meta.FireworkEffectMeta
 import org.bukkit.inventory.meta.ItemMeta
 
-class FireworkEffectMeta : ItemBuildMeta() {
+class FireworkEffectMeta : com.undefined.lynx.itembuilder.ItemBuildMeta() {
 
     private var effect: FireworkEffect? = null
 
