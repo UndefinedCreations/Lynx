@@ -56,19 +56,17 @@ object NickManager {
 
     fun reloadPlayerMeta(player: Player) {
         NMSManager.nms.nick.sendClientboundPlayerInfoRemovePacket(player)
-        delay(1) {
-            NMSManager.nms.nick.sendClientboundPlayerInfoAddPacket(player)
-            NMSManager.nms.nick.sendClientboundRespawnPacket(player)
-            NMSManager.nms.nick.sendClientboundPlayerInfoUpdateListedPacket(player)
-            NMSManager.nms.nick.sendClientboundGameEventPacket(player)
-            NMSManager.nms.nick.updateAbilities(player)
+        NMSManager.nms.nick.sendClientboundPlayerInfoAddPacket(player)
+        NMSManager.nms.nick.sendClientboundRespawnPacket(player)
+        NMSManager.nms.nick.sendClientboundPlayerInfoUpdateListedPacket(player)
+        NMSManager.nms.nick.sendClientboundGameEventPacket(player)
+        NMSManager.nms.nick.updateAbilities(player)
 
-            player.health = player.health
-            player.totalExperience = player.totalExperience
-            player.teleport(player.location.clone())
-            player.foodLevel = player.foodLevel
-            player.updateInventory()
-        }
+        player.health = player.health
+        player.totalExperience = player.totalExperience
+        player.teleport(player.location.clone())
+        player.foodLevel = player.foodLevel
+        player.updateInventory()
     }
 
     fun reloadPlayerMetaGlobal(player: Player) {

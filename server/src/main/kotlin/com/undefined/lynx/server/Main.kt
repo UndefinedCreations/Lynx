@@ -16,6 +16,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemRarity
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
+import java.util.concurrent.TimeUnit
 
 @Suppress("UNUSED_VARIABLE")
 class Main : JavaPlugin() {
@@ -60,6 +61,9 @@ class Main : JavaPlugin() {
 //        command.register()
 
         val main = StellarCommand("nick")
+            .addCooldown(5, TimeUnit.SECONDS) {
+                sender.sendMessage("FUCK OFF ${TimeUnit.MILLISECONDS.toSeconds(it)}")
+            }
         val nameSub= main.addArgument("name")
         nameSub.addArgument("set")
             .addStringArgument("name")

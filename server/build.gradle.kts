@@ -16,10 +16,9 @@ repositories {
 dependencies {
     compileOnly(libs.spigot)
 
-    implementation("com.undefined:stellar:0.1.68")
-    implementation("com.undefined:lynx:0.0.1")
+    implementation("com.undefined:stellar:1.0.0")
 
-//    implementation(project(":api"))
+    implementation(project(":api"))
 }
 
 tasks {
