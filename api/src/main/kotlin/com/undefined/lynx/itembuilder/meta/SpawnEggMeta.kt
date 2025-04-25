@@ -1,6 +1,5 @@
 package com.undefined.lynx.itembuilder.meta
 
-import com.undefined.lynx.itembuilder.ItemBuildMeta
 import org.bukkit.entity.EntitySnapshot
 import org.bukkit.entity.EntityType
 import org.bukkit.inventory.meta.ItemMeta

@@ -1,7 +1,6 @@
 package com.undefined.lynx.itembuilder
 
 import com.undefined.lynx.NMSManager
-import com.undefined.lynx.itembuilder.ItemBuildMeta
 import org.bukkit.NamespacedKey
 import org.bukkit.OfflinePlayer
 import org.bukkit.inventory.meta.ItemMeta

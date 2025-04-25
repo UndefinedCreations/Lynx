@@ -1,6 +1,5 @@
 package com.undefined.lynx.itembuilder.meta.banner
 
-import com.undefined.lynx.itembuilder.ItemBuildMeta
 import org.bukkit.block.banner.Pattern
 import org.bukkit.inventory.meta.BannerMeta
 import org.bukkit.inventory.meta.ItemMeta

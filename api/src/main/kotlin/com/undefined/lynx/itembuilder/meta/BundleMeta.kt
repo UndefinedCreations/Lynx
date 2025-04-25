@@ -1,7 +1,5 @@
 package com.undefined.lynx.itembuilder.meta
 
-import com.undefined.lynx.itembuilder.ItemBuildMeta
-import com.undefined.lynx.itembuilder.ItemBuilder
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.BundleMeta
 import org.bukkit.inventory.meta.ItemMeta

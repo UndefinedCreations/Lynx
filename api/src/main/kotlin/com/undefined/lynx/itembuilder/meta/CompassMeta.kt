@@ -1,6 +1,5 @@
 package com.undefined.lynx.itembuilder.meta
 
-import com.undefined.lynx.itembuilder.ItemBuildMeta
 import org.bukkit.Location
 import org.bukkit.inventory.meta.CompassMeta
 import org.bukkit.inventory.meta.ItemMeta

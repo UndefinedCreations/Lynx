@@ -1,6 +1,5 @@
 package com.undefined.lynx.itembuilder.meta.book
 
-import com.undefined.lynx.itembuilder.ItemBuildMeta
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.WritableBookMeta
 

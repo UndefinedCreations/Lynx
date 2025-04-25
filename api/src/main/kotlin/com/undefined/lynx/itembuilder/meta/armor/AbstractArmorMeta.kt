@@ -1,6 +1,5 @@
 package com.undefined.lynx.itembuilder.meta.armor
 
-import com.undefined.lynx.itembuilder.ItemBuildMeta
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.trim.ArmorTrim
 import org.bukkit.inventory.meta.trim.TrimMaterial

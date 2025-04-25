@@ -1,15 +1,19 @@
 package com.undefined.lynx.nms
 
 import com.undefined.lynx.Skin
+import org.bukkit.Location
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
-import java.util.UUID
+import java.util.*
 
 interface NMS {
 
     val nick: Nick
 
     val itemBuilder: ItemBuilder
+
+    val npc: NPC
 
     interface ItemBuilder {
 
@@ -36,6 +40,26 @@ interface NMS {
         fun sendClientboundGameEventPacket(player: Player)
 
         fun updateAbilities(player: Player)
+
+    }
+
+    interface NPC {
+
+        fun createServerPlayer(name: String, texture: String, signature: String): Any
+
+        fun sendSpawnPacket(serverPlayer: Any, location: Location, player: List<Player>? = null)
+
+        fun onClick(consumer: NPCInteract.() -> Unit)
+
+        fun setItem(serverPlayer: Any, slot: Int, itemStack: ItemStack?, players: List<UUID>?)
+
+        fun remove(serverPlayer: Any)
+
+        fun getUUID(serverPlayer: Any): UUID
+
+        fun getID(serverPlayer: Any): Int
+
+        fun sendTeleportPacket(serverPlayer: Any, location: Location, players: List<UUID>?)
 
     }
 

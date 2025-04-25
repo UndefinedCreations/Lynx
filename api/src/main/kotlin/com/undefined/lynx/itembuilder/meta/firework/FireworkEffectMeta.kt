@@ -1,6 +1,5 @@
 package com.undefined.lynx.itembuilder.meta.firework
 
-import com.undefined.lynx.itembuilder.ItemBuildMeta
 import org.bukkit.FireworkEffect
 import org.bukkit.inventory.meta.FireworkEffectMeta
 import org.bukkit.inventory.meta.ItemMeta
