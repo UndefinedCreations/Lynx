@@ -5,7 +5,7 @@ import com.undefined.lynx.NMSManager
 import com.undefined.lynx.Skin
 import com.undefined.lynx.event.event
 import com.undefined.lynx.scheduler.delay
-import com.undefined.lynx.util.legacyString
+import com.undefined.lynx.util.legacySectionString
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -83,7 +83,7 @@ object NickManager {
 
 fun Player.setName(name: String, reloadPlayer: Boolean = true) = NickManager.setName(this, name, reloadPlayer)
 
-fun Player.setName(name: Component, reloadPlayer: Boolean = true) = setName(name.legacyString(), reloadPlayer)
+fun Player.setName(name: Component, reloadPlayer: Boolean = true) = setName(name.legacySectionString(), reloadPlayer)
 
 fun Player.setSkin(skin: Skin, reloadPlayer: Boolean = true) = setSkin(skin.texture, skin.signature, reloadPlayer)
 
