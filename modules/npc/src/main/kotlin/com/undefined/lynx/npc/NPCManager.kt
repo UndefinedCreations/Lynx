@@ -1,15 +1,14 @@
 package com.undefined.lynx.npc
 
+import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.NMSManager
-import com.undefined.lynx.event.event
-import com.undefined.lynx.scheduler.async
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
-import org.bukkit.event.player.PlayerChangedWorldEvent
-import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.Listener
 import java.util.*
 
-object NPCManager {
+object NPCManager : Listener {
 
     internal val autoLoadNPCS: MutableList<NPC> = mutableListOf()
 
@@ -17,23 +16,7 @@ object NPCManager {
 
     init {
 
-        event<PlayerChangedWorldEvent> {
-            val world = this.player.world
-            async {
-                autoLoadNPCS.filter {
-                    it.visibleTo?.contains(player.uniqueId) ?: true
-                }.filter {
-                    world == it.location.world
-                }.forEach {
-                    NMSManager.nms.npc.sendSpawnPacket(it.serverPlayer, it.location, listOf(player))
-                    it.resentItems(listOf(player))
-                }
-            }
-        }
-
-        event<PlayerJoinEvent> {
-            spawnedNPC.filter { it.visibleTo == null }.forEach { NMSManager.nms.npc.sendSpawnPacket(it.serverPlayer, it.location, listOf(player)) }
-        }
+        Bukkit.getPluginManager().registerEvents(NPCListener(), LynxConfig.javaPlugin)
 
         NMSManager.nms.npc.onClick {
             val id = this.entityID

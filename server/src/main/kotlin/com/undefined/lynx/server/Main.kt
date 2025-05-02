@@ -1,23 +1,9 @@
 package com.undefined.lynx.server
 
 import com.undefined.lynx.LynxConfig
-import com.undefined.lynx.event.event
-import com.undefined.stellar.StellarCommand
 import com.undefined.stellar.StellarConfig
-import com.undefined.stellar.argument.misc.UUIDArgument
-import com.undefined.stellar.argument.world.LocationType
 import com.undefined.stellar.util.unregisterCommand
-import org.bukkit.ChatColor
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.NamespacedKey
-import org.bukkit.entity.Player
-import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.inventory.ItemStack
-import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.java.JavaPlugin
-import java.util.*
-import java.util.concurrent.TimeUnit
 
 @Suppress("UNUSED_VARIABLE")
 class Main : JavaPlugin() {
