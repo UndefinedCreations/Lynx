@@ -3,25 +3,28 @@ package com.undefined.lynx.nick
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.Skin
-import com.undefined.lynx.event.event
-import com.undefined.lynx.scheduler.delay
 import com.undefined.lynx.util.legacyString
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerQuitEvent
 import java.util.*
 
-object NickManager {
+object NickManager : Listener {
 
     val trueNames: HashMap<UUID, String> = hashMapOf()
     val trueSkins: HashMap<UUID, Pair<String, String>> = hashMapOf()
 
     init {
-        event<PlayerQuitEvent> {
-            trueNames.remove(player.uniqueId)
-            trueSkins.remove(player.uniqueId)
-        }
+        Bukkit.getPluginManager().registerEvents(this, LynxConfig.javaPlugin)
+    }
+
+    @EventHandler
+    fun onQuit(event: PlayerQuitEvent) {
+        trueNames.remove(event.player.uniqueId)
+        trueSkins.remove(event.player.uniqueId)
     }
 
     fun setName(player: Player, name: String, reloadPlayer: Boolean) {
@@ -72,11 +75,11 @@ object NickManager {
         Bukkit.getOnlinePlayers().forEach {
             it.hidePlayer(LynxConfig.javaPlugin, player)
         }
-        delay(1) {
+        Bukkit.getScheduler().runTaskLater(LynxConfig.javaPlugin, Runnable {
             Bukkit.getOnlinePlayers().forEach {
                 it.showPlayer(LynxConfig.javaPlugin, player)
             }
-        }
+        }, 1)
     }
 
 }
