@@ -11,7 +11,7 @@ import com.undefined.lynx.itembuilder.meta.book.WriteableBookMeta
 import com.undefined.lynx.itembuilder.meta.firework.FireworkEffectMeta
 import com.undefined.lynx.itembuilder.meta.firework.FireworkMeta
 import com.undefined.lynx.util.component
-import com.undefined.lynx.util.legacyString
+import com.undefined.lynx.util.legacySectionString
 import com.undefined.lynx.util.miniMessage
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
@@ -175,8 +175,8 @@ class ItemBuilder {
 
         var meta = item.itemMeta ?: return item
 
-        meta.setDisplayName(this.name?.legacyString())
-        meta.lore = this.lore.map { it.legacyString() }
+        meta.setDisplayName(this.name?.legacySectionString())
+        meta.lore = this.lore.map { it.legacySectionString() }
         meta.setCustomModelData(this.customModelData)
         for ((key, container) in persistentDataContainers)
             meta.persistentDataContainer[key, container.type as PersistentDataType<Any, Any>] = container.value
