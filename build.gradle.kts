@@ -11,7 +11,7 @@ plugins {
 dependencies {
     compileOnly(libs.spigot)
 
-    api(project(":nmsManager"))
+    api(project(":api"))
 
     dokkaPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:2.0.0")
 }
@@ -38,7 +38,7 @@ val packageSources by tasks.registering(Jar::class) {
     group = "lynx"
     archiveClassifier = "sources"
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    from(subprojects.map { it.sourceSets.main.get().allSource })
+    from(subprojects.filter { it.subprojects.isEmpty() }.map { it.sourceSets.main.get().allSource })
 }
 
 publishing {

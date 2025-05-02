@@ -1,6 +1,6 @@
 package com.undefined.lynx.itembuilder
 
-import com.undefined.lynx.NMSManager
+//import com.undefined.lynx.NMSManager
 import org.bukkit.NamespacedKey
 import org.bukkit.OfflinePlayer
 import org.bukkit.inventory.meta.ItemMeta
@@ -46,7 +46,8 @@ class SkullMeta : ItemBuildMeta() {
         skullMeta.owningPlayer = offlinePlayer
         skullMeta.ownerProfile = playerProfile
         skullMeta.owner = owner
-        texture?.let { NMSManager.nms.itemBuilder.setSkullTexture(skullMeta, it) }
+//        texture?.let { NMSManager.nms.itemBuilder.setSkullTexture(skullMeta, it) }
         return skullMeta
     }
+
 }

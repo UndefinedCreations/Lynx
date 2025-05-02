@@ -1,7 +1,7 @@
 package com.undefined.lynx.npc
 
 import com.undefined.lynx.LynxConfig
-import com.undefined.lynx.NMSManager
+//import com.undefined.lynx.NMSManager
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
@@ -18,10 +18,10 @@ object NPCManager : Listener {
 
         Bukkit.getPluginManager().registerEvents(NPCListener(), LynxConfig.javaPlugin)
 
-        NMSManager.nms.npc.onClick {
-            val id = this.entityID
-            spawnedNPC.filter { it.getEntityID() == id }.forEach { it.clickActions.forEach { it(this) } }
-        }
+//        NMSManager.nms.npc.onClick {
+//            val id = this.entityID
+//            spawnedNPC.filter { it.getEntityID() == id }.forEach { it.clickActions.forEach { it(this) } }
+//        }
 
     }
 
@@ -37,12 +37,13 @@ fun World.spawnNPC(
     visibleTo: List<UUID>? = null,
     autoLoad: Boolean = true
 ): NPC {
-    val serverPlayer = NMSManager.nms.npc.createServerPlayer(name, texture, signature)
-    NMSManager.nms.npc.sendSpawnPacket(serverPlayer, location)
-    val npc = NPC(serverPlayer, visibleTo, location)
-    if (autoLoad) NPCManager.autoLoadNPCS.add(npc)
-    NPCManager.spawnedNPC.add(npc)
-    return npc
+//    val serverPlayer = NMSManager.nms.npc.createServerPlayer(name, texture, signature)
+//    NMSManager.nms.npc.sendSpawnPacket(serverPlayer, location)
+//    val npc = NPC(serverPlayer, visibleTo, location)
+//    if (autoLoad) NPCManager.autoLoadNPCS.add(npc)
+//    NPCManager.spawnedNPC.add(npc)
+//    return npc
+    return TODO()
 }
 
-fun World.getNPC(uuid: UUID): NPC? = NPCManager.spawnedNPC.filter { it.getUUID() == uuid }.getOrNull(0)
+//fun World.getNPC(uuid: UUID): NPC? = NPCManager.spawnedNPC.filter { it.getUUID() == uuid }.getOrNull(0)

@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import com.mojang.datafixers.util.Pair
 import com.undefined.lynx.Skin
-import com.undefined.lynx.event.event
+//import com.undefined.lynx.event.event
 import com.undefined.lynx.nms.ClickType
 import com.undefined.lynx.nms.NMS
 import com.undefined.lynx.nms.NPCInteract
@@ -57,8 +57,8 @@ object NMS1_21_4: NMS {
 
     init {
         Bukkit.getOnlinePlayers().forEach { startPacketListener(it) }
-        event<PlayerJoinEvent> { startPacketListener(player) }
-        event<PlayerQuitEvent> { endPacketListener(player) }
+//        event<PlayerJoinEvent> { startPacketListener(player) }
+//        event<PlayerQuitEvent> { endPacketListener(player) }
     }
 
     private fun startPacketListener(player: Player) {

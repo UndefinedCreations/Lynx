@@ -15,7 +15,6 @@ class Main : JavaPlugin() {
 
         unregisterCommand("item")
 
-
 //        val npcCommand = StellarCommand("npc")
 //
 //        npcCommand.addArgument("spawn")

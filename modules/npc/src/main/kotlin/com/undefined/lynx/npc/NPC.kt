@@ -1,6 +1,6 @@
 package com.undefined.lynx.npc
 
-import com.undefined.lynx.NMSManager
+//import com.undefined.lynx.NMSManager
 import com.undefined.lynx.nms.NPCInteract
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -18,7 +18,7 @@ open class NPC(
     private val itemStacks: HashMap<Int, ItemStack> = hashMapOf()
 
     fun resentItems(players: List<Player>?) {
-        itemStacks.forEach { item -> NMSManager.nms.npc.setItem(serverPlayer, item.key, item.value, players?.map { it.uniqueId }) }
+//        itemStacks.forEach { item -> NMSManager.nms.npc.setItem(serverPlayer, item.key, item.value, players?.map { it.uniqueId }) }
     }
 
     fun onClick(onClick: NPCInteract.() -> Unit) {
@@ -26,22 +26,23 @@ open class NPC(
     }
 
     fun setItem(slot: Int, item: ItemStack) {
-        NMSManager.nms.npc.setItem(serverPlayer, slot, item, visibleTo)
+//        NMSManager.nms.npc.setItem(serverPlayer, slot, item, visibleTo)
         itemStacks[slot] = item
     }
 
     fun remove() {
-        NMSManager.nms.npc.remove(serverPlayer)
+//        NMSManager.nms.npc.remove(serverPlayer)
         NPCManager.autoLoadNPCS.remove(this)
         NPCManager.spawnedNPC.remove(this)
     }
 
     fun teleport(location: Location) {
-        NMSManager.nms.npc.sendTeleportPacket(serverPlayer, location, visibleTo)
+//        NMSManager.nms.npc.sendTeleportPacket(serverPlayer, location, visibleTo)
         this.location = location
     }
 
-    fun getUUID(): UUID = NMSManager.nms.npc.getUUID(serverPlayer)
+//    fun getUUID(): UUID = NMSManager.nms.npc.getUUID(serverPlayer)
 
-    fun getEntityID(): Int = NMSManager.nms.npc.getID(serverPlayer)
+//    fun getEntityID(): Int = NMSManager.nms.npc.getID(serverPlayer)
+
 }

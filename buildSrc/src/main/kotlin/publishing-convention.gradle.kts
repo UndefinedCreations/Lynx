@@ -58,6 +58,6 @@ tasks {
         archiveClassifier = "dev"
     }
     shadowJar {
-        archiveClassifier = "dev"
+        archiveClassifier = project.name
     }
 }

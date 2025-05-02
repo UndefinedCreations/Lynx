@@ -1,7 +1,8 @@
 rootProject.name = "lynx"
+
 include(
     ":server",
-    ":nmsManager",
+    ":api",
     ":common",
     ":nms:v1_21_4",
     ":modules:items",
@@ -11,4 +12,3 @@ include(
     ":modules:logger",
     ":modules:scheduler"
 )
-

@@ -63,6 +63,12 @@ dependencies {
     compileOnly(libs.spigot)
     api(project(":common"))
     api(project(":nms:v1_21_4"))
+    api(project(":modules:event"))
+    api(project(":modules:items"))
+    api(project(":modules:logger"))
+    api(project(":modules:nick"))
+    api(project(":modules:npc"))
+    api(project(":modules:scheduler"))
 }
 
 tasks {
@@ -72,7 +78,7 @@ tasks {
             exclude("**/intellij/**")
             exclude("**/jetbrains/**")
         }
-        archiveClassifier = "spigot"
+        archiveClassifier = "core"
     }
     compileKotlin {
         compilerOptions.jvmTarget = JvmTarget.JVM_1_8

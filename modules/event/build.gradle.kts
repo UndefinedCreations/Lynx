@@ -6,5 +6,4 @@ plugins {
 dependencies {
     compileOnly(libs.spigot)
     api(project(":common"))
-    api(project(":nmsManager"))
 }
