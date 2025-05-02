@@ -11,7 +11,7 @@ plugins {
 dependencies {
     compileOnly(libs.spigot)
 
-    api(project(":api"))
+    api(project(":nmsManager"))
 
     dokkaPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:2.0.0")
 }

@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     setup
-    id("com.undefinedcreations.nova") version "0.0.4"
+    id("com.undefinedcreations.nova") version "0.0.5"
     id("com.gradleup.shadow")
 }
 
@@ -18,7 +18,11 @@ dependencies {
 
     implementation("com.undefined:stellar:1.0.0")
 
-    implementation(project(":api"))
+    implementation(project(":nmsManager"))
+
+    implementation("net.kyori:adventure-api:4.17.0")
+    implementation("net.kyori:adventure-text-minimessage:4.17.0")
+    implementation("net.kyori:adventure-platform-bukkit:4.3.4")
 }
 
 tasks {
@@ -40,4 +44,10 @@ java {
 
 kotlin {
     jvmToolchain(21)
+}
+
+tasks {
+    runServer {
+        minecraftVersion("1.21.4")
+    }
 }
