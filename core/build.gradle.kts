@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("setup")
-    `publishing-convention`
+    id("publishing-convention")
 }
 
 val baseShadowJar by tasks.registering(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
@@ -61,23 +61,16 @@ publishing {
 
 dependencies {
     compileOnly(libs.spigot)
-    api(project(":common"))
-    api(project(":nms:v1_21_4"))
-    api(project(":modules:event"))
-    api(project(":modules:items"))
-    api(project(":modules:logger"))
-    api(project(":modules:nick"))
-    api(project(":modules:npc"))
-    api(project(":modules:scheduler"))
+    compileOnly(project(":nms:v1_21_4"))
+
+    implementation(project(":common"))
 }
 
 tasks {
     shadowJar {
-        minimize {
-            exclude("**/kotlin/**")
-            exclude("**/intellij/**")
-            exclude("**/jetbrains/**")
-        }
+        exclude("**/kotlin/**")
+        exclude("**/intellij/**")
+        exclude("**/jetbrains/**")
         archiveClassifier = "core"
     }
     compileKotlin {

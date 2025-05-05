@@ -1,9 +1,10 @@
 plugins {
     id("setup")
-    `publishing-convention`
+    id("publishing-convention")
 }
 
 dependencies {
     compileOnly(libs.spigot)
-    api(project(":common"))
+    compileOnly(project(":core"))
+    compileOnly(project(":common"))
 }

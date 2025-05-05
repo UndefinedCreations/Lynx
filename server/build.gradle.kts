@@ -17,9 +17,12 @@ dependencies {
     compileOnly(libs.spigot)
 
     implementation("com.undefined:stellar:1.0.0")
-    implementation("com.undefined:lynx:0.0.5:npc")
+    implementation("com.undefined:lynx:0.0.12:core")
+    implementation("com.undefined:lynx:0.0.12:npc")
 
-    implementation(project(":api"))
+//    implementation(project(":core"))
+//    implementation(project(":common"))
+//    implementation(project(":modules:npc"))
 
     implementation("net.kyori:adventure-api:4.17.0")
     implementation("net.kyori:adventure-text-minimessage:4.17.0")

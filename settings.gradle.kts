@@ -2,7 +2,7 @@ rootProject.name = "lynx"
 
 include(
     ":server",
-    ":api",
+    ":core",
     ":common",
     ":nms:v1_21_4",
     ":modules:items",

@@ -5,7 +5,6 @@ import com.undefined.stellar.StellarConfig
 import com.undefined.stellar.util.unregisterCommand
 import org.bukkit.plugin.java.JavaPlugin
 
-@Suppress("UNUSED_VARIABLE")
 class Main : JavaPlugin() {
 
     override fun onEnable() {
@@ -31,8 +30,6 @@ class Main : JavaPlugin() {
 //            }
 //
 //        val selectedNPC = npcCommand.addListArgument(UUIDArgument("uuid"), { NPCManager.getAllNPCs().map { it.getUUID() } }, { it })
-//
-//
 //
 //        selectedNPC.addArgument("item")
 //            .addIntegerArgument("slot", 0, 6)
