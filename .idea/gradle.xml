@@ -22,6 +22,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/buildSrc" />
             <option value="$PROJECT_DIR$/common" />
+            <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/modules" />
             <option value="$PROJECT_DIR$/modules/event" />
             <option value="$PROJECT_DIR$/modules/items" />
@@ -31,7 +32,6 @@
             <option value="$PROJECT_DIR$/modules/scheduler" />
             <option value="$PROJECT_DIR$/nms" />
             <option value="$PROJECT_DIR$/nms/v1_21_4" />
-            <option value="$PROJECT_DIR$/nmsManager" />
             <option value="$PROJECT_DIR$/server" />
           </set>
         </option>

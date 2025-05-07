@@ -1,10 +1,8 @@
 package com.undefined.lynx.nick
 
 import com.undefined.lynx.LynxConfig
-//import com.undefined.lynx.NMSManager
+import com.undefined.lynx.NMSManager
 import com.undefined.lynx.Skin
-//import com.undefined.lynx.util.legacyString
-import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -33,7 +31,7 @@ object NickManager : Listener {
         } else if (trueNames[player.uniqueId] == name) {
             trueNames.remove(player.uniqueId)
         }
-//        NMSManager.nms.nick.setName(player, name) TODO
+        NMSManager.nms.nick.setName(player, name)
         if (reloadPlayer) {
             reloadPlayerMeta(player)
             reloadPlayerMetaGlobal(player)
@@ -42,14 +40,14 @@ object NickManager : Listener {
 
     fun setSkin(player: Player, texture: String, signature: String, reloadPlayer: Boolean) {
         if (!trueSkins.containsKey(player.uniqueId)) {
-//            trueSkins[player.uniqueId] = player.getSkin().let { Pair(it.texture, it.signature) }
+            trueSkins[player.uniqueId] = player.getSkin().let { Pair(it.texture, it.signature) }
         } else {
             val pair = trueSkins[player.uniqueId]!!
             if (pair.first == texture && pair.second == signature) {
                 trueSkins.remove(player.uniqueId)
             }
         }
-//        NMSManager.nms.nick.setSkin(player, texture, signature)
+        NMSManager.nms.nick.setSkin(player, texture, signature)
         if (reloadPlayer) {
             reloadPlayerMeta(player)
             reloadPlayerMetaGlobal(player)
@@ -57,12 +55,12 @@ object NickManager : Listener {
     }
 
     fun reloadPlayerMeta(player: Player) {
-//        NMSManager.nms.nick.sendClientboundPlayerInfoRemovePacket(player)
-//        NMSManager.nms.nick.sendClientboundPlayerInfoAddPacket(player)
-//        NMSManager.nms.nick.sendClientboundRespawnPacket(player)
-//        NMSManager.nms.nick.sendClientboundPlayerInfoUpdateListedPacket(player)
-//        NMSManager.nms.nick.sendClientboundGameEventPacket(player)
-//        NMSManager.nms.nick.updateAbilities(player)
+        NMSManager.nms.nick.sendClientboundPlayerInfoRemovePacket(player)
+        NMSManager.nms.nick.sendClientboundPlayerInfoAddPacket(player)
+        NMSManager.nms.nick.sendClientboundRespawnPacket(player)
+        NMSManager.nms.nick.sendClientboundPlayerInfoUpdateListedPacket(player)
+        NMSManager.nms.nick.sendClientboundGameEventPacket(player)
+        NMSManager.nms.nick.updateAbilities(player)
 
         player.health = player.health
         player.totalExperience = player.totalExperience
@@ -105,9 +103,9 @@ fun Player.reloadPlayerMetaGlobal() = NickManager.reloadPlayerMetaGlobal(this)
 
 fun Player.getTrueName(): String = NickManager.trueNames[uniqueId] ?: name
 
-//fun Player.getSkin(): Skin = NMSManager.nms.nick.getSkin(this)
+fun Player.getSkin(): Skin = NMSManager.nms.nick.getSkin(this)
 
-//fun Player.getTrueSkin(): Skin = NickManager.trueSkins[uniqueId]?.let { Skin(it.first, it.second) } ?: getSkin()
+fun Player.getTrueSkin(): Skin = NickManager.trueSkins[uniqueId]?.let { Skin(it.first, it.second) } ?: getSkin()
 
 fun Player.hasTrueName(): Boolean = !NickManager.trueNames.containsKey(uniqueId)
 

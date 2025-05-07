@@ -3,6 +3,7 @@ package com.undefined.lynx.internal
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import com.mojang.datafixers.util.Pair
+import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.Skin
 //import com.undefined.lynx.event.event
 import com.undefined.lynx.nms.ClickType
@@ -36,13 +37,16 @@ import org.bukkit.craftbukkit.v1_21_R3.CraftWorld
 import org.bukkit.craftbukkit.v1_21_R3.entity.CraftPlayer
 import org.bukkit.craftbukkit.v1_21_R3.inventory.CraftItemStack
 import org.bukkit.entity.Player
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import java.util.*
 
-object NMS1_21_4: NMS {
+@Suppress("NAME_SHADOWING")
+object NMS1_21_4: NMS, Listener {
 
     object MAPPING {
         const val CONNECTION = "e"
@@ -57,8 +61,17 @@ object NMS1_21_4: NMS {
 
     init {
         Bukkit.getOnlinePlayers().forEach { startPacketListener(it) }
-//        event<PlayerJoinEvent> { startPacketListener(player) }
-//        event<PlayerQuitEvent> { endPacketListener(player) }
+        Bukkit.getPluginManager().registerEvents(this, LynxConfig.javaPlugin)
+    }
+
+    @EventHandler
+    fun onJoin(event: PlayerJoinEvent) {
+        startPacketListener(event.player)
+    }
+
+    @EventHandler
+    fun onQuit(event: PlayerQuitEvent) {
+        endPacketListener(event.player)
     }
 
     private fun startPacketListener(player: Player) {

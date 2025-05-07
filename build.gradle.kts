@@ -79,16 +79,16 @@ publishing {
             }
         }
     }
-    repositories {
-        maven {
-            name = "undefined-repo"
-            url = uri("https://repo.undefinedcreations.com/releases")
-            credentials(PasswordCredentials::class) {
-                username = System.getenv("MAVEN_NAME") ?: property("mavenUser").toString()
-                password = System.getenv("MAVEN_SECRET") ?: property("mavenPassword").toString()
-            }
-        }
-    }
+//    repositories {
+//        maven {
+//            name = "undefined-repo"
+//            url = uri("https://repo.undefinedcreations.com/releases")
+//            credentials(PasswordCredentials::class) {
+//                username = System.getenv("MAVEN_NAME") ?: property("mavenUser").toString()
+//                password = System.getenv("MAVEN_SECRET") ?: property("mavenPassword").toString()
+//            }
+//        }
+//    }
 }
 
 java {
