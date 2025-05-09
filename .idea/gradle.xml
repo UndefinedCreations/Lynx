@@ -30,6 +30,7 @@
             <option value="$PROJECT_DIR$/modules/nick" />
             <option value="$PROJECT_DIR$/modules/npc" />
             <option value="$PROJECT_DIR$/modules/scheduler" />
+            <option value="$PROJECT_DIR$/modules/sql" />
             <option value="$PROJECT_DIR$/nms" />
             <option value="$PROJECT_DIR$/nms/v1_21_4" />
             <option value="$PROJECT_DIR$/server" />

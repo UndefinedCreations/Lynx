@@ -10,5 +10,6 @@ include(
     ":modules:npc",
     ":modules:event",
     ":modules:logger",
-    ":modules:scheduler"
+    ":modules:scheduler",
+    ":modules:sql"
 )
