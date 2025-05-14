@@ -11,6 +11,5 @@ dependencies {
 tasks {
     remap {
         minecraftVersion("1.21.4")
-
     }
 }

@@ -8,10 +8,29 @@ plugins {
     id("org.jetbrains.dokka") version "2.0.0"
 }
 
+private val submodules: HashMap<String, String> = hashMapOf(
+    ":core" to "core", // project name to classifier
+    ":modules:event" to "event",
+    ":modules:items" to "items",
+    ":modules:logger" to "logger",
+    ":modules:nick" to "nick",
+    ":modules:npc" to "npc",
+    ":modules:scheduler" to "scheduler",
+    ":modules:sql" to "sql",
+)
+
 dependencies {
     compileOnly(libs.spigot)
 
     api(project(":core"))
+    api(project(":nms:v1_21_4"))
+    api(project(":modules:event"))
+    api(project(":modules:items"))
+    api(project(":modules:logger"))
+    api(project(":modules:nick"))
+    api(project(":modules:npc"))
+    api(project(":modules:scheduler"))
+    api(project(":modules:sql"))
 
     dokkaPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:2.0.0")
 }
@@ -43,6 +62,50 @@ val packageSources by tasks.registering(Jar::class) {
 
 publishing {
     publications {
+        create<MavenPublication>("baseJar") {
+            artifactId = rootProject.name
+            from(components["shadow"])
+            for (module in submodules)
+                artifact(project(module.key).layout.buildDirectory.dir("libs").get().file("lynx-$version-${module.value}.jar")) {
+                    classifier = module.value
+                }
+//            artifact(project(":modules:event").layout.buildDirectory.dir("libs").get().file("lynx-$version-event.jar")) {
+//                classifier = "event"
+//            }
+//            artifact(project(":core").layout.buildDirectory.dir("libs").get().file("lynx-$version-core.jar")) {
+//                classifier = "core"
+//            }
+
+            pom {
+                name = "Lynx"
+                description = "A general purpose API for Java and Kotlin."
+                url = "https://www.github.com/UndefinedCreations/Lynx"
+                licenses {
+                    license {
+                        name = "MIT"
+                        url = "https://mit-license.org/"
+                        distribution = "https://mit-license.org/"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "redmagic"
+                        name = "TheRedMagic"
+                        url = "https://github.com/TheRedMagic/"
+                    }
+                    developer {
+                        id = "lutto"
+                        name = "StillLutto"
+                        url = "https://github.com/StillLutto/"
+                    }
+                }
+                scm {
+                    url = "https://github.com/UndefinedCreations/Lynx/"
+                    connection = "scm:git:git://github.com/UndefinedCreations/Lynx.git"
+                    developerConnection = "scm:git:ssh://git@github.com/UndefinedCreations/Lynx.git"
+                }
+            }
+        }
         create<MavenPublication>("sources") {
             artifactId = rootProject.name
             artifact(packageJavadoc)
@@ -79,16 +142,16 @@ publishing {
             }
         }
     }
-//    repositories {
-//        maven {
-//            name = "undefined-repo"
-//            url = uri("https://repo.undefinedcreations.com/releases")
-//            credentials(PasswordCredentials::class) {
-//                username = System.getenv("MAVEN_NAME") ?: property("mavenUser").toString()
-//                password = System.getenv("MAVEN_SECRET") ?: property("mavenPassword").toString()
-//            }
-//        }
-//    }
+    repositories {
+        maven {
+            name = "undefined-repo"
+            url = uri("https://repo.undefinedcreations.com/releases")
+            credentials(PasswordCredentials::class) {
+                username = System.getenv("MAVEN_NAME") ?: property("mavenUser").toString()
+                password = System.getenv("MAVEN_SECRET") ?: property("mavenPassword").toString()
+            }
+        }
+    }
 }
 
 java {
@@ -98,6 +161,20 @@ java {
 
 tasks {
     shadowJar {
-        archiveClassifier = "all"
+        minimize {
+            exclude("**/kotlin/**")
+            exclude("**/intellij/**")
+            exclude("**/jetbrains/**")
+        }
+        archiveClassifier = ""
+        dependsOn(project(":core").tasks.named("shadowJar"))
+
+        dependsOn(project(":modules:event").tasks.named("shadowJar"))
+        dependsOn(project(":modules:items").tasks.named("shadowJar"))
+        dependsOn(project(":modules:logger").tasks.named("shadowJar"))
+        dependsOn(project(":modules:nick").tasks.named("shadowJar"))
+        dependsOn(project(":modules:npc").tasks.named("shadowJar"))
+        dependsOn(project(":modules:scheduler").tasks.named("shadowJar"))
+        dependsOn(project(":modules:sql").tasks.named("shadowJar"))
     }
 }
