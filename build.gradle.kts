@@ -69,12 +69,6 @@ publishing {
                 artifact(project(module.key).layout.buildDirectory.dir("libs").get().file("lynx-$version-${module.value}.jar")) {
                     classifier = module.value
                 }
-//            artifact(project(":modules:event").layout.buildDirectory.dir("libs").get().file("lynx-$version-event.jar")) {
-//                classifier = "event"
-//            }
-//            artifact(project(":core").layout.buildDirectory.dir("libs").get().file("lynx-$version-core.jar")) {
-//                classifier = "core"
-//            }
 
             pom {
                 name = "Lynx"
@@ -169,12 +163,7 @@ tasks {
         archiveClassifier = ""
         dependsOn(project(":core").tasks.named("shadowJar"))
 
-        dependsOn(project(":modules:event").tasks.named("shadowJar"))
-        dependsOn(project(":modules:items").tasks.named("shadowJar"))
-        dependsOn(project(":modules:logger").tasks.named("shadowJar"))
-        dependsOn(project(":modules:nick").tasks.named("shadowJar"))
-        dependsOn(project(":modules:npc").tasks.named("shadowJar"))
-        dependsOn(project(":modules:scheduler").tasks.named("shadowJar"))
-        dependsOn(project(":modules:sql").tasks.named("shadowJar"))
+        for (module in submodules)
+            dependsOn(project(module.key).tasks.named("shadowJar"))
     }
 }
