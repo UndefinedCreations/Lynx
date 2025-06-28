@@ -5,7 +5,6 @@ import com.mojang.authlib.properties.Property
 import com.mojang.datafixers.util.Pair
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.Skin
-//import com.undefined.lynx.event.event
 import com.undefined.lynx.nms.ClickType
 import com.undefined.lynx.nms.NMS
 import com.undefined.lynx.nms.NPCInteract
@@ -13,6 +12,11 @@ import com.undefined.lynx.util.execute
 import com.undefined.lynx.util.getPrivateField
 import com.undefined.lynx.util.getPrivateMethod
 import net.minecraft.network.Connection
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.numbers.BlankFormat
+import net.minecraft.network.chat.numbers.NumberFormat
+import net.minecraft.network.chat.numbers.StyledFormat
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
 import net.minecraft.network.syncher.EntityDataAccessor
@@ -29,6 +33,8 @@ import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.entity.PositionMoveRotation
 import net.minecraft.world.item.component.ResolvableProfile
+import net.minecraft.world.scores.Objective
+import net.minecraft.world.scores.criteria.ObjectiveCriteria
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -36,6 +42,8 @@ import org.bukkit.craftbukkit.v1_21_R3.CraftServer
 import org.bukkit.craftbukkit.v1_21_R3.CraftWorld
 import org.bukkit.craftbukkit.v1_21_R3.entity.CraftPlayer
 import org.bukkit.craftbukkit.v1_21_R3.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_21_R3.scoreboard.CraftScoreboard
+import org.bukkit.entity.Display
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -43,6 +51,7 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
+import org.bukkit.scoreboard.DisplaySlot
 import java.util.*
 
 @Suppress("NAME_SHADOWING")
@@ -284,6 +293,38 @@ object NMS1_21_4: NMS, Listener {
 
             private fun getServer(): MinecraftServer = (Bukkit.getServer() as CraftServer).server
             private fun getServerLevel(): ServerLevel = (Bukkit.getWorlds().first() as CraftWorld).handle
+        }
+    }
+
+    override val sideBar: NMS.SideBar by lazy {
+        object : NMS.SideBar {
+
+            override fun sendSideBar(player: Player) {
+
+                val o = Objective(
+                    (player.scoreboard as CraftScoreboard).handle,
+                    "test",
+                    ObjectiveCriteria.DUMMY,
+                    Component.nullToEmpty("Testing UwU"),
+                    ObjectiveCriteria.RenderType.INTEGER,
+                    false,
+                    BlankFormat()
+                    )
+
+                val obj = ClientboundSetDisplayObjectivePacket(net.minecraft.world.scores.DisplaySlot.SIDEBAR, o)
+
+
+                val packet = ClientboundSetScorePacket(
+                    player.name,
+                    "test",
+                    1,
+                    Optional.ofNullable(Component.nullToEmpty("test")),
+                    Optional.ofNullable(BlankFormat())
+                    )
+
+                player.sendPackets(obj, packet)
+            }
+
         }
     }
 

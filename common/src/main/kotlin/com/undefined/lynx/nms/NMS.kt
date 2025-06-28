@@ -15,6 +15,8 @@ interface NMS {
 
     val npc: NPC
 
+    val sideBar: SideBar
+
     interface ItemBuilder {
 
         fun setSkullTexture(skullMeta: SkullMeta, texture: String): SkullMeta
@@ -60,6 +62,12 @@ interface NMS {
         fun getID(serverPlayer: Any): Int
 
         fun sendTeleportPacket(serverPlayer: Any, location: Location, players: List<UUID>?)
+
+    }
+
+    interface SideBar {
+
+        fun sendSideBar(player: Player)
 
     }
 

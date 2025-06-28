@@ -7,9 +7,9 @@ plugins {
 
 dependencies {
     compileOnly(libs.spigot)
-    compileOnly(project(":nms:v1_21_4"))
+    api(project(":nms:v1_21_4"))
 
-    implementation(project(":common"))
+    api(project(":common"))
 }
 
 tasks {

@@ -1,3 +1,4 @@
+import com.undefinedcreations.nova.ServerType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -17,12 +18,9 @@ dependencies {
     compileOnly(libs.spigot)
 
     implementation("com.undefined:stellar:1.0.0")
-//    implementation("com.undefined:lynx:0.0.12:core")
-//    implementation("com.undefined:lynx:0.0.12:npc")
-    implementation("com.undefined:lynx:0.0.21")
 
-//    implementation(project(":common"))
-//    implementation(project(":modules:npc"))
+    implementation(project(":core"))
+    implementation(project(":modules:sidebar"))
 
     implementation("net.kyori:adventure-api:4.17.0")
     implementation("net.kyori:adventure-text-minimessage:4.17.0")
@@ -39,6 +37,7 @@ tasks {
     runServer {
         minecraftVersion("1.21.4")
         acceptMojangEula()
+        serverType(ServerType.PAPERMC)
     }
 }
 
