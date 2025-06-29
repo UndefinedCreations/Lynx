@@ -13,6 +13,8 @@ import com.undefined.lynx.util.getPrivateField
 import com.undefined.lynx.util.getPrivateMethod
 import net.minecraft.network.Connection
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.numbers.BlankFormat
+import net.minecraft.network.chat.numbers.NumberFormat
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
 import net.minecraft.network.syncher.EntityDataAccessor
@@ -292,7 +294,7 @@ object NMS1_21_4: NMS, Listener {
         }
     }
 
-    override val sideBar: NMS.Scoreboard by lazy {
+    override val scoreboard: NMS.Scoreboard by lazy {
         object : NMS.Scoreboard {
 
             override fun createObjective(
@@ -305,7 +307,7 @@ object NMS1_21_4: NMS, Listener {
                 Component.nullToEmpty(title),
                 ObjectiveCriteria.RenderType.INTEGER,
                 false,
-                null
+                BlankFormat.INSTANCE
             )
 
             override fun setTitle(objective: Any, title: String) {
@@ -319,7 +321,7 @@ object NMS1_21_4: NMS, Listener {
                 players: List<Player>
             ) {
                 val objective = objective as? Objective ?: return
-                ClientboundSetObjectivePacket(objective, id).run { players.sendPackets(this) }
+                players.sendPackets(ClientboundSetObjectivePacket(objective, id))
             }
 
             override fun sendClientboundSetDisplayObjectivePacket(
@@ -327,7 +329,7 @@ object NMS1_21_4: NMS, Listener {
                 players: List<Player>
             ) {
                 val objective = objective as? Objective ?: return
-                ClientboundSetDisplayObjectivePacket(net.minecraft.world.scores.DisplaySlot.SIDEBAR, objective)
+                players.sendPackets(ClientboundSetDisplayObjectivePacket(net.minecraft.world.scores.DisplaySlot.SIDEBAR, objective))
             }
 
             override fun sendScorePacket(
@@ -337,13 +339,22 @@ object NMS1_21_4: NMS, Listener {
                 players: List<Player>
             ) {
                 val objective = objective as? Objective ?: return
-                ClientboundSetScorePacket(
+                players.sendPackets(ClientboundSetScorePacket(
                     text,
                     objective.name,
                     score,
                     Optional.empty(),
-                    Optional.empty()
-                ).run { players.sendPackets(this) }
+                    Optional.of(BlankFormat.INSTANCE)
+                ))
+            }
+
+            override fun sendClientboundResetScorePacket(
+                text: String,
+                objective: Any,
+                players: List<Player>
+            ) {
+                val objective = objective as? Objective ?: return
+                players.sendPackets(ClientboundResetScorePacket(text, objective.name))
             }
 
             override fun createTeam(scoreboard: Scoreboard, name: String): Any = PlayerTeam((scoreboard as CraftScoreboard).handle, name)
@@ -368,7 +379,7 @@ object NMS1_21_4: NMS, Listener {
                 players: List<Player>
             ) {
                 val team = team as? PlayerTeam ?: return
-                ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(team, true)
+                players.sendPackets(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(team, true))
             }
 
             override fun sendClientboundSetPlayerTeamPacketRemove(
@@ -376,7 +387,7 @@ object NMS1_21_4: NMS, Listener {
                 players: List<Player>
             ) {
                 val team = team as? PlayerTeam ?: return
-                ClientboundSetPlayerTeamPacket.createRemovePacket(team)
+                players.sendPackets(ClientboundSetPlayerTeamPacket.createRemovePacket(team))
             }
 
         }

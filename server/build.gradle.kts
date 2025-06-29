@@ -21,6 +21,7 @@ dependencies {
 
     implementation(project(":core"))
     implementation(project(":modules:scoreboard"))
+    implementation(project(":modules:scheduler"))
 
     implementation("net.kyori:adventure-api:4.17.0")
     implementation("net.kyori:adventure-text-minimessage:4.17.0")
