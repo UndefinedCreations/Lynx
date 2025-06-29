@@ -13,10 +13,6 @@ import com.undefined.lynx.util.getPrivateField
 import com.undefined.lynx.util.getPrivateMethod
 import net.minecraft.network.Connection
 import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.Style
-import net.minecraft.network.chat.numbers.BlankFormat
-import net.minecraft.network.chat.numbers.NumberFormat
-import net.minecraft.network.chat.numbers.StyledFormat
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
 import net.minecraft.network.syncher.EntityDataAccessor
@@ -34,6 +30,7 @@ import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.entity.PositionMoveRotation
 import net.minecraft.world.item.component.ResolvableProfile
 import net.minecraft.world.scores.Objective
+import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.criteria.ObjectiveCriteria
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -43,7 +40,6 @@ import org.bukkit.craftbukkit.v1_21_R3.CraftWorld
 import org.bukkit.craftbukkit.v1_21_R3.entity.CraftPlayer
 import org.bukkit.craftbukkit.v1_21_R3.inventory.CraftItemStack
 import org.bukkit.craftbukkit.v1_21_R3.scoreboard.CraftScoreboard
-import org.bukkit.entity.Display
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -51,7 +47,7 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
-import org.bukkit.scoreboard.DisplaySlot
+import org.bukkit.scoreboard.Scoreboard
 import java.util.*
 
 @Suppress("NAME_SHADOWING")
@@ -296,33 +292,91 @@ object NMS1_21_4: NMS, Listener {
         }
     }
 
-    override val sideBar: NMS.SideBar by lazy {
-        object : NMS.SideBar {
+    override val sideBar: NMS.Scoreboard by lazy {
+        object : NMS.Scoreboard {
 
-            override fun sendSideBar(player: Player) {
+            override fun createObjective(
+                scoreboard: Scoreboard,
+                title: String
+            ): Any = Objective(
+                (scoreboard as CraftScoreboard).handle,
+                UUID.randomUUID().toString(),
+                ObjectiveCriteria.DUMMY,
+                Component.nullToEmpty(title),
+                ObjectiveCriteria.RenderType.INTEGER,
+                false,
+                null
+            )
 
-                val o = Objective(
-                    (player.scoreboard as CraftScoreboard).handle,
-                    "test",
-                    ObjectiveCriteria.DUMMY,
-                    Component.nullToEmpty("Testing UwU"),
-                    ObjectiveCriteria.RenderType.INTEGER,
-                    false,
-                    BlankFormat()
-                    )
+            override fun setTitle(objective: Any, title: String) {
+                val objective = objective as? Objective ?: return
+                objective.displayName = Component.nullToEmpty(title)
+            }
 
-                val obj = ClientboundSetDisplayObjectivePacket(net.minecraft.world.scores.DisplaySlot.SIDEBAR, o)
+            override fun sendClientboundSetObjectivePacket(
+                objective: Any,
+                id: Int,
+                players: List<Player>
+            ) {
+                val objective = objective as? Objective ?: return
+                ClientboundSetObjectivePacket(objective, id).run { players.sendPackets(this) }
+            }
 
+            override fun sendClientboundSetDisplayObjectivePacket(
+                objective: Any,
+                players: List<Player>
+            ) {
+                val objective = objective as? Objective ?: return
+                ClientboundSetDisplayObjectivePacket(net.minecraft.world.scores.DisplaySlot.SIDEBAR, objective)
+            }
 
-                val packet = ClientboundSetScorePacket(
-                    player.name,
-                    "test",
-                    1,
-                    Optional.ofNullable(Component.nullToEmpty("test")),
-                    Optional.ofNullable(BlankFormat())
-                    )
+            override fun sendScorePacket(
+                text: String,
+                objective: Any,
+                score: Int,
+                players: List<Player>
+            ) {
+                val objective = objective as? Objective ?: return
+                ClientboundSetScorePacket(
+                    text,
+                    objective.name,
+                    score,
+                    Optional.empty(),
+                    Optional.empty()
+                ).run { players.sendPackets(this) }
+            }
 
-                player.sendPackets(obj, packet)
+            override fun createTeam(scoreboard: Scoreboard, name: String): Any = PlayerTeam((scoreboard as CraftScoreboard).handle, name)
+
+            override fun setTeamPrefix(team: Any, prefix: String) {
+                val team = team as? PlayerTeam ?: return
+                team.playerPrefix = Component.nullToEmpty(prefix)
+            }
+
+            override fun setTeamSuffix(team: Any, suffix: String) {
+                val team = team as? PlayerTeam ?: return
+                team.playerSuffix = Component.nullToEmpty(suffix)
+            }
+
+            override fun addTeamEntry(team: Any, name: String) {
+                val team = team as? PlayerTeam ?: return
+                team.players.add(name)
+            }
+
+            override fun sendClientboundSetPlayerTeamPacketAddOrModify(
+                team: Any,
+                players: List<Player>
+            ) {
+                val team = team as? PlayerTeam ?: return
+                ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(team, true)
+            }
+
+            override fun sendClientboundSetPlayerTeamPacketRemove(
+                team: Any,
+                players: List<Player>
+            ) {
+                val team = team as? PlayerTeam ?: return
+                ClientboundSetPlayerTeamPacket.createRemovePacket(team)
             }
 
         }

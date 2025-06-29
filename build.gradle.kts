@@ -31,6 +31,7 @@ dependencies {
     api(project(":modules:npc"))
     api(project(":modules:scheduler"))
     api(project(":modules:sql"))
+    api(project(":modules:scoreboard"))
 
     dokkaPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:2.0.0")
 }

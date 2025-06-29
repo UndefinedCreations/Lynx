@@ -15,7 +15,7 @@ interface NMS {
 
     val npc: NPC
 
-    val sideBar: SideBar
+    val sideBar: NMS.Scoreboard
 
     interface ItemBuilder {
 
@@ -65,9 +65,34 @@ interface NMS {
 
     }
 
-    interface SideBar {
+    interface Scoreboard {
 
-        fun sendSideBar(player: Player)
+        fun createObjective(scoreboard: org.bukkit.scoreboard.Scoreboard, title: String): Any
+
+        fun setTitle(objective: Any, title: String)
+
+        /*
+         0 is set the sidebar
+         1 is update title
+         2 is remove sidebar
+         */
+        fun sendClientboundSetObjectivePacket(objective: Any, id: Int, players: List<Player>)
+
+        fun sendClientboundSetDisplayObjectivePacket(objective: Any, players: List<Player>)
+
+        fun sendScorePacket(text: String, objective: Any, score: Int, players: List<Player>)
+
+        fun createTeam(scoreboard: org.bukkit.scoreboard.Scoreboard, name: String): Any
+
+        fun setTeamPrefix(team: Any, prefix: String)
+
+        fun setTeamSuffix(team: Any, suffix: String)
+
+        fun addTeamEntry(team: Any, name: String)
+
+        fun sendClientboundSetPlayerTeamPacketAddOrModify(team: Any, players: List<Player>)
+
+        fun sendClientboundSetPlayerTeamPacketRemove(team: Any, players: List<Player>)
 
     }
 

@@ -12,5 +12,5 @@ include(
     ":modules:logger",
     ":modules:scheduler",
     ":modules:sql",
-    ":modules:sidebar"
+    ":modules:scoreboard"
 )
