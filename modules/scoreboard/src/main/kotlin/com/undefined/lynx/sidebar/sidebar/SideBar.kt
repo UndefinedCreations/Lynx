@@ -4,6 +4,7 @@ import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.sidebar.ScoreboardManager
 import com.undefined.lynx.sidebar.checkAsyncAndApply
+import com.undefined.lynx.sidebar.order
 import com.undefined.lynx.sidebar.sidebar.lines.*
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -233,10 +234,6 @@ class SideBar(
 
     private fun orderToInt(string: String): Int {
         return string.split("§")[1].toCharArray()[0].lowercaseChar() - 'a'
-    }
-
-    private fun order(time: Int): String {
-        return "§" + ('a'.code + time).toChar().toString() + ChatColor.RESET
     }
 
     private fun nextOrderId(): String {

@@ -3,23 +3,26 @@ package com.undefined.lynx.sidebar.team
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.sidebar.ScoreboardManager
 import com.undefined.lynx.sidebar.checkAsyncAndApply
+import com.undefined.lynx.sidebar.order
 import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.team.NameTagVisibility
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Scoreboard
+import java.util.UUID
 
 @Suppress("unused")
 class Team(
     internal val autoLoad: Boolean = true,
     scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
     private val async: Boolean = false,
+    order: Int = 1,
     kotlinDSL: Team.() -> Unit = {}
 ) {
 
     internal val playersList: MutableList<Player> = mutableListOf()
-    private val team = NMSManager.nms.scoreboard.createTeam(scoreboard, "test")
+    private val team = NMSManager.nms.scoreboard.createTeam(scoreboard, "${order(order)}${UUID.randomUUID()}")
 
     var prefix: String = ""
         set(value) {
@@ -130,5 +133,6 @@ fun team(
     autoLoad: Boolean = true,
     scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
     async: Boolean = false,
+    order: Int = 1,
     kotlinDSL: Team.() -> Unit
-) = Team(autoLoad, scoreboard, async, kotlinDSL)
+) = Team(autoLoad, scoreboard, async, order, kotlinDSL)
