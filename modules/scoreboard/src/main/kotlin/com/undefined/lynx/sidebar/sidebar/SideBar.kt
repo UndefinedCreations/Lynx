@@ -1,17 +1,13 @@
 package com.undefined.lynx.sidebar.sidebar
 
 import com.undefined.lynx.NMSManager
-import com.undefined.lynx.sidebar.sidebar.lines.EmptyLine
-import com.undefined.lynx.sidebar.sidebar.lines.Line
-import com.undefined.lynx.sidebar.sidebar.lines.PlayerLine
-import com.undefined.lynx.sidebar.sidebar.lines.SideBarTeam
-import com.undefined.lynx.sidebar.sidebar.lines.TeamLine
+import com.undefined.lynx.sidebar.sidebar.lines.*
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Scoreboard
-import kotlin.io.path.Path
 
+@Suppress("unused")
 class SideBar(
     title: String,
     private val scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
@@ -79,12 +75,26 @@ class SideBar(
     }
 
     fun modifyDynamicPlayerLine(id: Any, run: Player.() -> String) = apply {
-        val playerLine = lines.filterIsInstance<PlayerLine>().firstOrNull() { it.sideBarTeam.id == id } ?: return@apply
+        val playerLine = lines.filterIsInstance<PlayerLine>().firstOrNull { it.sideBarTeam.id == id } ?: return@apply
         players.forEach {
-            NMSManager.nms.scoreboard.setTeamPrefix(playerLine, run(it))
-            NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(playerLine, listOf(it))
+            NMSManager.nms.scoreboard.setTeamPrefix(playerLine.sideBarTeam.team, run(it))
+            NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(playerLine.sideBarTeam.team, listOf(it))
         }
         playerLine.run = run
+    }
+
+    fun updateDynamicPlayerLine(id: Any) = updateDynamicPlayerLine(id, players)
+
+    fun updateDynamicPlayerLine(id: Any, vararg player: Player) = updateDynamicPlayerLine(id, player.toList())
+
+    fun updateDynamicPlayerLine(id: Any, toUpdate: List<Player>) = apply {
+        val toUpdate = toUpdate.filter { players.contains(it) }
+        lines.filterIsInstance<PlayerLine>().firstOrNull { it.sideBarTeam.id == id }?.let { line ->
+            toUpdate.forEach {
+                NMSManager.nms.scoreboard.setTeamPrefix(line.sideBarTeam.team, line.run(it))
+                NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(line.sideBarTeam.team, listOf(it))
+            }
+        }
     }
 
     fun addDynamicLine(id: Any, line: String) = apply {
@@ -98,7 +108,7 @@ class SideBar(
     }
 
     fun modifyDynamicLine(id: Any, line: String, update: Boolean = true) = apply {
-        val teamLine = lines.filterIsInstance<TeamLine>().firstOrNull() { it.sideBarTeam.id == id } ?: return@apply
+        val teamLine = lines.filterIsInstance<TeamLine>().firstOrNull { it.sideBarTeam.id == id } ?: return@apply
         NMSManager.nms.scoreboard.setTeamPrefix(teamLine.sideBarTeam.team, line)
         teamLine.text = line
         if (update) NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(teamLine, players)
@@ -146,6 +156,7 @@ class SideBar(
     private fun orderToInt(string: String): Int {
         return string.split("§")[1].toCharArray()[0].lowercaseChar() - 'a'
     }
+
     private fun order(time: Int): String {
         return "§" + ('a'.code + time).toChar().toString() + ChatColor.RESET
     }
@@ -153,6 +164,7 @@ class SideBar(
     private fun nextOrderId(): String {
         return order((lines.maxOfOrNull { orderToInt(it.order) } ?: 0) + 1)
     }
+
 }
 
 fun sidebar(

@@ -21,15 +21,16 @@ class Main : JavaPlugin() {
         StellarConfig.setPlugin(this)
         LynxConfig.setPlugin(this)
 
+        val bar = sidebar("test") {
+
+            addDynamicPlayerLine("Test") { player!!.name }
+
+        }
+
         StellarCommand("test")
             .addExecution<Player> {
 
-                sidebar("test") {
 
-                    addViewer(sender)
-                    addDynamicPlayerLine("Test") { player!!.name }
-
-                }
 
             }.register()
 
