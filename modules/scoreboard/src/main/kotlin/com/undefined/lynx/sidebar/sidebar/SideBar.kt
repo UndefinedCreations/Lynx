@@ -64,10 +64,7 @@ class SideBar(
         lines.filterIsInstance<TeamLine>().firstOrNull { it.sideBarTeam.id == id }?.run {
             NMSManager.nms.scoreboard.sendClientboundResetScorePacket(this.order, objective, players)
             lines.remove(this)
-            when (this) {
-                is StaticTimerLine -> this.bukkitTask?.cancel()
-                is PlayerTimerLine -> this.bukkitTask?.cancel()
-            }
+            if (this is TimerLine) this.bukkitTask?.cancel()
         }
     }
 
@@ -202,6 +199,17 @@ class SideBar(
         NMSManager.nms.scoreboard.sendClientboundSetObjectivePacket(objective, 1, list)
         lines.filterIsInstance<TeamLine>().forEach { NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketRemove(it.sideBarTeam.team, list) }
         players.removeAll(list)
+    }
+
+    fun remove() = checkAsyncAndApply {
+        lines.forEach {
+            when(it) {
+                is TeamLine -> removeDynamicLine(it.sideBarTeam.id)
+                else -> removeLine(it.text)
+            }
+        }
+        lines.clear()
+        removeViewers(players)
     }
 
     private inline fun <T> T.checkAsyncAndApply(crossinline block: T.() -> Unit): T = apply {
