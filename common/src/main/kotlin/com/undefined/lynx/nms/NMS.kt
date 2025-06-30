@@ -1,6 +1,9 @@
 package com.undefined.lynx.nms
 
+import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.Skin
+import com.undefined.lynx.team.NameTagVisibility
+import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -15,7 +18,7 @@ interface NMS {
 
     val npc: NPC
 
-    val scoreboard: NMS.Scoreboard
+    val scoreboard: Scoreboard
 
     interface ItemBuilder {
 
@@ -89,6 +92,14 @@ interface NMS {
         fun setTeamPrefix(team: Any, prefix: String)
 
         fun setTeamSuffix(team: Any, suffix: String)
+
+        fun setTeamSeeFriendlyInvisibles(team: Any, canSee: Boolean)
+
+        fun setTeamNameTagVisibility(team: Any, visible: NameTagVisibility)
+
+        fun setTeamCollisionRule(team: Any, rule: CollisionRule)
+
+        fun setTeamColor(team: Any, color: ChatColor)
 
         fun addTeamEntry(team: Any, name: String)
 

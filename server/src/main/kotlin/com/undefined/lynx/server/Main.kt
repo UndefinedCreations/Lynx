@@ -1,20 +1,14 @@
 package com.undefined.lynx.server
 
 import com.undefined.lynx.LynxConfig
-import com.undefined.lynx.scheduler.delay
-import com.undefined.lynx.scheduler.repeatingTask
-import com.undefined.lynx.sidebar.sidebar.SideBar
 import com.undefined.lynx.sidebar.sidebar.sidebar
+import com.undefined.lynx.sidebar.team.team
 import com.undefined.stellar.StellarCommand
 import com.undefined.stellar.StellarConfig
-import com.undefined.stellar.util.unregisterCommand
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.plugin.java.JavaPlugin
-import java.util.UUID
-import java.util.concurrent.TimeUnit
-import kotlin.random.Random
 
 class Main : JavaPlugin() {
 
@@ -25,15 +19,23 @@ class Main : JavaPlugin() {
 
         val bar = sidebar("test", async = true) {
 
-            addDynamicPlayerTimerLine("tests", 10) { "${ChatColor.AQUA}Ping: ${ChatColor.GRAY}${this.inventory.getItem(
+            addDynamicPlayerTimerLine("tests", 1) { "${ChatColor.AQUA}Ping: ${ChatColor.GRAY}${this.inventory.getItem(
                 EquipmentSlot.HAND)?.type?.name}" }
 
         }
+
+        val team = team(autoLoad = false) {
+            prefix = "Testing UwU "
+            color = ChatColor.RED
+        }
+
 
         StellarCommand("test")
             .addExecution<Player> {
 
                 bar.addViewer(sender)
+                team.addViewer(sender)
+                team.addEntry(sender)
 
             }.register()
 

@@ -8,13 +8,15 @@ import com.undefined.lynx.Skin
 import com.undefined.lynx.nms.ClickType
 import com.undefined.lynx.nms.NMS
 import com.undefined.lynx.nms.NPCInteract
+import com.undefined.lynx.team.CollisionRule
+import com.undefined.lynx.team.NameTagVisibility
 import com.undefined.lynx.util.execute
 import com.undefined.lynx.util.getPrivateField
 import com.undefined.lynx.util.getPrivateMethod
+import net.minecraft.ChatFormatting
 import net.minecraft.network.Connection
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.numbers.BlankFormat
-import net.minecraft.network.chat.numbers.NumberFormat
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
 import net.minecraft.network.syncher.EntityDataAccessor
@@ -33,8 +35,10 @@ import net.minecraft.world.entity.PositionMoveRotation
 import net.minecraft.world.item.component.ResolvableProfile
 import net.minecraft.world.scores.Objective
 import net.minecraft.world.scores.PlayerTeam
+import net.minecraft.world.scores.Team
 import net.minecraft.world.scores.criteria.ObjectiveCriteria
 import org.bukkit.Bukkit
+import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.craftbukkit.v1_21_R3.CraftServer
@@ -367,6 +371,26 @@ object NMS1_21_4: NMS, Listener {
             override fun setTeamSuffix(team: Any, suffix: String) {
                 val team = team as? PlayerTeam ?: return
                 team.playerSuffix = Component.nullToEmpty(suffix)
+            }
+
+            override fun setTeamSeeFriendlyInvisibles(team: Any, canSee: Boolean) {
+                val team = team as? PlayerTeam ?: return
+                team.setSeeFriendlyInvisibles(canSee)
+            }
+
+            override fun setTeamNameTagVisibility(team: Any, visible: NameTagVisibility) {
+                val team = team as? PlayerTeam ?: return
+                team.nameTagVisibility = Team.Visibility.byName(visible.name)
+            }
+
+            override fun setTeamCollisionRule(team: Any, rule: CollisionRule) {
+                val team = team as? PlayerTeam ?: return
+                team.collisionRule = Team.CollisionRule.byName(rule.name)
+            }
+
+            override fun setTeamColor(team: Any, color: ChatColor) {
+                val team = team as? PlayerTeam ?: return
+                team.color = ChatFormatting.getByName(color.name)
             }
 
             override fun addTeamEntry(team: Any, name: String) {

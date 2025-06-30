@@ -2,6 +2,7 @@ package com.undefined.lynx.sidebar.sidebar
 
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.NMSManager
+import com.undefined.lynx.sidebar.ScoreboardManager
 import com.undefined.lynx.sidebar.checkAsyncAndApply
 import com.undefined.lynx.sidebar.sidebar.lines.*
 import org.bukkit.Bukkit
@@ -18,7 +19,7 @@ class SideBar(
     kotlinDSL: SideBar.() -> Unit = {}
 ) {
 
-    private val players: MutableList<Player> = mutableListOf()
+    internal val players: MutableList<Player> = mutableListOf()
     private val objective = NMSManager.nms.scoreboard.createObjective(scoreboard, title)
     private val lines: MutableList<Line> = mutableListOf()
 
@@ -27,6 +28,7 @@ class SideBar(
 
     init {
         kotlinDSL()
+        ScoreboardManager.activeSideBars.add(this)
     }
 
     fun updateDynamicLines() = checkAsyncAndApply(async) {
@@ -211,6 +213,7 @@ class SideBar(
         }
         lines.clear()
         removeViewers(players)
+        ScoreboardManager.activeSideBars.remove(this)
     }
 
     private fun runDynamicTimer(runnable: Runnable, order: String, ticks: Int, line: TimerLine) {
