@@ -8,7 +8,9 @@ import com.undefined.lynx.sidebar.sidebar.sidebar
 import com.undefined.stellar.StellarCommand
 import com.undefined.stellar.StellarConfig
 import com.undefined.stellar.util.unregisterCommand
+import org.bukkit.ChatColor
 import org.bukkit.entity.Player
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -23,7 +25,8 @@ class Main : JavaPlugin() {
 
         val bar = sidebar("test", async = true) {
 
-            addDynamicPlayerLine("Test") { player!!.name }
+            addDynamicPlayerTimerLine("tests", 10) { "${ChatColor.AQUA}Ping: ${ChatColor.GRAY}${this.inventory.getItem(
+                EquipmentSlot.HAND)?.type?.name}" }
 
         }
 

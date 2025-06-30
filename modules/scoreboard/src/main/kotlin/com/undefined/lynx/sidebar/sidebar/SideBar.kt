@@ -60,6 +60,10 @@ class SideBar(
         lines.filterIsInstance<TeamLine>().firstOrNull { it.sideBarTeam.id == id }?.run {
             NMSManager.nms.scoreboard.sendClientboundResetScorePacket(this.order, objective, players)
             lines.remove(this)
+            when (this) {
+                is StaticTimerLine -> this.bukkitTask?.cancel()
+                is PlayerTimerLine -> this.bukkitTask?.cancel()
+            }
         }
     }
 
@@ -106,8 +110,7 @@ class SideBar(
         NMSManager.nms.scoreboard.setTeamPrefix(pair.first, line)
         NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(pair.first, players)
         NMSManager.nms.scoreboard.sendScorePacket(pair.second, objective, 0, players)
-        val line = TeamLine(line, SideBarTeam(pair.first, id), pair.second)
-        lines.add(line)
+        lines.add(TeamLine(line, SideBarTeam(pair.first, id), pair.second))
     }
 
     fun modifyDynamicLine(id: Any, line: String, update: Boolean = true) = checkAsyncAndApply {
@@ -115,6 +118,52 @@ class SideBar(
         NMSManager.nms.scoreboard.setTeamPrefix(teamLine.sideBarTeam.team, line)
         teamLine.text = line
         if (update) NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(teamLine, players)
+    }
+
+    fun addDynamicTimerLine(id: Any, ticks: Int, async: Boolean = true, run: Unit.() -> String) = checkAsyncAndApply {
+        val pair = dynamicLineCheck(id) ?: return@checkAsyncAndApply
+        NMSManager.nms.scoreboard.addTeamEntry(pair.first, pair.second)
+        val line = StaticTimerLine(SideBarTeam(pair.first, id), pair.second, run, null)
+        val runnable = Runnable {
+            NMSManager.nms.scoreboard.setTeamPrefix(pair.first, line.run(Unit))
+            NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(pair.first, players)
+        }
+        runnable.run()
+        runDynamicTimer(runnable, pair.second, ticks, line)
+        lines.add(line)
+    }
+
+
+
+    fun modifyDynamicTimerLine(id: Any, run: Unit.() -> String) = checkAsyncAndApply {
+        val line = lines.filterIsInstance<StaticTimerLine>().firstOrNull { it.sideBarTeam.id == id } ?: return@checkAsyncAndApply
+        line.run = run
+        NMSManager.nms.scoreboard.setTeamPrefix(line.sideBarTeam.team, run(Unit))
+        NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(line.sideBarTeam.team, players)
+    }
+
+    fun addDynamicPlayerTimerLine(id: Any, ticks: Int, async: Boolean = false, run: Player.() -> String) = checkAsyncAndApply {
+        val pair = dynamicLineCheck(id) ?: return@checkAsyncAndApply
+        NMSManager.nms.scoreboard.addTeamEntry(pair.first, pair.second)
+        val line = PlayerTimerLine(SideBarTeam(pair.first, id), pair.second, run, null)
+        val runnable = Runnable {
+            players.forEach {
+                NMSManager.nms.scoreboard.setTeamPrefix(pair.first, line.run(it))
+                NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(pair.first, listOf(it))
+            }
+        }
+        runnable.run()
+        runDynamicTimer(runnable, pair.second, ticks, line)
+        lines.add(line)
+    }
+
+    fun modifyDynamicPlayerTimerLine(id: Any, run: Player.() -> String) = checkAsyncAndApply {
+        val line = lines.filterIsInstance<PlayerTimerLine>().firstOrNull { it.sideBarTeam.id == id } ?: return@checkAsyncAndApply
+        line.run = run
+        players.forEach {
+            NMSManager.nms.scoreboard.setTeamPrefix(line.sideBarTeam.team, run(it))
+            NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(line.sideBarTeam.team, listOf(it))
+        }
     }
 
     fun addViewer(player: Player) = addViewers(listOf(player))
@@ -150,6 +199,12 @@ class SideBar(
 
     private inline fun <T> T.checkAsyncAndApply(crossinline block: T.() -> Unit): T = apply {
         if (async) Bukkit.getScheduler().runTaskAsynchronously(LynxConfig.javaPlugin, Runnable { block() }) else block()
+    }
+
+    private fun runDynamicTimer(runnable: Runnable, order: String, ticks: Int, line: TimerLine) {
+        NMSManager.nms.scoreboard.sendScorePacket(order, objective, 0, players)
+        line.bukkitTask = if (async) Bukkit.getScheduler().runTaskTimerAsynchronously(LynxConfig.javaPlugin, runnable, ticks.toLong(), ticks.toLong())
+        else Bukkit.getScheduler().runTaskTimer(LynxConfig.javaPlugin, runnable, ticks.toLong(), ticks.toLong())
     }
 
     private fun dynamicLineCheck(id: Any): Pair<Any, String>? {

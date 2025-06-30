@@ -6,5 +6,5 @@ class PlayerLine(
     sideBarTeam: SideBarTeam,
     order: String,
     var run: Player.() -> String
-): TeamLine("PlayerLine", sideBarTeam, order){
+): TeamLine("", sideBarTeam, order){
 }
