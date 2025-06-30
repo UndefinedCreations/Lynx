@@ -26,7 +26,8 @@ class Main : JavaPlugin() {
 
                 sidebar("test") {
 
-
+                    addViewer(sender)
+                    addDynamicPlayerLine("Test") { player!!.name }
 
                 }
 
