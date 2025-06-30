@@ -17,6 +17,7 @@ private val submodules: HashMap<String, String> = hashMapOf(
     ":modules:npc" to "npc",
     ":modules:scheduler" to "scheduler",
     ":modules:sql" to "sql",
+    ":modules:scoreboard" to "scoreboard",
 )
 
 dependencies {
