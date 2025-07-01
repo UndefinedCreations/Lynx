@@ -15,10 +15,14 @@ import com.undefined.lynx.util.getPrivateField
 import com.undefined.lynx.util.getPrivateMethod
 import net.kyori.adventure.platform.bukkit.MinecraftComponentSerializer
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
+import net.md_5.bungee.chat.ComponentSerializer
 import net.minecraft.ChatFormatting
 import net.minecraft.network.Connection
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.ComponentSerialization
 import net.minecraft.network.chat.MutableComponent
+import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.TextColor
 import net.minecraft.network.chat.numbers.BlankFormat
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
@@ -50,6 +54,7 @@ import org.bukkit.craftbukkit.v1_21_R3.CraftWorld
 import org.bukkit.craftbukkit.v1_21_R3.entity.CraftPlayer
 import org.bukkit.craftbukkit.v1_21_R3.inventory.CraftItemStack
 import org.bukkit.craftbukkit.v1_21_R3.scoreboard.CraftScoreboard
+import org.bukkit.craftbukkit.v1_21_R3.util.CraftChatMessage
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -301,20 +306,20 @@ object NMS1_21_4: NMS, Listener {
         object : NMS.Scoreboard {
             override fun createObjective(
                 scoreboard: Scoreboard,
-                title: AdventureComponent
+                title: String
             ): Any = Objective(
                 (scoreboard as CraftScoreboard).handle,
                 UUID.randomUUID().toString(),
                 ObjectiveCriteria.DUMMY,
-                title.toNMS(),
+                CraftChatMessage.fromJSONOrNull(title) ?: throw IllegalArgumentException("Can't get component"),
                 ObjectiveCriteria.RenderType.INTEGER,
                 false,
                 BlankFormat.INSTANCE
             )
 
-            override fun setTitle(objective: Any, title: AdventureComponent) {
+            override fun setTitle(objective: Any, title: String) {
                 val objective = objective as? Objective ?: return
-                objective.displayName = title.toNMS()
+                objective.displayName = CraftChatMessage.fromJSONOrNull(title) ?: throw IllegalArgumentException("Can't get component")
             }
 
             override fun sendClientboundSetObjectivePacket(
@@ -336,18 +341,18 @@ object NMS1_21_4: NMS, Listener {
 
             override fun sendSetScorePacket(
                 orderId: String,
-                text: AdventureComponent,
+                text: String,
                 objective: Any,
                 score: Int,
                 players: List<Player>
             ) {
                 val objective = objective as? Objective ?: return
-                val nmsText = text.toNMS()
+                val nmsText = CraftChatMessage.fromJSONOrNull(text) ?: throw IllegalArgumentException("Can't get component")
                 players.sendPackets(ClientboundSetScorePacket(
                     orderId,
                     objective.name,
                     score,
-                    Optional.of(nmsText.withColor(1)),
+                    Optional.of(nmsText),
                     Optional.of(BlankFormat.INSTANCE)
                 ))
             }
@@ -363,14 +368,14 @@ object NMS1_21_4: NMS, Listener {
 
             override fun createTeam(scoreboard: Scoreboard, name: String): Any = PlayerTeam((scoreboard as CraftScoreboard).handle, name)
 
-            override fun setTeamPrefix(team: Any, prefix: AdventureComponent) {
+            override fun setTeamPrefix(team: Any, prefix: String) {
                 val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
-                team.playerPrefix = prefix.toNMS()
+                team.playerPrefix = CraftChatMessage.fromJSONOrNull(prefix)
             }
 
-            override fun setTeamSuffix(team: Any, suffix: AdventureComponent) {
+            override fun setTeamSuffix(team: Any, suffix: String) {
                 val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
-                team.playerSuffix = suffix.toNMS()
+                team.playerSuffix = CraftChatMessage.fromJSONOrNull(suffix)
             }
 
             override fun setTeamSeeFriendlyInvisibles(team: Any, canSee: Boolean) {

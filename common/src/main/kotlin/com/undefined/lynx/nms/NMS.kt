@@ -50,12 +50,12 @@ interface NMS {
         /**
          * Create a NMS objective class
          */
-        fun createObjective(scoreboard: org.bukkit.scoreboard.Scoreboard, title: Component): Any
+        fun createObjective(scoreboard: org.bukkit.scoreboard.Scoreboard, title: String): Any
 
         /**
          * Changes the title in the objective
          */
-        fun setTitle(objective: Any, title: Component)
+        fun setTitle(objective: Any, title: String)
 
         /**
          *
@@ -76,7 +76,7 @@ interface NMS {
         /**
          * Sends the set score packet to the list of players
          */
-        fun sendSetScorePacket(orderId: String, text: Component, objective: Any, score: Int, players: List<Player>)
+        fun sendSetScorePacket(orderId: String, text: String, objective: Any, score: Int, players: List<Player>)
 
         /**
          * Sends the set reset score packet to the list of players
@@ -91,12 +91,13 @@ interface NMS {
         /**
          * Changes a teams prefix
          */
-        fun setTeamPrefix(team: Any, prefix: Component)
+        fun setTeamPrefix(team: Any, prefix: String)
+
 
         /**
          * Changes a teams suffix
          */
-        fun setTeamSuffix(team: Any, suffix: Component)
+        fun setTeamSuffix(team: Any, suffix: String)
 
         /**
          * Changes a teams ability to see friendly invisible

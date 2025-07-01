@@ -4,6 +4,7 @@ import com.undefined.lynx.NMSManager
 import com.undefined.lynx.sidebar.ScoreboardManager
 import com.undefined.lynx.sidebar.checkAsyncAndApply
 import com.undefined.lynx.sidebar.order
+import com.undefined.lynx.sidebar.toJson
 import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.team.NameTagVisibility
 import net.kyori.adventure.text.Component
@@ -25,16 +26,16 @@ class Team(
     internal val playersList: MutableList<Player> = mutableListOf()
     private val team = NMSManager.nms.scoreboard.createTeam(scoreboard, "${order(order)}${UUID.randomUUID()}")
 
-    var prefix: Component = Component.empty()
+    var prefix: String = ""
         set(value) {
-            NMSManager.nms.scoreboard.setTeamPrefix(team, value)
+            NMSManager.nms.scoreboard.setTeamPrefix(team, value.toJson())
             NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players())
             field = value
         }
 
-    var suffix: Component = Component.empty()
+    var suffix: String = ""
         set(value) {
-            NMSManager.nms.scoreboard.setTeamSuffix(team, value)
+            NMSManager.nms.scoreboard.setTeamSuffix(team, value.toJson())
             NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players())
             field = value
         }
@@ -83,15 +84,12 @@ class Team(
         NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players())
     }
 
-    fun setPrefix(prefix: String) = setPrefix(Component.text(prefix))
 
-    fun setPrefix(prefix: Component) = checkAsyncAndApply(async) {
+    fun setPrefix(prefix: String) = checkAsyncAndApply(async) {
         this.prefix = prefix
     }
 
-    fun setSuffix(suffix: String) = setSuffix(Component.text(suffix))
-
-    fun setSuffix(suffix: Component) = checkAsyncAndApply(async) {
+    fun setSuffix(suffix: String) = checkAsyncAndApply(async) {
         this.suffix = suffix
     }
 

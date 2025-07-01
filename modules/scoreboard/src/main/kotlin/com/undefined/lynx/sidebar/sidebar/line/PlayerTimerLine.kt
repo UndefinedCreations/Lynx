@@ -7,6 +7,6 @@ import org.bukkit.scheduler.BukkitTask
 class PlayerTimerLine(
     sideBarTeam: SidebarTeam,
     order: String,
-    var run: Player.() -> Component,
+    var run: Player.() -> String,
     bukkitTask: BukkitTask?
 ) : TimerLine(sideBarTeam, order, bukkitTask)

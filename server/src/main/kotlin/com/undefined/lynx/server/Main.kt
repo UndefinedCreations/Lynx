@@ -7,9 +7,12 @@ import com.undefined.lynx.nick.setName
 import com.undefined.lynx.scheduler.repeatingTask
 import com.undefined.lynx.sidebar.sidebar.sidebar
 import com.undefined.lynx.sidebar.team.team
+import com.undefined.lynx.util.miniMessage
 import com.undefined.stellar.StellarCommand
 import com.undefined.stellar.StellarConfig
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.Style
+import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.ChatColor
 import org.bukkit.Material
@@ -25,22 +28,27 @@ class Main : JavaPlugin() {
         StellarConfig.setPlugin(this)
         LynxConfig.setPlugin(this)
 
-        val bar = sidebar(!"<red>test", async = true) {
-//            addLine(!"test")
-            addDynamicPlayerTimerLine("id", 1) { !"<gold>Ping: <gray>${this.inventory.getItem(EquipmentSlot.HAND)?.type?.name}" }
-            addEmptyLine()
-            addDynamicPlayerTimerLine("test", 1) { !"<gold>Test: <gray>${this.inventory.getItem(EquipmentSlot.HAND)?.type?.name}" }
-            addDynamicPlayerTimerLine("as", 1) { !"<gold>Ads: <gray>${this.inventory.getItem(EquipmentSlot.HAND)?.type?.name}" }
-        }
+
 
         val team = team {
-            prefix = !"Testing "
+            prefix = "Testing "
             color = ChatColor.RED
         }
 
         StellarCommand("test")
             .addExecution<Player> {
-                bar.addViewer(sender)
+
+                val bar = sidebar(!"<red>test", async = true) {
+                    addViewer(sender)
+                    addLine("${ChatColor.AQUA}1")
+                    addEmptyLine()
+                    addDynamicLine("Test", "<white>Testing <aqua>idk <red>asdas".miniMessage())
+
+                    modifyDynamicLine("Test", "<white>Testing <aqua>idk <white>asdas".miniMessage())
+
+                }
+
+
                 team.addEntry(sender)
             }.register()
     }
