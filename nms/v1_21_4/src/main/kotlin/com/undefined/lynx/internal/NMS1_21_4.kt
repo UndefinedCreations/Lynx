@@ -13,9 +13,12 @@ import com.undefined.lynx.team.NameTagVisibility
 import com.undefined.lynx.util.execute
 import com.undefined.lynx.util.getPrivateField
 import com.undefined.lynx.util.getPrivateMethod
+import net.kyori.adventure.platform.bukkit.MinecraftComponentSerializer
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import net.minecraft.ChatFormatting
 import net.minecraft.network.Connection
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.numbers.BlankFormat
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
@@ -37,6 +40,7 @@ import net.minecraft.world.scores.Objective
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
 import net.minecraft.world.scores.criteria.ObjectiveCriteria
+import net.kyori.adventure.text.Component as AdventureComponent
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Location
@@ -97,7 +101,6 @@ object NMS1_21_4: NMS, Listener {
                     val entityID = this.getPrivateField<Int>(ServerboundInteractPacket::class.java, MAPPING.ServerboundInteractPacket_ENTITYID)
                     val action = this.getPrivateField<Any>(ServerboundInteractPacket::class.java, MAPPING.ServerboundInteractPacket_ACTION)
                     val actionType = action::class.java.getPrivateMethod(MAPPING.ServerboundInteractionPacket_GET_TYPE).execute(action)
-                    println(actionType)
                     when(actionType.toString()) {
                         "ATTACK" -> {
                             clickData(NPCInteract(entityID, ClickType.LEFT, player))
@@ -142,7 +145,6 @@ object NMS1_21_4: NMS, Listener {
 
     override val nick: NMS.Nick by lazy {
         object : NMS.Nick {
-
             override fun setSkin(player: Player, texture: String, signature: String) {
                 val gameProfile = player.serverPlayer().gameProfile
                 val properties = gameProfile.properties
@@ -210,9 +212,6 @@ object NMS1_21_4: NMS, Listener {
 
     override val npc: NMS.NPC by lazy {
         object : NMS.NPC {
-
-
-
             override fun createServerPlayer(name: String, texture: String, signature: String): Any {
                 val gameProfile = GameProfile(UUID.randomUUID(), name)
                 gameProfile.properties.put("textures", Property("textures", texture, signature))
@@ -300,23 +299,22 @@ object NMS1_21_4: NMS, Listener {
 
     override val scoreboard: NMS.Scoreboard by lazy {
         object : NMS.Scoreboard {
-
             override fun createObjective(
                 scoreboard: Scoreboard,
-                title: String
+                title: AdventureComponent
             ): Any = Objective(
                 (scoreboard as CraftScoreboard).handle,
                 UUID.randomUUID().toString(),
                 ObjectiveCriteria.DUMMY,
-                Component.nullToEmpty(title),
+                title.toNMS(),
                 ObjectiveCriteria.RenderType.INTEGER,
                 false,
                 BlankFormat.INSTANCE
             )
 
-            override fun setTitle(objective: Any, title: String) {
+            override fun setTitle(objective: Any, title: AdventureComponent) {
                 val objective = objective as? Objective ?: return
-                objective.displayName = Component.nullToEmpty(title)
+                objective.displayName = title.toNMS()
             }
 
             override fun sendClientboundSetObjectivePacket(
@@ -336,18 +334,20 @@ object NMS1_21_4: NMS, Listener {
                 players.sendPackets(ClientboundSetDisplayObjectivePacket(net.minecraft.world.scores.DisplaySlot.SIDEBAR, objective))
             }
 
-            override fun sendScorePacket(
-                text: String,
+            override fun sendSetScorePacket(
+                orderId: String,
+                text: AdventureComponent,
                 objective: Any,
                 score: Int,
                 players: List<Player>
             ) {
                 val objective = objective as? Objective ?: return
+                val nmsText = text.toNMS()
                 players.sendPackets(ClientboundSetScorePacket(
-                    text,
+                    orderId,
                     objective.name,
                     score,
-                    Optional.empty(),
+                    Optional.of(nmsText.withColor(1)),
                     Optional.of(BlankFormat.INSTANCE)
                 ))
             }
@@ -363,38 +363,38 @@ object NMS1_21_4: NMS, Listener {
 
             override fun createTeam(scoreboard: Scoreboard, name: String): Any = PlayerTeam((scoreboard as CraftScoreboard).handle, name)
 
-            override fun setTeamPrefix(team: Any, prefix: String) {
-                val team = team as? PlayerTeam ?: return
-                team.playerPrefix = Component.nullToEmpty(prefix)
+            override fun setTeamPrefix(team: Any, prefix: AdventureComponent) {
+                val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
+                team.playerPrefix = prefix.toNMS()
             }
 
-            override fun setTeamSuffix(team: Any, suffix: String) {
-                val team = team as? PlayerTeam ?: return
-                team.playerSuffix = Component.nullToEmpty(suffix)
+            override fun setTeamSuffix(team: Any, suffix: AdventureComponent) {
+                val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
+                team.playerSuffix = suffix.toNMS()
             }
 
             override fun setTeamSeeFriendlyInvisibles(team: Any, canSee: Boolean) {
-                val team = team as? PlayerTeam ?: return
+                val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
                 team.setSeeFriendlyInvisibles(canSee)
             }
 
             override fun setTeamNameTagVisibility(team: Any, visible: NameTagVisibility) {
-                val team = team as? PlayerTeam ?: return
+                val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
                 team.nameTagVisibility = Team.Visibility.byName(visible.name)
             }
 
             override fun setTeamCollisionRule(team: Any, rule: CollisionRule) {
-                val team = team as? PlayerTeam ?: return
+                val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
                 team.collisionRule = Team.CollisionRule.byName(rule.name)
             }
 
             override fun setTeamColor(team: Any, color: ChatColor) {
-                val team = team as? PlayerTeam ?: return
+                val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
                 team.color = ChatFormatting.getByName(color.name)
             }
 
             override fun addTeamEntry(team: Any, name: String) {
-                val team = team as? PlayerTeam ?: return
+                val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
                 team.players.add(name)
             }
 
@@ -402,7 +402,7 @@ object NMS1_21_4: NMS, Listener {
                 team: Any,
                 players: List<Player>
             ) {
-                val team = team as? PlayerTeam ?: return
+                val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
                 players.sendPackets(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(team, true))
             }
 
@@ -410,27 +410,28 @@ object NMS1_21_4: NMS, Listener {
                 team: Any,
                 players: List<Player>
             ) {
-                val team = team as? PlayerTeam ?: return
+                val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
                 players.sendPackets(ClientboundSetPlayerTeamPacket.createRemovePacket(team))
             }
 
         }
     }
 
-
-    private fun List<UUID>?.sendPacket(vararg packets: Packet<*>) = (this?.mapNotNull { Bukkit.getPlayer(it) } ?: Bukkit.getOnlinePlayers()).sendPackets(*packets)
-
-    private fun Player.serverPlayer(): ServerPlayer = (this as CraftPlayer).handle
-
-    private fun Player.sendPackets(vararg packets: Packet<*>?) {
-        val connection = serverPlayer().connection
-        packets.filterNotNull().forEach { connection.sendPacket(it) }
-    }
-
-    private fun Collection<Player>.sendPackets(vararg packet: Packet<*>?) {
-        for (player in this) {
-            player.sendPackets(*packet)
-        }
-    }
-
 }
+
+private fun List<UUID>?.sendPacket(vararg packets: Packet<*>) = (this?.mapNotNull { Bukkit.getPlayer(it) } ?: Bukkit.getOnlinePlayers()).sendPackets(*packets)
+
+private fun Player.serverPlayer(): ServerPlayer = (this as CraftPlayer).handle
+
+private fun Player.sendPackets(vararg packets: Packet<*>?) {
+    val connection = serverPlayer().connection
+    packets.filterNotNull().forEach { connection.sendPacket(it) }
+}
+
+private fun Collection<Player>.sendPackets(vararg packet: Packet<*>?) {
+    for (player in this) {
+        player.sendPackets(*packet)
+    }
+}
+
+fun AdventureComponent.toNMS(): MutableComponent = MinecraftComponentSerializer.get().serialize(this) as MutableComponent

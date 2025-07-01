@@ -6,13 +6,14 @@ import com.undefined.lynx.sidebar.checkAsyncAndApply
 import com.undefined.lynx.sidebar.order
 import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.team.NameTagVisibility
+import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Scoreboard
 import java.util.UUID
 
-@Suppress("unused")
+@Suppress("UNUSED")
 class Team(
     internal val autoLoad: Boolean = true,
     scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
@@ -24,14 +25,14 @@ class Team(
     internal val playersList: MutableList<Player> = mutableListOf()
     private val team = NMSManager.nms.scoreboard.createTeam(scoreboard, "${order(order)}${UUID.randomUUID()}")
 
-    var prefix: String = ""
+    var prefix: Component = Component.empty()
         set(value) {
             NMSManager.nms.scoreboard.setTeamPrefix(team, value)
             NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players())
             field = value
         }
 
-    var suffix: String = ""
+    var suffix: Component = Component.empty()
         set(value) {
             NMSManager.nms.scoreboard.setTeamSuffix(team, value)
             NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players())
@@ -81,12 +82,16 @@ class Team(
         names.forEach { NMSManager.nms.scoreboard.addTeamEntry(team, it) }
         NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players())
     }
-    
-    fun setPrefix(prefix: String) = checkAsyncAndApply(async) {
+
+    fun setPrefix(prefix: String) = setPrefix(Component.text(prefix))
+
+    fun setPrefix(prefix: Component) = checkAsyncAndApply(async) {
         this.prefix = prefix
     }
 
-    fun setSuffix(suffix: String) = checkAsyncAndApply(async) {
+    fun setSuffix(suffix: String) = setSuffix(Component.text(suffix))
+
+    fun setSuffix(suffix: Component) = checkAsyncAndApply(async) {
         this.suffix = suffix
     }
 

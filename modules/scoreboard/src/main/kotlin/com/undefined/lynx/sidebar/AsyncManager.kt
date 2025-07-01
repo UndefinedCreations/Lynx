@@ -8,6 +8,4 @@ internal inline fun <T> T.checkAsyncAndApply(async: Boolean, crossinline block: 
     if (async) Bukkit.getScheduler().runTaskAsynchronously(LynxConfig.javaPlugin, Runnable { block() }) else block()
 }
 
-internal fun order(time: Int): String {
-    return "§" + ('a'.code + time).toChar().toString() + ChatColor.RESET
-}
+internal fun order(index: Int): String = (index.toChar().code + 1).toChar().toString()
