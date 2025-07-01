@@ -1,6 +1,10 @@
 plugins {
-    id("setup")
+    kotlin("jvm")
     id("com.undefinedcreations.echo")
+}
+
+repositories {
+    mavenCentral()
 }
 
 dependencies {

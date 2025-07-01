@@ -2,13 +2,12 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("setup")
-//    id("publishing-convention")
 }
 
 dependencies {
     compileOnly(libs.spigot)
-    api(project(":nms:v1_21_4"))
 
+    api(project(":nms:v1_21_4"))
     api(project(":common"))
 }
 

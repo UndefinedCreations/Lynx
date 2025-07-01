@@ -33,12 +33,12 @@ tasks {
     compileJava {
         options.release = 8
     }
-    shadowJar { //TODO AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-//        minimize {
-//            exclude("**/kotlin/**")
-//            exclude("**/intellij/**")
-//            exclude("**/jetbrains/**")
-//        }
+    shadowJar {
+        minimize {
+            exclude("**/kotlin/**")
+            exclude("**/intellij/**")
+            exclude("**/jetbrains/**")
+        }
         archiveClassifier = project.name
         archiveFileName = "${rootProject.name}-${project.version}-${project.name}.jar"
     }

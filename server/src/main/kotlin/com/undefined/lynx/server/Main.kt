@@ -26,42 +26,21 @@ class Main : JavaPlugin() {
         LynxConfig.setPlugin(this)
 
         val bar = sidebar("test", async = true) {
-
-            addDynamicPlayerTimerLine(Type.RANK, 1) { "${ChatColor.AQUA}Ping: ${ChatColor.GRAY}${this.inventory.getItem(
+            addDynamicPlayerTimerLine("id", 1) { "${ChatColor.AQUA}Ping: ${ChatColor.GRAY}${this.inventory.getItem(
                 EquipmentSlot.HAND)?.type?.name}" }
-
         }
 
-        val team = team() {
+        val team = team {
             prefix = "Testing UwU "
             color = ChatColor.RED
         }
 
-
         StellarCommand("test")
             .addExecution<Player> {
-
-
                 bar.addViewer(sender)
                 team.addViewer(sender)
                 team.addEntry("Testing")
-
-                sender.setName("Testing")
-
             }.register()
-
-
-
     }
 
-    override fun onDisable() {
-
-
-
-    }
-
-}
-
-enum class Type() {
-    RANK
 }
