@@ -121,7 +121,12 @@ class Sidebar(
         removeViewers(players)
         ScoreboardManager.activeSidebars.remove(this)
     }
-
+    fun resend() = apply {
+        val active = mutableListOf<Player>()
+        active.addAll(players)
+        removeViewers(players)
+        addViewers(active)
+    }
 }
 
 fun sidebar(
