@@ -1,9 +1,9 @@
-package com.undefined.lynx.sidebar.sidebar.lines
+package com.undefined.lynx.sidebar.sidebar.line
 
 import org.bukkit.entity.Player
 
 class PlayerLine(
-    sideBarTeam: SideBarTeam,
+    sideBarTeam: SidebarTeam,
     order: String,
     var run: Player.() -> String
 ): TeamLine("", sideBarTeam, order){

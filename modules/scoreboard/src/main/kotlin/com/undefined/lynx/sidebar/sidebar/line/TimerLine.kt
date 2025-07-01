@@ -1,9 +1,9 @@
-package com.undefined.lynx.sidebar.sidebar.lines
+package com.undefined.lynx.sidebar.sidebar.line
 
 import org.bukkit.scheduler.BukkitTask
 
 open class TimerLine(
-    sideBarTeam: SideBarTeam,
+    sideBarTeam: SidebarTeam,
     order: String,
-    var bukkitTask: BukkitTask?
+    var task: BukkitTask?
 ): TeamLine("", sideBarTeam, order)

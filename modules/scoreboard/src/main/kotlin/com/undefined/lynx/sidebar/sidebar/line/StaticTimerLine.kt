@@ -1,9 +1,9 @@
-package com.undefined.lynx.sidebar.sidebar.lines
+package com.undefined.lynx.sidebar.sidebar.line
 
 import org.bukkit.scheduler.BukkitTask
 
 class StaticTimerLine(
-    sideBarTeam: SideBarTeam,
+    sideBarTeam: SidebarTeam,
     order: String,
     var run: Unit.() -> String,
     bukkitTask: BukkitTask?
