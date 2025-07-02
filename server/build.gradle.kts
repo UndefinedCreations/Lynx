@@ -1,12 +1,20 @@
+import com.undefinedcreations.nova.ServerType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    setup
+    java
+    kotlin("jvm")
     id("com.undefinedcreations.nova") version "0.0.5"
     id("com.gradleup.shadow")
 }
 
 repositories {
+    mavenCentral()
+    mavenLocal()
+    maven {
+        name = "spigot-repo"
+        url = uri("https://hub.spigotmc.org/nexus/content/repositories/snapshots")
+    }
     maven {
         name = "undefined-releases"
         url = uri("https://repo.undefinedcreations.com/releases")
@@ -17,12 +25,8 @@ dependencies {
     compileOnly(libs.spigot)
 
     implementation("com.undefined:stellar:1.0.0")
-//    implementation("com.undefined:lynx:0.0.12:core")
-//    implementation("com.undefined:lynx:0.0.12:npc")
-    implementation("com.undefined:lynx:0.0.21")
 
-//    implementation(project(":common"))
-//    implementation(project(":modules:npc"))
+    implementation(project(":"))
 
     implementation("net.kyori:adventure-api:4.17.0")
     implementation("net.kyori:adventure-text-minimessage:4.17.0")
@@ -36,9 +40,14 @@ tasks {
     compileJava {
         options.release = 21
     }
+    shadowJar {
+        archiveFileName = "server.jar"
+    }
     runServer {
         minecraftVersion("1.21.4")
         acceptMojangEula()
+        perVersionFolder(true)
+        serverType(ServerType.SPIGOT)
     }
 }
 
@@ -48,10 +57,4 @@ java {
 
 kotlin {
     jvmToolchain(21)
-}
-
-tasks {
-    runServer {
-        minecraftVersion("1.21.4")
-    }
 }
