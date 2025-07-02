@@ -17,18 +17,28 @@ interface NMS {
     val itemBuilder: ItemBuilder
     val npc: NPC
     val scoreboard: Scoreboard
+    val playerMeta: PlayerMeta
 
     interface ItemBuilder {
         fun setSkullTexture(skullMeta: SkullMeta, texture: String): SkullMeta
+    }
+
+    interface PlayerMeta {
+
+        fun sendClientboundPlayerInfoRemovePacket(uuid: List<UUID>, players: List<Player>)
+        fun sendClientboundPlayerInfoAddPacket(player: Any, players: List<Player>)
+        fun sendClientboundPlayerInfoUpdateListedPacket(player: Any, players: List<Player>)
+
+        fun sendClientboundPlayerInfoRemovePacket(player: List<Player>, players: List<Player>) = sendClientboundPlayerInfoRemovePacket(player.map { it.uniqueId }, players)
+        fun sendClientboundPlayerInfoAddPacket(player: Player, players: List<Player>)
+        fun sendClientboundPlayerInfoUpdateListedPacket(player: Player, players: List<Player>)
+
     }
 
     interface Nick {
         fun setSkin(player: Player, texture: String, signature: String)
         fun setName(player: Player, name: String)
         fun getSkin(player: Player): Skin
-        fun sendClientboundPlayerInfoRemovePacket(player: Player)
-        fun sendClientboundPlayerInfoAddPacket(player: Player)
-        fun sendClientboundPlayerInfoUpdateListedPacket(player: Player)
         fun sendClientboundRespawnPacket(player: Player)
         fun sendClientboundGameEventPacket(player: Player)
         fun updateAbilities(player: Player)

@@ -64,6 +64,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.scoreboard.Scoreboard
 import java.util.*
+import javax.swing.Action
 
 @Suppress("NAME_SHADOWING")
 object NMS1_21_4: NMS, Listener {
@@ -148,6 +149,37 @@ object NMS1_21_4: NMS, Listener {
         }
     }
 
+    override val playerMeta: NMS.PlayerMeta by lazy {
+        object : NMS.PlayerMeta {
+            override fun sendClientboundPlayerInfoRemovePacket(
+                uuid: List<UUID>,
+                players: List<Player>
+            ) = players.sendPackets(ClientboundPlayerInfoRemovePacket(uuid))
+
+
+            override fun sendClientboundPlayerInfoAddPacket(
+                player: Any,
+                players: List<Player>
+            ) = players.sendPackets(ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, player as ServerPlayer))
+
+            override fun sendClientboundPlayerInfoAddPacket(
+                player: Player,
+                players: List<Player>
+            ) = sendClientboundPlayerInfoAddPacket(player.serverPlayer(), players)
+
+            override fun sendClientboundPlayerInfoUpdateListedPacket(
+                player: Any,
+                players: List<Player>
+            ) = players.sendPackets(ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, player as ServerPlayer))
+
+            override fun sendClientboundPlayerInfoUpdateListedPacket(
+                player: Player,
+                players: List<Player>
+            ) = sendClientboundPlayerInfoUpdateListedPacket(player.serverPlayer(), players)
+        }
+    }
+
+
     override val nick: NMS.Nick by lazy {
         object : NMS.Nick {
             override fun setSkin(player: Player, texture: String, signature: String) {
@@ -174,18 +206,6 @@ object NMS1_21_4: NMS, Listener {
                     property.signature as String
                 )
             }
-
-            override fun sendClientboundPlayerInfoRemovePacket(player: Player) = player.sendPackets(
-                ClientboundPlayerInfoRemovePacket(listOf(player.uniqueId))
-            )
-
-            override fun sendClientboundPlayerInfoAddPacket(player: Player) = player.sendPackets(
-                ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, player.serverPlayer())
-            )
-
-            override fun sendClientboundPlayerInfoUpdateListedPacket(player: Player) = player.sendPackets(
-                ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED, player.serverPlayer())
-            )
 
             override fun sendClientboundRespawnPacket(player: Player) = player.serverPlayer().run {
                 this.connection.sendPacket(ClientboundRespawnPacket(
