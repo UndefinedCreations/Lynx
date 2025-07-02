@@ -18,7 +18,6 @@ import org.bukkit.scoreboard.Scoreboard
 abstract class AbstractSideBar(
     title: String,
     internal val scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
-    internal val async: Boolean = false
 ) {
 
     internal val players: MutableList<Player> = mutableListOf()
@@ -94,7 +93,7 @@ abstract class AbstractSideBar(
             NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(pair.first, players)
         }
         runnable.run()
-        runDynamicTimer(runnable, pair.second, ticks, line)
+        runDynamicTimer(runnable, pair.second, ticks, line, async)
         lines.add(line)
     }
 
@@ -116,7 +115,7 @@ abstract class AbstractSideBar(
             }
         }
         runnable.run()
-        runDynamicTimer(runnable, pair.second, ticks, line)
+        runDynamicTimer(runnable, pair.second, ticks, line, async)
         lines.add(line)
     }
 
@@ -130,7 +129,7 @@ abstract class AbstractSideBar(
         }
     }
 
-    private fun runDynamicTimer(runnable: Runnable, order: String, ticks: Int, line: TimerLine) {
+    private fun runDynamicTimer(runnable: Runnable, order: String, ticks: Int, line: TimerLine, async: Boolean) {
         NMSManager.nms.scoreboard.sendSetScorePacket(order, "".toJson(), objective, 0, players)
         line.task = if (async) Bukkit.getScheduler().runTaskTimerAsynchronously(LynxConfig.javaPlugin, runnable, ticks.toLong(), ticks.toLong())
         else Bukkit.getScheduler().runTaskTimer(LynxConfig.javaPlugin, runnable, ticks.toLong(), ticks.toLong())

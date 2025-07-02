@@ -22,16 +22,15 @@ import org.bukkit.scoreboard.Scoreboard
 class Sidebar(
     title: String,
     scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
-    async: Boolean = false,
     kotlinDSL: Sidebar.() -> Unit = {}
-): AbstractSideBar(title, scoreboard, async) {
+): AbstractSideBar(title, scoreboard) {
 
     init {
         kotlinDSL()
         ScoreboardManager.activeSidebars.add(this)
     }
 
-    fun updateDynamicLines() = checkAsyncAndApply(async) {
+    fun updateDynamicLines() = apply {
         lines.filterIsInstance<TeamLine>().forEach { NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(it.sideBarTeam.team, players) }
     }
     fun setTitle(title: String) = apply { setTitleJson(title.toJson()) }
@@ -42,7 +41,7 @@ class Sidebar(
     fun addLine(line: String) = apply { addLineWithJson(line.toJson()) }
     fun removeLine(line: Component) = apply { removeLineJson(line.toJson()) }
     fun removeLine(line: String) = apply { removeLineJson(line.toJson()) }
-    fun removeDynamicLine(id: Any) = checkAsyncAndApply(async) {
+    fun removeDynamicLine(id: Any) = apply {
         lines.filterIsInstance<TeamLine>().firstOrNull { it.sideBarTeam.id == id }?.run {
             NMSManager.nms.scoreboard.sendClientboundResetScorePacket(this.order, objective, players)
             lines.remove(this)
@@ -55,7 +54,7 @@ class Sidebar(
     fun modifyDynamicPlayerLine(id: Any, run: Player.() -> Component) = apply { modifyDynamicPlayerLineJson(id) { run(this).toJson() } }
     fun updateStringDynamicPlayerLine(id: Any) = updateDynamicPlayerLine(id, players)
     fun updateDynamicPlayerLine(id: Any, vararg player: Player) = updateDynamicPlayerLine(id, player.toList())
-    fun updateDynamicPlayerLine(id: Any, toUpdate: List<Player>) = checkAsyncAndApply(async) {
+    fun updateDynamicPlayerLine(id: Any, toUpdate: List<Player>) = apply {
         val players = toUpdate.filter { this.players.contains(it) }
         lines.filterIsInstance<PlayerLine>().firstOrNull { it.sideBarTeam.id == id }?.let { line ->
             for (player in players) {
@@ -105,12 +104,12 @@ class Sidebar(
         players.addAll(list)
     }
     fun removeViewer(player: Player) = removeViewers(listOf(player))
-    fun removeViewers(list: List<Player>) = checkAsyncAndApply(async) {
+    fun removeViewers(list: List<Player>) = apply {
         NMSManager.nms.scoreboard.sendClientboundSetObjectivePacket(objective, 1, list)
         lines.filterIsInstance<TeamLine>().forEach { NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketRemove(it.sideBarTeam.team, list) }
         players.removeAll(list)
     }
-    fun remove() = checkAsyncAndApply(async) {
+    fun remove() = apply {
         for (line in lines) {
             when(line) {
                 is TeamLine -> removeDynamicLine(line.sideBarTeam.id)
@@ -132,6 +131,5 @@ class Sidebar(
 fun sidebar(
     title: String,
     scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
-    async: Boolean = false,
     block: Sidebar.() -> Unit = {}
-): Sidebar = Sidebar(title, scoreboard, async, block)
+): Sidebar = Sidebar(title, scoreboard, block)
