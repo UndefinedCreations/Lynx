@@ -102,7 +102,7 @@ abstract class AbstractSideBar(
         for (player in players) updateTeamPrefix(line.sideBarTeam.team, run(player), listOf(player))
     }
 
-    private fun updateTeamPrefix(team: Any, prefix: String, players: List<Player>) {
+    internal fun updateTeamPrefix(team: Any, prefix: String, players: List<Player>) {
         NMSManager.nms.scoreboard.setTeamPrefix(team, prefix)
         NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players)
     }

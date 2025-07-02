@@ -30,7 +30,7 @@ class Sidebar(
         ScoreboardManager.activeSidebars.add(this)
     }
 
-    fun updateDynamicLines() = apply {
+    fun updateDynamicLines(async: Boolean = false) = checkAsyncAndApply(async) {
         lines.filterIsInstance<TeamLine>().forEach { NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(it.sideBarTeam.team, players) }
     }
     fun setTitle(title: String) = apply { setTitleJson(title.toJson()) }
@@ -55,12 +55,8 @@ class Sidebar(
     fun updateStringDynamicPlayerLine(id: Any) = updateDynamicPlayerLine(id, players)
     fun updateDynamicPlayerLine(id: Any, vararg player: Player) = updateDynamicPlayerLine(id, player.toList())
     fun updateDynamicPlayerLine(id: Any, toUpdate: List<Player>) = apply {
-        val players = toUpdate.filter { this.players.contains(it) }
         lines.filterIsInstance<PlayerLine>().firstOrNull { it.sideBarTeam.id == id }?.let { line ->
-            for (player in players) {
-                NMSManager.nms.scoreboard.setTeamPrefix(line.sideBarTeam.team, line.run(player))
-                NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(line.sideBarTeam.team, listOf(player))
-            }
+            for (player in toUpdate.filter { this.players.contains(it) }) for (player in players) updateTeamPrefix(line.sideBarTeam.team, line.run(player), listOf(player))
         }
     }
     fun addStringDynamicLine(id: Any, line: String) = apply { addDynamicLineJson(id, line.toJson()) }
@@ -84,21 +80,10 @@ class Sidebar(
 
         for (line in lines) {
             when (line) {
-                is PlayerTimerLine -> {
-                    for (player in players) {
-                        NMSManager.nms.scoreboard.setTeamPrefix(line.sideBarTeam.team, line.run(player))
-                        NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(line.sideBarTeam.team, listOf(player))
-                    }
-                }
-                is PlayerLine -> {
-                    for (player in players) {
-                        NMSManager.nms.scoreboard.setTeamPrefix(line.sideBarTeam.team, line.run(player))
-                        NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(line.sideBarTeam.team, listOf(player))
-                    }
-                }
+                is PlayerTimerLine -> for (player in players) updateTeamPrefix(line.sideBarTeam.team, line.run(player), listOf(player))
+                is PlayerLine -> for (player in players) updateTeamPrefix(line.sideBarTeam.team, line.run(player), listOf(player))
                 is TeamLine -> NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(line.sideBarTeam.team, players)
             }
-
             NMSManager.nms.scoreboard.sendSetScorePacket(line.order, line.text.toJson(), objective, 0, list)
         }
         players.addAll(list)
