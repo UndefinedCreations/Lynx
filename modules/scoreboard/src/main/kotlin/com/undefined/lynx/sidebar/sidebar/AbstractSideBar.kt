@@ -48,31 +48,21 @@ abstract class AbstractSideBar(
     internal fun addDynamicPlayerLineJson(id: Any, run: Player.() -> String) {
         val pair = dynamicLineCheck(id) ?: return
         NMSManager.nms.scoreboard.addTeamEntry(pair.first, pair.second)
-
-        for (player in players) {
-            NMSManager.nms.scoreboard.setTeamPrefix(pair.first, run(player))
-            NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(pair.first, listOf(player))
-        }
-
+        for (player in players) updateTeamPrefix(pair.first, run(player), listOf(player))
         NMSManager.nms.scoreboard.sendSetScorePacket(pair.second, "".toJson(), objective, 0, players)
-        val line = PlayerLine(SidebarTeam(pair.first, id), pair.second, run)
-        lines.add(line)
+        lines.add(PlayerLine(SidebarTeam(pair.first, id), pair.second, run))
     }
 
     internal fun modifyDynamicPlayerLineJson(id: Any, run: Player.() -> String) {
         val playerLine = lines.filterIsInstance<PlayerLine>().firstOrNull { it.sideBarTeam.id == id } ?: return
-        for (player in players) {
-            NMSManager.nms.scoreboard.setTeamPrefix(playerLine.sideBarTeam.team, run(player))
-            NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(playerLine.sideBarTeam.team, listOf(player))
-        }
+        for (player in players) updateTeamPrefix(playerLine.sideBarTeam.team, run(player), listOf(player))
         playerLine.run = run
     }
 
     internal fun addDynamicLineJson(id: Any, line: String) {
         val pair = dynamicLineCheck(id) ?: return
         NMSManager.nms.scoreboard.addTeamEntry(pair.first, pair.second)
-        NMSManager.nms.scoreboard.setTeamPrefix(pair.first, line)
-        NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(pair.first, players)
+        updateTeamPrefix(pair.first, line, players)
         NMSManager.nms.scoreboard.sendSetScorePacket(pair.second, "".toJson(), objective, 0, players)
         lines.add(TeamLine("".toJson(), SidebarTeam(pair.first, id), pair.second))
     }
@@ -88,45 +78,33 @@ abstract class AbstractSideBar(
         val pair = dynamicLineCheck(id) ?: return
         NMSManager.nms.scoreboard.addTeamEntry(pair.first, pair.second)
         val line = StaticTimerLine(SidebarTeam(pair.first, id), pair.second, run, null)
-        val runnable = Runnable {
-            NMSManager.nms.scoreboard.setTeamPrefix(pair.first, line.run())
-            NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(pair.first, players)
-        }
-        runnable.run()
-        runDynamicTimer(runnable, pair.second, ticks, line, async)
+        runDynamicTimer({ updateTeamPrefix(pair.first, line.run(), players) }.apply { this() }, pair.second, ticks, line, async)
         lines.add(line)
     }
 
     internal fun modifyDynamicTimerLineJson(id: Any, run: () -> String) {
         val line = lines.filterIsInstance<StaticTimerLine>().firstOrNull { it.sideBarTeam.id == id } ?: return
         line.run = run
-        NMSManager.nms.scoreboard.setTeamPrefix(line.sideBarTeam.team, run())
-        NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(line.sideBarTeam.team, players)
+        updateTeamPrefix(line.sideBarTeam.team, run(), players)
     }
 
     internal fun addDynamicPlayerTimerLineJson(id: Any, ticks: Int = updateTimerTick, async: Boolean = false, run: Player.() -> String) {
         val pair = dynamicLineCheck(id) ?: return
         NMSManager.nms.scoreboard.addTeamEntry(pair.first, pair.second)
         val line = PlayerTimerLine(SidebarTeam(pair.first, id), pair.second, run, null)
-        val runnable = Runnable {
-            for (player in players) {
-                NMSManager.nms.scoreboard.setTeamPrefix(pair.first, line.run(player))
-                NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(pair.first, listOf(player))
-            }
-        }
-        runnable.run()
-        runDynamicTimer(runnable, pair.second, ticks, line, async)
+        runDynamicTimer({ for (player in players) updateTeamPrefix(pair.first, line.run(player), listOf(player)) }.apply { this() }, pair.second, ticks, line, async)
         lines.add(line)
     }
 
     internal fun modifyDynamicPlayerTimerLineJson(id: Any, run: Player.() -> String) {
         val line = lines.filterIsInstance<PlayerTimerLine>().firstOrNull { it.sideBarTeam.id == id } ?: return
         line.run = run
+        for (player in players) updateTeamPrefix(line.sideBarTeam.team, run(player), listOf(player))
+    }
 
-        for (player in players) {
-            NMSManager.nms.scoreboard.setTeamPrefix(line.sideBarTeam.team, run(player))
-            NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(line.sideBarTeam.team, listOf(player))
-        }
+    private fun updateTeamPrefix(team: Any, prefix: String, players: List<Player>) {
+        NMSManager.nms.scoreboard.setTeamPrefix(team, prefix)
+        NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players)
     }
 
     private fun runDynamicTimer(runnable: Runnable, order: String, ticks: Int, line: TimerLine, async: Boolean) {
