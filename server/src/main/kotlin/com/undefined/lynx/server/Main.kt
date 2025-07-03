@@ -2,6 +2,7 @@ package com.undefined.lynx.server
 
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.sidebar.sidebar.sidebar
+import com.undefined.lynx.sidebar.team.team
 import com.undefined.lynx.tab.size.fillTab
 import com.undefined.lynx.util.miniMessage
 import com.undefined.stellar.StellarCommand
@@ -18,7 +19,10 @@ class Main : JavaPlugin() {
         StellarConfig.setPlugin(this)
         LynxConfig.setPlugin(this)
 
-
+        val team = team(order = 0) {
+            prefix = "Testing "
+            color = ChatColor.AQUA
+        }
 
         StellarCommand("test")
             .addExecution<Player> {
@@ -27,10 +31,11 @@ class Main : JavaPlugin() {
                     addLine("${ChatColor.AQUA}1")
                     addEmptyLine()
                     addDynamicPlayerTimerLine("Test", 10) {
-                        "<white>Block <aqua>${this.inventory.itemInHand.type.name}".miniMessage()
+                        "<white>Block <aqua>${this.inventory. itemInHand.type.name}".miniMessage()
                     }
                 }
 
+                team.addEntry(sender)
 
                 sender.fillTab()
 
