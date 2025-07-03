@@ -27,6 +27,7 @@ dependencies {
     implementation("com.undefined:stellar:1.0.0")
 
     implementation(project(":"))
+    implementation(project(":modules:tab"))
 
     implementation("net.kyori:adventure-api:4.17.0")
     implementation("net.kyori:adventure-text-minimessage:4.17.0")

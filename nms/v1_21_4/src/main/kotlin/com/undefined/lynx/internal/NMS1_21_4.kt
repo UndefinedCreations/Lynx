@@ -14,15 +14,9 @@ import com.undefined.lynx.util.execute
 import com.undefined.lynx.util.getPrivateField
 import com.undefined.lynx.util.getPrivateMethod
 import net.kyori.adventure.platform.bukkit.MinecraftComponentSerializer
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
-import net.md_5.bungee.chat.ComponentSerializer
 import net.minecraft.ChatFormatting
 import net.minecraft.network.Connection
-import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.ComponentSerialization
 import net.minecraft.network.chat.MutableComponent
-import net.minecraft.network.chat.Style
-import net.minecraft.network.chat.TextColor
 import net.minecraft.network.chat.numbers.BlankFormat
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
@@ -44,7 +38,6 @@ import net.minecraft.world.scores.Objective
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
 import net.minecraft.world.scores.criteria.ObjectiveCriteria
-import net.kyori.adventure.text.Component as AdventureComponent
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Location
@@ -64,13 +57,14 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.scoreboard.Scoreboard
 import java.util.*
-import javax.swing.Action
+import net.kyori.adventure.text.Component as AdventureComponent
 
 @Suppress("NAME_SHADOWING")
 object NMS1_21_4: NMS, Listener {
 
     object MAPPING {
         const val CONNECTION = "e"
+        const val LATENCY = "o"
         const val ServerboundInteractPacket_ENTITYID = "b"
         const val ServerboundInteractPacket_ACTION = "c"
         const val ServerboundInteractionPacket_GET_TYPE = "a"
@@ -151,7 +145,7 @@ object NMS1_21_4: NMS, Listener {
 
     override val playerMeta: NMS.PlayerMeta by lazy {
         object : NMS.PlayerMeta {
-            override fun sendClientboundPlayerInfoRemovePacket(
+            override fun sendClientboundPlayerInfoRemovePacketList(
                 uuid: List<UUID>,
                 players: List<Player>
             ) = players.sendPackets(ClientboundPlayerInfoRemovePacket(uuid))
@@ -160,9 +154,22 @@ object NMS1_21_4: NMS, Listener {
             override fun sendClientboundPlayerInfoAddPacket(
                 player: Any,
                 players: List<Player>
-            ) = players.sendPackets(ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, player as ServerPlayer))
+            ) = players.sendPackets(
+                ClientboundPlayerInfoUpdatePacket(
+                    ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER,
+                    player as ServerPlayer
+                )
+            )
 
-            override fun sendClientboundPlayerInfoAddPacket(
+            override fun sendClientboundPlayerInfoRemovePacketListServerPlayer(
+                players: List<Any>,
+                viewers: List<Player>
+            ) = viewers.sendPackets(
+                ClientboundPlayerInfoRemovePacket(
+                    players.filterIsInstance<ServerPlayer>().map { it.uuid })
+            )
+
+            override fun sendClientboundPlayerInfoAddPacketPlayer(
                 player: Player,
                 players: List<Player>
             ) = sendClientboundPlayerInfoAddPacket(player.serverPlayer(), players)
@@ -170,33 +177,77 @@ object NMS1_21_4: NMS, Listener {
             override fun sendClientboundPlayerInfoUpdateListedPacket(
                 player: Any,
                 players: List<Player>
-            ) = players.sendPackets(ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, player as ServerPlayer))
+            ) = players.sendPackets(
+                ClientboundPlayerInfoUpdatePacket(
+                    ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED,
+                    player as ServerPlayer
+                )
+            )
 
-            override fun sendClientboundPlayerInfoUpdateListedPacket(
+            override fun sendClientboundPlayerInfoUpdateListedPacketPlayer(
                 player: Player,
                 players: List<Player>
             ) = sendClientboundPlayerInfoUpdateListedPacket(player.serverPlayer(), players)
-        }
-    }
 
+            override fun sendClientboundPlayerInfoUpdateListedOrderPacket(
+                player: Any,
+                players: List<Player>
+            ) {
+                val serverPlayer = player as? ServerPlayer ?: return
+                players.sendPackets(ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LIST_ORDER, serverPlayer))
+                players.sendPackets(ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME, serverPlayer))
+            }
 
-    override val nick: NMS.Nick by lazy {
-        object : NMS.Nick {
-            override fun setSkin(player: Player, texture: String, signature: String) {
-                val gameProfile = player.serverPlayer().gameProfile
+            override fun sendClientboundPlayerInfoUpdateLatencyPacket(
+                players: List<Any>,
+                viewers: List<Player>
+            ) {
+                for (player in players.filterIsInstance<ServerPlayer>()) viewers.sendPackets(
+                    ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LATENCY, player)
+                )
+            }
+
+            override fun setName(
+                player: Any,
+                name: String
+            ) {
+                val serverPlayer = player as? ServerPlayer ?: return
+                val gameProfile = serverPlayer.gameProfile
+                gameProfile::class.java.getDeclaredField("name").run {
+                    isAccessible = true
+                    set(gameProfile, name)
+                }
+            }
+
+            override fun setSkin(
+                player: Any,
+                texture: String,
+                signature: String
+            ) {
+                val serverPlayer = player as? ServerPlayer ?: return
+                val gameProfile = serverPlayer.gameProfile
                 val properties = gameProfile.properties
                 val property = properties.get("textures").iterator().next()
                 properties.remove("textures", property)
                 properties.put("textures", Property("textures", texture, signature))
             }
 
-            override fun setName(player: Player, name: String) {
-                val gameProfile = player.serverPlayer().gameProfile
-                gameProfile::class.java.getDeclaredField("name").run {
+            override fun setLatency(player: Any, latency: Int) {
+                val serverPlayer = player as? ServerPlayer ?: return
+                ServerCommonPacketListenerImpl::class.java.getDeclaredField(MAPPING.LATENCY).run {
                     isAccessible = true
-                    set(gameProfile, name)
+                    set(serverPlayer.connection, latency)
                 }
             }
+        }
+    }
+
+
+    override val nick: NMS.Nick by lazy {
+        object : NMS.Nick {
+            override fun setSkin(player: Player, texture: String, signature: String) = playerMeta.setSkin(player.serverPlayer(), texture, signature)
+
+            override fun setName(player: Player, name: String) = playerMeta.setName(player.serverPlayer(), name)
 
             override fun getSkin(player: Player): Skin {
                 val gameProfile = player.serverPlayer().gameProfile

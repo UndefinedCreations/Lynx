@@ -56,9 +56,9 @@ object NickManager : Listener {
 
     fun reloadPlayerMeta(player: Player) {
         NMSManager.nms.playerMeta.sendClientboundPlayerInfoRemovePacket(listOf(player), listOf(player))
-        NMSManager.nms.playerMeta.sendClientboundPlayerInfoAddPacket(player, listOf(player))
+        NMSManager.nms.playerMeta.sendClientboundPlayerInfoAddPacketPlayer(player, listOf(player))
         NMSManager.nms.nick.sendClientboundRespawnPacket(player)
-        NMSManager.nms.playerMeta.sendClientboundPlayerInfoUpdateListedPacket(player, listOf(player))
+        NMSManager.nms.playerMeta.sendClientboundPlayerInfoUpdateListedPacketPlayer(player, listOf(player))
         NMSManager.nms.nick.sendClientboundGameEventPacket(player)
         NMSManager.nms.nick.updateAbilities(player)
 

@@ -3,7 +3,6 @@ package com.undefined.lynx.nms
 import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.Skin
 import com.undefined.lynx.team.NameTagVisibility
-import net.kyori.adventure.text.Component
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -25,13 +24,24 @@ interface NMS {
 
     interface PlayerMeta {
 
-        fun sendClientboundPlayerInfoRemovePacket(uuid: List<UUID>, players: List<Player>)
+        fun sendClientboundPlayerInfoRemovePacketList(uuid: List<UUID>, players: List<Player>)
+        fun sendClientboundPlayerInfoRemovePacketListServerPlayer(players: List<Any>, viewers: List<Player>)
         fun sendClientboundPlayerInfoAddPacket(player: Any, players: List<Player>)
         fun sendClientboundPlayerInfoUpdateListedPacket(player: Any, players: List<Player>)
 
-        fun sendClientboundPlayerInfoRemovePacket(player: List<Player>, players: List<Player>) = sendClientboundPlayerInfoRemovePacket(player.map { it.uniqueId }, players)
-        fun sendClientboundPlayerInfoAddPacket(player: Player, players: List<Player>)
-        fun sendClientboundPlayerInfoUpdateListedPacket(player: Player, players: List<Player>)
+        fun sendClientboundPlayerInfoRemovePacket(player: List<Player>, players: List<Player>) = sendClientboundPlayerInfoRemovePacketList(player.map { it.uniqueId }, players)
+        fun sendClientboundPlayerInfoAddPacketPlayer(player: Player, players: List<Player>)
+        fun sendClientboundPlayerInfoUpdateListedPacketPlayer(player: Player, players: List<Player>)
+
+        fun sendClientboundPlayerInfoUpdateListedOrderPacket(player: Any, players: List<Player>)
+
+        fun sendClientboundPlayerInfoUpdateLatencyPacket(players: List<Any>, viewers: List<Player>)
+
+        fun setName(player: Any, name: String)
+        fun setSkin(player: Any, texture: String, signature: String)
+
+        fun setLatency(player: Any, latency: Int)
+
 
     }
 
