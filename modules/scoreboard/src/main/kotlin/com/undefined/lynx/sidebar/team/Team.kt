@@ -3,7 +3,6 @@ package com.undefined.lynx.sidebar.team
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.sidebar.ScoreboardManager
 import com.undefined.lynx.sidebar.checkAsyncAndApply
-import com.undefined.lynx.sidebar.order
 import com.undefined.lynx.sidebar.toJson
 import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.team.NameTagVisibility
@@ -12,33 +11,20 @@ import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Scoreboard
-import java.util.UUID
 
 @Suppress("UNUSED")
-class Team(
-    internal val autoLoad: Boolean = true,
+class Team @JvmOverloads constructor(
+    override val autoLoad: Boolean = true,
     scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
     private val async: Boolean = false,
     order: Int = 1,
     kotlinDSL: Team.() -> Unit = {}
-) {
+): AbstractTeam(autoLoad, scoreboard, async, order) {
 
-    internal val playersList: MutableList<Player> = mutableListOf()
-    private val team = NMSManager.nms.scoreboard.createTeam(scoreboard, "${order(order)}${UUID.randomUUID()}")
-
-    var prefix: String = ""
-        set(value) {
-            NMSManager.nms.scoreboard.setTeamPrefix(team, value.toJson())
-            NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players())
-            field = value
-        }
-
-    var suffix: String = ""
-        set(value) {
-            NMSManager.nms.scoreboard.setTeamSuffix(team, value.toJson())
-            NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players())
-            field = value
-        }
+    init {
+        ScoreboardManager.activeTeams.add(this)
+        kotlinDSL()
+    }
 
     var color: ChatColor = ChatColor.WHITE
         set(value) {
@@ -68,11 +54,6 @@ class Team(
             field = value
         }
 
-    init {
-        ScoreboardManager.activeTeams.add(this)
-        kotlinDSL()
-    }
-
     fun addEntry(player: Player) = addEntries(listOf(player.name))
 
     fun addEntries(players: Set<Player>) = addEntries(players.map { it.name })
@@ -85,12 +66,20 @@ class Team(
     }
 
 
-    fun setPrefix(prefix: String) = checkAsyncAndApply(async) {
-        this.prefix = prefix
+    fun setPrefixString(prefix: String) = checkAsyncAndApply(async) {
+        setPrefixJson(prefix.toJson())
     }
 
-    fun setSuffix(suffix: String) = checkAsyncAndApply(async) {
-        this.suffix = suffix
+    fun setSuffixString(suffix: String) = checkAsyncAndApply(async) {
+        setSuffixJson(suffix.toJson())
+    }
+
+    fun setPrefix(prefix: Component) = checkAsyncAndApply(async) {
+        setPrefixJson(prefix.toJson())
+    }
+
+    fun setSuffix(suffix: Component) = checkAsyncAndApply(async) {
+        setSuffixJson(suffix.toJson())
     }
 
     fun setColor(color: ChatColor) = checkAsyncAndApply(async) {
@@ -128,7 +117,7 @@ class Team(
         ScoreboardManager.activeTeams.remove(this)
     }
 
-    private fun players(): List<Player> = if (autoLoad) Bukkit.getOnlinePlayers().toList() else playersList
+
 
 }
 
