@@ -1,5 +1,6 @@
 package com.undefined.lynx.itembuilder
 
+import com.undefined.lynx.adventure.toLegacyText
 import com.undefined.lynx.itembuilder.meta.*
 import com.undefined.lynx.itembuilder.meta.armor.ArmorMeta
 import com.undefined.lynx.itembuilder.meta.armor.LeatherArmorMeta
@@ -14,6 +15,9 @@ import com.undefined.lynx.util.component
 import com.undefined.lynx.util.legacySectionString
 import com.undefined.lynx.util.miniMessage
 import net.kyori.adventure.text.Component
+import net.md_5.bungee.api.chat.BaseComponent
+import net.md_5.bungee.api.chat.TextComponent
+import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute
@@ -35,8 +39,8 @@ class ItemBuilder {
     private var itemStack: ItemStack? = null
     private var material: Material? = null
 
-    var name: Component? = null
-    var lore: MutableList<Component> = mutableListOf()
+    var name: String? = null
+    var lore: MutableList<String> = mutableListOf()
     var amount: Int = 1
     var customModelData = 0
     var persistentDataContainers: HashMap<NamespacedKey, PDCInfo<*, *>> = hashMapOf()
@@ -62,42 +66,32 @@ class ItemBuilder {
         this.itemStack = itemStack
         this.material = itemStack.type
         val itemMeta = itemStack.itemMeta ?: return
-        setPlainName(itemMeta.itemName)
-        itemMeta.lore?.let { setRawLore(it) }
+        setName(itemMeta.itemName)
+        itemMeta.lore?.let { setStringLore(it) }
         setAmount(itemStack.amount)
         this.itemMeta = getItemMeta()
         this.itemMeta?.let { setItemCache(it, itemMeta) }
     }
 
     fun setName(name: Component): ItemBuilder = apply {
-        this.name = name
+        this.name = name.toLegacyText()
     }
     fun setName(name: String): ItemBuilder = apply {
-        this.name = "<reset>$name".miniMessage()
-    }
-    fun setPlainName(name: String): ItemBuilder = apply {
-        this.name = name.component()
+        this.name = "${ChatColor.RESET}$name"
     }
     fun setLore(lore: List<Component>): ItemBuilder = apply {
+        this.lore = lore.map { it.toLegacyText() }.toMutableList()
+    }
+    fun setLore(vararg lore: Component) = setLore(lore.toList())
+    fun setStringLore(vararg lore: String) = setStringLore(lore.toList())
+    fun setStringLore(lore: List<String>) = apply {
         this.lore = lore.toMutableList()
-    }
-    fun setRawLore(lore: List<String>): ItemBuilder = apply {
-        this.lore = lore.map { it.component() }.toMutableList()
-    }
-    fun setLore(vararg lore: Component): ItemBuilder = apply {
-        this.lore = lore.toMutableList()
-    }
-    fun setLore(vararg lore: String): ItemBuilder = apply {
-        this.lore = lore.map { "<reset>$it".miniMessage() }.toMutableList()
     }
     fun addLore(vararg lore: Component): ItemBuilder = apply {
-        this.lore.addAll(lore.toList())
+        this.lore.addAll(lore.map { it.toLegacyText() }.toList())
     }
     fun addLore(vararg lore: String): ItemBuilder = apply {
-        this.lore.addAll(lore.map { "<reset>$it".miniMessage() }.toList())
-    }
-    fun addPlainLore(vararg lore: String): ItemBuilder = apply {
-        this.lore.addAll(lore.map { it.component() }.toList())
+        this.lore.addAll(lore.toList())
     }
     fun setAmount(amount: Int): ItemBuilder = apply {
         this.amount = amount
@@ -175,8 +169,8 @@ class ItemBuilder {
 
         var meta = item.itemMeta ?: return item
 
-        meta.setDisplayName(this.name?.legacySectionString())
-        meta.lore = this.lore.map { it.legacySectionString() }
+        meta.setDisplayName(name)
+        meta.lore = this.lore
         meta.setCustomModelData(this.customModelData)
         for ((key, container) in persistentDataContainers)
             meta.persistentDataContainer[key, container.type as PersistentDataType<Any, Any>] = container.value

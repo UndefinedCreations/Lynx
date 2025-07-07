@@ -15,6 +15,7 @@ import com.undefined.lynx.util.getPrivateField
 import com.undefined.lynx.util.getPrivateMethod
 import com.undefined.lynx.util.setPrivateField
 import net.kyori.adventure.platform.bukkit.MinecraftComponentSerializer
+import net.md_5.bungee.api.chat.BaseComponent
 import net.minecraft.ChatFormatting
 import net.minecraft.network.Connection
 import net.minecraft.network.chat.MutableComponent

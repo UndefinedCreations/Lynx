@@ -3,6 +3,7 @@ package com.undefined.lynx.nms
 import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.Skin
 import com.undefined.lynx.team.NameTagVisibility
+import net.md_5.bungee.api.chat.BaseComponent
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.entity.Player

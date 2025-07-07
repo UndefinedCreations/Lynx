@@ -1,7 +1,6 @@
 package com.undefined.lynx.sidebar.sidebar.line
 
-import com.undefined.lynx.sidebar.toJson
-import net.kyori.adventure.text.Component
+import com.undefined.lynx.adventure.toJson
 import org.bukkit.scheduler.BukkitTask
 
 open class TimerLine(
