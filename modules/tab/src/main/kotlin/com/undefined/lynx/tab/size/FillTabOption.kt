@@ -1,7 +1,7 @@
 package com.undefined.lynx.tab.size
 
+import com.undefined.lynx.adventure.toJson
 import com.undefined.lynx.tab.TabLatency
-import com.undefined.lynx.tab.TabManager.toJson
 import net.kyori.adventure.text.Component
 
 object FillTabOption {

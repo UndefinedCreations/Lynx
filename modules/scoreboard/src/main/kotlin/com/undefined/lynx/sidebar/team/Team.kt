@@ -1,9 +1,9 @@
 package com.undefined.lynx.sidebar.team
 
 import com.undefined.lynx.NMSManager
+import com.undefined.lynx.adventure.toJson
 import com.undefined.lynx.sidebar.ScoreboardManager
 import com.undefined.lynx.sidebar.checkAsyncAndApply
-import com.undefined.lynx.sidebar.toJson
 import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.team.NameTagVisibility
 import net.kyori.adventure.text.Component

@@ -2,9 +2,9 @@ package com.undefined.lynx.tab.layout
 
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.Skin
+import com.undefined.lynx.adventure.toJson
 import com.undefined.lynx.tab.DefaultTabSkin
 import com.undefined.lynx.tab.TabLatency
-import com.undefined.lynx.tab.TabManager.toJson
 import com.undefined.lynx.tab.runRunnable
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player

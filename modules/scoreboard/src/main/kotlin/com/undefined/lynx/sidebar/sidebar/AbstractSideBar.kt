@@ -2,6 +2,7 @@ package com.undefined.lynx.sidebar.sidebar
 
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.NMSManager
+import com.undefined.lynx.adventure.toJson
 import com.undefined.lynx.sidebar.order
 import com.undefined.lynx.sidebar.sidebar.line.Line
 import com.undefined.lynx.sidebar.sidebar.line.PlayerLine
@@ -10,7 +11,6 @@ import com.undefined.lynx.sidebar.sidebar.line.SidebarTeam
 import com.undefined.lynx.sidebar.sidebar.line.StaticTimerLine
 import com.undefined.lynx.sidebar.sidebar.line.TeamLine
 import com.undefined.lynx.sidebar.sidebar.line.TimerLine
-import com.undefined.lynx.sidebar.toJson
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Scoreboard

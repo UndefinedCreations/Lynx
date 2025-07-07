@@ -1,13 +1,13 @@
 package com.undefined.lynx.sidebar.sidebar
 
 import com.undefined.lynx.NMSManager
+import com.undefined.lynx.adventure.toJson
 import com.undefined.lynx.sidebar.ScoreboardManager
 import com.undefined.lynx.sidebar.checkAsyncAndApply
 import com.undefined.lynx.sidebar.sidebar.line.PlayerLine
 import com.undefined.lynx.sidebar.sidebar.line.PlayerTimerLine
 import com.undefined.lynx.sidebar.sidebar.line.TeamLine
 import com.undefined.lynx.sidebar.sidebar.line.TimerLine
-import com.undefined.lynx.sidebar.toJson
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player

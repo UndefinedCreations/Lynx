@@ -79,9 +79,6 @@ object TabManager {
 
     fun order(index: Int): String =  "§${(index.toChar().code + 1).toChar()}"
 
-    fun Component.toJson(): String = JSONComponentSerializer.json().serialize(this)
-    fun String.toJson(): String = ComponentSerializer.toJson(TextComponent(this)).toString()
-
 }
 
 internal fun runRunnable(runnable: Runnable, async: Boolean) = if (async) CompletableFuture.supplyAsync { runnable.run() } else runnable.run()

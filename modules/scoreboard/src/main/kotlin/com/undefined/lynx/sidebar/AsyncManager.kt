@@ -13,6 +13,3 @@ internal inline fun <T> T.checkAsyncAndApply(async: Boolean, crossinline block: 
 }
 
 internal fun order(index: Int): String = (index.toChar().code + 1).toChar().toString()
-
-internal fun Component.toJson(): String = JSONComponentSerializer.json().serialize(this)
-internal fun String.toJson(): String = ComponentSerializer.toJson(TextComponent(this)).toString()
