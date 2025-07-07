@@ -5,7 +5,8 @@ import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
-class LynxEvent(async: Boolean = false): Event(async), Cancellable {
+
+class LynxEvent @JvmOverloads constructor(async: Boolean = false): Event(async), Cancellable {
 
     private var cancelled = false
 
@@ -29,4 +30,4 @@ class LynxEvent(async: Boolean = false): Event(async), Cancellable {
     }
 }
 
-fun Event.call() = Bukkit.getPluginManager().callEvent(this)
+

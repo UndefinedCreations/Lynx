@@ -28,7 +28,7 @@ class Main : JavaPlugin() {
 
                 val itemBuilder = ItemBuilder(Material.DIAMOND_HELMET)
                     .setName("<yellow>Woo: <rainbow:!2>||||||||||||||||||||||||</rainbow>!".miniMessage())
-                    .build()
+                    .bui
 
                 sender.inventory.addItem(itemBuilder)
 
