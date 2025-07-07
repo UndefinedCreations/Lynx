@@ -13,6 +13,7 @@ import com.undefined.lynx.team.NameTagVisibility
 import com.undefined.lynx.util.execute
 import com.undefined.lynx.util.getPrivateField
 import com.undefined.lynx.util.getPrivateMethod
+import com.undefined.lynx.util.setPrivateField
 import net.kyori.adventure.platform.bukkit.MinecraftComponentSerializer
 import net.minecraft.ChatFormatting
 import net.minecraft.network.Connection
@@ -69,6 +70,9 @@ object NMS1_21_4: NMS, Listener {
         const val ServerboundInteractPacket_ACTION = "c"
         const val ServerboundInteractionPacket_GET_TYPE = "a"
         const val SET_ROT = "b"
+
+        const val SET_PREFIX = "g"
+        const val SET_SUFFIX = "h"
     }
 
     private var idMap: HashMap<UUID, UUID> = hashMapOf()
@@ -183,6 +187,11 @@ object NMS1_21_4: NMS, Listener {
                     player as ServerPlayer
                 )
             )
+
+            override fun setServerPlayerOrder(player: Any, order: Int) {
+                val serverPlayer = player as? ServerPlayer ?: return
+                serverPlayer.listOrder = order
+            }
 
             override fun sendClientboundPlayerInfoUpdateListedPacketPlayer(
                 player: Player,
@@ -307,6 +316,11 @@ object NMS1_21_4: NMS, Listener {
                 fakeServerPlayer.connection = connection
 
                 return fakeServerPlayer
+            }
+
+            override fun getName(serverPlayer: Any): String  {
+                val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Server player isn't a server player.")
+                return serverPlayer.gameProfile.name
             }
 
             override fun sendSpawnPacket(serverPlayer: Any, location: Location, player: List<Player>?) {
@@ -441,12 +455,12 @@ object NMS1_21_4: NMS, Listener {
 
             override fun setTeamPrefix(team: Any, prefix: String) {
                 val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
-                team.playerPrefix = CraftChatMessage.fromJSONOrNull(prefix)
+                setPrivateField(team, MAPPING.SET_PREFIX, CraftChatMessage.fromJSONOrNull(prefix))
             }
 
             override fun setTeamSuffix(team: Any, suffix: String) {
                 val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
-                team.playerSuffix = CraftChatMessage.fromJSONOrNull(suffix)
+                setPrivateField(team, MAPPING.SET_SUFFIX, CraftChatMessage.fromJSONOrNull(suffix))
             }
 
             override fun setTeamSeeFriendlyInvisibles(team: Any, canSee: Boolean) {
@@ -472,6 +486,16 @@ object NMS1_21_4: NMS, Listener {
             override fun addTeamEntry(team: Any, name: String) {
                 val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
                 team.players.add(name)
+            }
+
+            override fun removeTeamEntry(team: Any, name: String) {
+                val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
+                team.players.remove(name)
+            }
+
+            override fun getTeamEntry(team: Any): List<String> {
+                val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
+                return team.players.toList()
             }
 
             override fun sendClientboundSetPlayerTeamPacketAddOrModify(
@@ -501,7 +525,7 @@ private fun Player.serverPlayer(): ServerPlayer = (this as CraftPlayer).handle
 
 private fun Player.sendPackets(vararg packets: Packet<*>?) {
     val connection = serverPlayer().connection
-    packets.filterNotNull().forEach { connection.sendPacket(it) }
+    packets.filterNotNull().forEach { connection.send(it) }
 }
 
 private fun Collection<Player>.sendPackets(vararg packet: Packet<*>?) {

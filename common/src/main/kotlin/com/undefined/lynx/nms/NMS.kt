@@ -29,6 +29,8 @@ interface NMS {
         fun sendClientboundPlayerInfoAddPacket(player: Any, players: List<Player>)
         fun sendClientboundPlayerInfoUpdateListedPacket(player: Any, players: List<Player>)
 
+        fun setServerPlayerOrder(player: Any, order: Int)
+
         fun sendClientboundPlayerInfoRemovePacket(player: List<Player>, players: List<Player>) = sendClientboundPlayerInfoRemovePacketList(player.map { it.uniqueId }, players)
         fun sendClientboundPlayerInfoAddPacketPlayer(player: Player, players: List<Player>)
         fun sendClientboundPlayerInfoUpdateListedPacketPlayer(player: Player, players: List<Player>)
@@ -56,6 +58,7 @@ interface NMS {
 
     interface NPC {
         fun createServerPlayer(name: String, texture: String, signature: String): Any
+        fun getName(serverPlayer: Any): String
         fun sendSpawnPacket(serverPlayer: Any, location: Location, player: List<Player>? = null)
         fun onClick(consumer: NPCInteract.() -> Unit)
         fun setItem(serverPlayer: Any, slot: Int, itemStack: ItemStack?, players: List<UUID>?)
@@ -143,6 +146,10 @@ interface NMS {
          * Adds an entry to the team
          */
         fun addTeamEntry(team: Any, name: String)
+
+        fun removeTeamEntry(team: Any, name: String)
+
+        fun getTeamEntry(team: Any): List<String>
 
         /**
          * Sends the set player team add or modify packet to the list of players

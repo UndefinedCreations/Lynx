@@ -1,5 +1,6 @@
 package com.undefined.lynx.tab
 
+import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.NMSManager
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer
@@ -8,6 +9,7 @@ import net.md_5.bungee.chat.ComponentSerializer
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.util.*
+import java.util.concurrent.CompletableFuture
 
 object TabManager {
 
@@ -32,11 +34,14 @@ object TabManager {
             NMSManager.nms.playerMeta.sendClientboundPlayerInfoUpdateListedPacket(player, viewers)
             NMSManager.nms.playerMeta.sendClientboundPlayerInfoUpdateListedOrderPacket(player, viewers)
         }
+        NMSManager.nms.playerMeta.sendClientboundPlayerInfoUpdateLatencyPacket(players, viewers)
     }
 
     fun createTeam(order: String) = NMSManager.nms.scoreboard.createTeam(Bukkit.getScoreboardManager()!!.mainScoreboard, "$order${UUID.randomUUID()}")
 
     fun addTeamEntry(team: Any, entry: String) = NMSManager.nms.scoreboard.addTeamEntry(team, entry)
+
+    fun removeTeamEntry(team: Any, entry: String) = NMSManager.nms.scoreboard.removeTeamEntry(team, entry)
 
     fun modifyTeamName(team: Any, nameJson: String, viewers: List<Player>) {
         NMSManager.nms.scoreboard.setTeamPrefix(team, nameJson)
@@ -78,3 +83,5 @@ object TabManager {
     fun String.toJson(): String = ComponentSerializer.toJson(TextComponent(this)).toString()
 
 }
+
+internal fun runRunnable(runnable: Runnable, async: Boolean) = if (async) CompletableFuture.supplyAsync { runnable.run() } else runnable.run()

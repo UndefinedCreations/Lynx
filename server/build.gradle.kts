@@ -48,7 +48,6 @@ tasks {
         minecraftVersion("1.21.4")
         acceptMojangEula()
         perVersionFolder(true)
-        serverType(ServerType.SPIGOT)
     }
 }
 
