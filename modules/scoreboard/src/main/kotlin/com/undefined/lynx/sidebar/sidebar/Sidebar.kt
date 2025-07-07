@@ -76,6 +76,7 @@ class Sidebar @JvmOverloads constructor(
     fun addViewer(player: Player) = addViewers(listOf(player))
     fun addViewers(list: List<Player>) {
         val list = list.filter { !players.contains(it) }
+        list.forEach { player -> ScoreboardManager.activeSidebars.firstOrNull { it.players.contains(player) }?.run { this.removeViewer(player) } }
         NMSManager.nms.scoreboard.sendClientboundSetObjectivePacket(objective, 0, list)
         NMSManager.nms.scoreboard.sendClientboundSetDisplayObjectivePacket(objective, list)
 
