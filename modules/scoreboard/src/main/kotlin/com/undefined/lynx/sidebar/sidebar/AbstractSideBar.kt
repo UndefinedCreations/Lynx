@@ -21,7 +21,7 @@ abstract class AbstractSideBar(
 ) {
 
     internal val players: MutableList<Player> = mutableListOf()
-    internal val objective = NMSManager.nms.scoreboard.createObjective(scoreboard, title)
+    internal val objective = NMSManager.nms.scoreboard.createObjective(scoreboard, title.toJson())
     internal val lines: MutableList<Line> = mutableListOf()
 
     var updateTimerTick = 20

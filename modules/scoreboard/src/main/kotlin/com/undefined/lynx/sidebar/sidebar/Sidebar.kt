@@ -1,25 +1,20 @@
 package com.undefined.lynx.sidebar.sidebar
 
-import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.sidebar.ScoreboardManager
 import com.undefined.lynx.sidebar.checkAsyncAndApply
-import com.undefined.lynx.sidebar.order
-import com.undefined.lynx.sidebar.sidebar.line.*
+import com.undefined.lynx.sidebar.sidebar.line.PlayerLine
+import com.undefined.lynx.sidebar.sidebar.line.PlayerTimerLine
+import com.undefined.lynx.sidebar.sidebar.line.TeamLine
+import com.undefined.lynx.sidebar.sidebar.line.TimerLine
 import com.undefined.lynx.sidebar.toJson
-import net.kyori.adventure.platform.bukkit.MinecraftComponentSerializer
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.serializer.json.JSONComponentSerializer
-import net.md_5.bungee.api.chat.BaseComponent
-import net.md_5.bungee.api.chat.TextComponent
-import net.md_5.bungee.chat.ComponentSerializer
 import org.bukkit.Bukkit
-import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Scoreboard
 
 @Suppress("UNUSED")
-class Sidebar(
+class Sidebar @JvmOverloads constructor(
     title: String,
     scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
     kotlinDSL: Sidebar.() -> Unit = {}
@@ -61,13 +56,19 @@ class Sidebar(
     }
     fun addStringDynamicLine(id: Any, line: String) = apply { addDynamicLineJson(id, line.toJson()) }
     fun addDynamicLine(id: Any, line: Component) = apply { addDynamicLineJson(id, line.toJson()) }
+    @JvmOverloads
     fun modifyStringDynamicLine(id: Any, line: String, update: Boolean = true) = apply { modifyDynamicLineJson(id, line.toJson(), update) }
+    @JvmOverloads
     fun modifyDynamicLine(id: Any, line: Component, update: Boolean = true) = apply { modifyDynamicLineJson(id, line.toJson(), update) }
+    @JvmOverloads
     fun addStringDynamicTimerLine(id: Any, ticks: Int = updateTimerTick, async: Boolean = true, run: () -> String) = apply { addDynamicTimerLineJson(id, ticks, async) { run().toJson() } }
+    @JvmOverloads
     fun addDynamicTimerLine(id: Any, ticks: Int = updateTimerTick, async: Boolean = true, run: () -> Component) = apply { addDynamicTimerLineJson(id, ticks, async) { run().toJson() } }
     fun modifyStringDynamicTimerLine(id: Any, run: () -> String) = apply { modifyDynamicTimerLineJson(id) { run().toJson() } }
     fun modifyDynamicTimerLine(id: Any, run: () -> Component) = apply { modifyDynamicTimerLineJson(id) { run().toJson() } }
+    @JvmOverloads
     fun addStringDynamicPlayerTimerLine(id: Any, ticks: Int = updateTimerTick, async: Boolean = false, run: Player.() -> String) = apply { addDynamicPlayerTimerLineJson(id, ticks, async) { run(this).toJson() } }
+    @JvmOverloads
     fun addDynamicPlayerTimerLine(id: Any, ticks: Int = updateTimerTick, async: Boolean = false, run: Player.() -> Component) = apply { addDynamicPlayerTimerLineJson(id, ticks, async) { run(this).toJson() } }
     fun modifyDynamicPlayerTimerLine(id: Any, run: Player.() -> Component) = apply { modifyDynamicPlayerTimerLineJson(id) { run(this).toJson() } }
     fun modifyStringDynamicPlayerTimerLine(id: Any, run: Player.() -> String) = apply { modifyDynamicPlayerTimerLineJson(id) { run(this).toJson() } }
