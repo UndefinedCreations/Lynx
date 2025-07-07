@@ -60,6 +60,7 @@ open class AbstractTabLayout(
     fun addPlayer(player: Player) = addPlayers(listOf(player))
 
     fun addPlayers(players: List<Player>) = runRunnable({
+        val players = players.filter { !players.contains(it) }
         NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(TabLayoutManager.badTeam, players)
         TabManager.addFakePlayers(fakePlayers.values.toList(), players)
         players.forEach { player ->
