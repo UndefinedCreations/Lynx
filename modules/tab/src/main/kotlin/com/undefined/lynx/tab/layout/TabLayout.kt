@@ -2,16 +2,33 @@ package com.undefined.lynx.tab.layout
 
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.Skin
+import com.undefined.lynx.tab.DefaultTabSkin
 import com.undefined.lynx.tab.TabLatency
 import com.undefined.lynx.tab.TabManager.toJson
 import com.undefined.lynx.tab.runRunnable
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 
-class TabLayout(
-    private val async: Boolean = true,
+class TabLayout @JvmOverloads constructor(
+    async: Boolean = true,
+    texture: String = DefaultTabSkin.TEXTURE,
+    sign: String = DefaultTabSkin.SIGN,
+    defaultText: String = "",
     kotlinDSL: TabLayout.() -> Unit = {}
-): AbstractTabLayout(async) {
+): AbstractTabLayout(
+    async,
+    texture,
+    sign,
+    defaultText.toJson()
+) {
+
+    @JvmOverloads
+    constructor(
+        async: Boolean = true,
+        skin: Skin,
+        defaultText: String = "",
+        kotlinDSL: TabLayout.() -> Unit = {}
+    ): this(async, skin.texture, skin.texture, defaultText.toJson(), kotlinDSL)
 
     init {
         kotlinDSL()
@@ -102,6 +119,9 @@ class TabLayout(
 }
 
 fun tabLayout(
-    async: Boolean = false,
+    async: Boolean = true,
+    texture: String = DefaultTabSkin.TEXTURE,
+    sign: String = DefaultTabSkin.SIGN,
+    defaultText: String = "",
     kotlinDSL: TabLayout.() -> Unit = {}
-) = TabLayout(async, kotlinDSL)
+) = TabLayout(async, texture, sign, defaultText, kotlinDSL)

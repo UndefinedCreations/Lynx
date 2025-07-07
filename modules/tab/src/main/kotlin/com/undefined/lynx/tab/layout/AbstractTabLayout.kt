@@ -12,7 +12,10 @@ import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitTask
 
 open class AbstractTabLayout(
-    private val async: Boolean = true
+    internal val async: Boolean = true,
+    texture: String,
+    sign: String,
+    defaultText: String
 ) {
 
     internal val fakePlayers: HashMap<Int, Any> = hashMapOf()
@@ -24,15 +27,15 @@ open class AbstractTabLayout(
         for (x in 0..79) {
             val fakePlayer = TabManager.createFakePlayer(
                 "",
-                DefaultTabSkin.TEXTURE,
-                DefaultTabSkin.SIGN
+                texture,
+                sign
             )
             val name = TabManager.order(x)
             NMSManager.nms.playerMeta.setName(fakePlayer, name)
             fakePlayers[x] = fakePlayer
             val team = TabManager.createTeam(name)
             TabManager.addTeamEntry(team, name)
-            NMSManager.nms.scoreboard.setTeamPrefix(team, "".toJson())
+            NMSManager.nms.scoreboard.setTeamPrefix(team, defaultText)
             teams[x] = team
         }
 
