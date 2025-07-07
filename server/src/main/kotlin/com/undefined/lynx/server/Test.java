@@ -1,5 +1,6 @@
 package com.undefined.lynx.server;
 
+import com.undefined.lynx.nick.NickUtil;
 import com.undefined.lynx.sidebar.team.Team;
 
 public class Test {

@@ -12,8 +12,8 @@ import java.util.*
 
 object NickManager : Listener {
 
-    val trueNames: HashMap<UUID, String> = hashMapOf()
-    val trueSkins: HashMap<UUID, Pair<String, String>> = hashMapOf()
+    internal val trueNames: HashMap<UUID, String> = hashMapOf()
+    internal val trueSkins: HashMap<UUID, Skin> = hashMapOf()
 
     init {
         Bukkit.getPluginManager().registerEvents(this, LynxConfig.javaPlugin)
@@ -23,35 +23,6 @@ object NickManager : Listener {
     fun onQuit(event: PlayerQuitEvent) {
         trueNames.remove(event.player.uniqueId)
         trueSkins.remove(event.player.uniqueId)
-    }
-
-    fun setName(player: Player, name: String, reloadPlayer: Boolean) {
-        if (!trueNames.containsKey(player.uniqueId)) {
-            trueNames[player.uniqueId] = player.name
-        } else if (trueNames[player.uniqueId] == name) {
-            trueNames.remove(player.uniqueId)
-        }
-        NMSManager.nms.nick.setName(player, name)
-        if (reloadPlayer) {
-            reloadPlayerMeta(player)
-            reloadPlayerMetaGlobal(player)
-        }
-    }
-
-    fun setSkin(player: Player, texture: String, signature: String, reloadPlayer: Boolean) {
-        if (!trueSkins.containsKey(player.uniqueId)) {
-            trueSkins[player.uniqueId] = player.getSkin().let { Pair(it.texture, it.signature) }
-        } else {
-            val pair = trueSkins[player.uniqueId]!!
-            if (pair.first == texture && pair.second == signature) {
-                trueSkins.remove(player.uniqueId)
-            }
-        }
-        NMSManager.nms.nick.setSkin(player, texture, signature)
-        if (reloadPlayer) {
-            reloadPlayerMeta(player)
-            reloadPlayerMetaGlobal(player)
-        }
     }
 
     fun reloadPlayerMeta(player: Player) {
@@ -79,38 +50,5 @@ object NickManager : Listener {
             }
         }, 1)
     }
-
 }
 
-fun Player.setName(name: String, reloadPlayer: Boolean = true) = NickManager.setName(this, name, reloadPlayer)
-
-//fun Player.setName(name: Component, reloadPlayer: Boolean = true) = setName(name.legacyString(), reloadPlayer)
-
-fun Player.setSkin(skin: Skin, reloadPlayer: Boolean = true) = setSkin(skin.texture, skin.signature, reloadPlayer)
-
-fun Player.setSkin(texture: String, signature: String, reloadPlayer: Boolean = true) =
-    NickManager.setSkin(this, texture, signature, reloadPlayer)
-
-/**
- * Resend entity meta to the player and only the player
- */
-fun Player.reloadPlayerMeta() = NickManager.reloadPlayerMeta(this)
-
-/**
- * Resend entity meta to all players.
- */
-fun Player.reloadPlayerMetaGlobal() = NickManager.reloadPlayerMetaGlobal(this)
-
-fun Player.getTrueName(): String = NickManager.trueNames[uniqueId] ?: name
-
-fun Player.getSkin(): Skin = NMSManager.nms.nick.getSkin(this)
-
-fun Player.getTrueSkin(): Skin = NickManager.trueSkins[uniqueId]?.let { Skin(it.first, it.second) } ?: getSkin()
-
-fun Player.hasTrueName(): Boolean = !NickManager.trueNames.containsKey(uniqueId)
-
-fun Player.hasTrueSkin(): Boolean = !NickManager.trueSkins.containsKey(uniqueId)
-
-fun Player.resetName(reloadPlayer: Boolean = true) = NickManager.trueNames[uniqueId]?.let { setName(it, reloadPlayer) }
-
-fun Player.resetSkin(reloadPlayer: Boolean = true) = NickManager.trueSkins[uniqueId]?.let { setSkin(it.first, it.second, reloadPlayer) }
