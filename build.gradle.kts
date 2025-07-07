@@ -18,6 +18,7 @@ private val submodules: HashMap<String, String> = hashMapOf(
     ":modules:scheduler" to "scheduler",
     ":modules:sql" to "sql",
     ":modules:scoreboard" to "scoreboard",
+    ":modules:tab" to "tab"
 )
 
 dependencies {
@@ -33,6 +34,7 @@ dependencies {
     api(project(":modules:scheduler"))
     api(project(":modules:sql"))
     api(project(":modules:scoreboard"))
+    api(project(":modules:tab"))
 
     dokkaPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:2.0.0")
 }
