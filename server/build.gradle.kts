@@ -1,4 +1,3 @@
-import com.undefinedcreations.nova.ServerType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {

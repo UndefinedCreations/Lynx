@@ -14,11 +14,8 @@ import com.undefined.lynx.util.execute
 import com.undefined.lynx.util.getPrivateField
 import com.undefined.lynx.util.getPrivateMethod
 import com.undefined.lynx.util.setPrivateField
-import net.kyori.adventure.platform.bukkit.MinecraftComponentSerializer
-import net.md_5.bungee.api.chat.BaseComponent
 import net.minecraft.ChatFormatting
 import net.minecraft.network.Connection
-import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.numbers.BlankFormat
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
@@ -60,7 +57,6 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.scoreboard.Scoreboard
 import java.util.*
-import net.kyori.adventure.text.Component as AdventureComponent
 
 @Suppress("NAME_SHADOWING")
 object NMS1_21_4: NMS, Listener {

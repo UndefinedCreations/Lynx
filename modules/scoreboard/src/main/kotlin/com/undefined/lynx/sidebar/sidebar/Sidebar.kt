@@ -2,14 +2,17 @@ package com.undefined.lynx.sidebar.sidebar
 
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.adventure.toJson
+import com.undefined.lynx.adventure.toLegacyText
 import com.undefined.lynx.sidebar.ScoreboardManager
 import com.undefined.lynx.sidebar.checkAsyncAndApply
 import com.undefined.lynx.sidebar.sidebar.line.PlayerLine
 import com.undefined.lynx.sidebar.sidebar.line.PlayerTimerLine
 import com.undefined.lynx.sidebar.sidebar.line.TeamLine
 import com.undefined.lynx.sidebar.sidebar.line.TimerLine
+import com.undefined.lynx.util.RunBlock
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
+import org.bukkit.block.sign.Side
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Scoreboard
 
@@ -20,11 +23,17 @@ class Sidebar @JvmOverloads constructor(
     kotlinDSL: Sidebar.() -> Unit = {}
 ): AbstractSideBar(title, scoreboard) {
 
+    @JvmOverloads constructor(title: String, scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard, block: RunBlock<Sidebar>): this(title, scoreboard, { block.run(this) })
+    @JvmOverloads constructor(title: Component, scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard, block: RunBlock<Sidebar>): this(title.toLegacyText(), scoreboard, { block.run(this) })
+    @JvmOverloads constructor(title: Component, scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard, kotlinDSL: Sidebar.() -> Unit = {}): this(title.toLegacyText(), scoreboard, kotlinDSL)
+
+
     init {
         kotlinDSL()
         ScoreboardManager.activeSidebars.add(this)
     }
 
+    @JvmOverloads
     fun updateDynamicLines(async: Boolean = false) = checkAsyncAndApply(async) {
         lines.filterIsInstance<TeamLine>().forEach { NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(it.sideBarTeam.team, players) }
     }
@@ -119,4 +128,10 @@ fun sidebar(
     title: String,
     scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
     block: Sidebar.() -> Unit = {}
-): Sidebar = Sidebar(title, scoreboard, block)
+) = Sidebar(title, scoreboard, block)
+
+fun sidebar(
+    title: Component,
+    scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
+    block: Sidebar.() -> Unit = {}
+) = sidebar(title.toLegacyText(), scoreboard, block)

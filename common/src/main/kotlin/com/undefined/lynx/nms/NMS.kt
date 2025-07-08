@@ -1,7 +1,7 @@
 package com.undefined.lynx.nms
 
-import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.Skin
+import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.team.NameTagVisibility
 import org.bukkit.ChatColor
 import org.bukkit.Location

@@ -1,8 +1,8 @@
 package com.undefined.lynx.npc
 
+//import com.undefined.lynx.NMSManager
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.NMSManager
-//import com.undefined.lynx.NMSManager
 import com.undefined.lynx.npc.NPCManager.autoLoadNPCS
 import com.undefined.lynx.npc.NPCManager.spawnedNPC
 import org.bukkit.Bukkit
@@ -10,7 +10,6 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.event.player.PlayerQuitEvent
 
 class NPCListener : Listener {
 

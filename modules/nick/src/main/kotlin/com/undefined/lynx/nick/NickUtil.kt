@@ -6,8 +6,7 @@ import com.undefined.lynx.Skin
 import com.undefined.lynx.nick.NickManager.trueNames
 import com.undefined.lynx.nick.NickManager.trueSkins
 import org.bukkit.entity.Player
-import java.util.Base64
-import kotlin.collections.set
+import java.util.*
 
 object NickUtil {
 

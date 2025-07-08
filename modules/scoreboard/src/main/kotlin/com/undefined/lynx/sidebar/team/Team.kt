@@ -6,6 +6,7 @@ import com.undefined.lynx.sidebar.ScoreboardManager
 import com.undefined.lynx.sidebar.checkAsyncAndApply
 import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.team.NameTagVisibility
+import com.undefined.lynx.util.RunBlock
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -20,6 +21,8 @@ class Team @JvmOverloads constructor(
     order: Int = 1,
     kotlinDSL: Team.() -> Unit = {}
 ): AbstractTeam(autoLoad, scoreboard, async, order) {
+
+    @JvmOverloads constructor(autoLoad: Boolean = true, scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard, async: Boolean = false, order: Int = 1, block: RunBlock<Team>): this(autoLoad, scoreboard, async, order) { block.run(this) }
 
     init {
         ScoreboardManager.activeTeams.add(this)

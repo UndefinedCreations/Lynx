@@ -2,7 +2,6 @@ package com.undefined.lynx.npc
 
 
 import com.undefined.lynx.NMSManager
-import com.undefined.lynx.nms.NMS
 import com.undefined.lynx.nms.NPCInteract
 import org.bukkit.Bukkit
 import org.bukkit.Location

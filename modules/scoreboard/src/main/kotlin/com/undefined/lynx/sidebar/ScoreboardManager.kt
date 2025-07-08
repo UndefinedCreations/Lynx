@@ -11,7 +11,9 @@ import org.bukkit.event.player.PlayerQuitEvent
 
 object ScoreboardManager : Listener {
 
+    @JvmStatic
     val activeTeams: MutableList<Team> = mutableListOf()
+    @JvmStatic
     val activeSidebars: MutableList<Sidebar> = mutableListOf()
 
     init {

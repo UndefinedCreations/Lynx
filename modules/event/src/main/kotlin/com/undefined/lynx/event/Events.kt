@@ -3,7 +3,6 @@ package com.undefined.lynx.event
 import com.undefined.lynx.LynxConfig
 import org.bukkit.event.Event
 import org.bukkit.event.EventPriority
-import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
 
 inline fun <reified T : Event> event(
