@@ -17,10 +17,10 @@ fun <T : Any> Any.getPrivateField(clazz: Class<*>, name: String): T =
 fun <T : Any> Any.getPrivateField(name: String): T =
     javaClass.getDeclaredField(name).apply { isAccessible = true }[this] as T
 
-fun setPrivateField(clazz: Any, name: String, data: Any) {
-    clazz::class.java.getDeclaredField(name).run {
+inline fun <reified T : Any> Any.setPrivateField(name: String, data: Any) {
+    T::class.java.getDeclaredField(name).run {
         isAccessible = true
-        set(clazz, data)
+        set(this@setPrivateField, data)
     }
 }
 
