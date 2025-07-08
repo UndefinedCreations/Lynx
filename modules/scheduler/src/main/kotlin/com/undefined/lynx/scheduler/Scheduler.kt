@@ -7,32 +7,41 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.floor
 
 
-fun sync(runnable: BukkitRunnable.() -> Unit): BukkitTask = createRunnable(runnable)
-    .runTask(LynxConfig.javaPlugin)
+object Scheduler {
+    @JvmStatic
+    fun sync(runnable: SchedulerBlock) = sync { runnable.run(it) }
+    @JvmStatic
+    fun async(runnable: SchedulerBlock) = async { runnable.run(it) }
+    @JvmStatic
+    @JvmOverloads
+    fun delay(ticks: Int, unit: TimeUnit? = null, async: Boolean = false, runnable: SchedulerBlock) = delay(ticks, unit, async) { runnable.run(it) }
+    @JvmStatic
+    @JvmOverloads
+    fun repeatingTask(ticks: Int, period: Int = ticks, times: Int = -1, unit: TimeUnit? = null, async: Boolean = false, runnable: SchedulerBlock) =
+        repeatingTask(ticks, period, times, unit, async) { runnable.run(it) }
+}
 
-fun async(runnable: BukkitRunnable.() -> Unit): BukkitTask = createRunnable(runnable)
-    .runTaskAsynchronously(LynxConfig.javaPlugin)
+fun sync(runnable: (BukkitRunnable) -> Unit) = createRunnable(runnable).runTask(LynxConfig.javaPlugin)
+fun async(runnable: (BukkitRunnable) -> Unit) = createRunnable(runnable).runTaskAsynchronously(LynxConfig.javaPlugin)
 
-fun delay(ticks: Int, unit: TimeUnit? = null, async: Boolean = false, runnable: BukkitRunnable.() -> Unit): BukkitTask {
-    return if (async) {
+fun delay(ticks: Int, unit: TimeUnit? = null, async: Boolean = false, runnable: (BukkitRunnable) -> Unit) =
+    if (async) {
         createRunnable(runnable).runTaskLaterAsynchronously(LynxConfig.javaPlugin, unit.toTicks(ticks.toLong()))
     } else {
         createRunnable(runnable).runTaskLater(LynxConfig.javaPlugin, unit.toTicks(ticks.toLong()))
     }
-}
 
-fun delay(ticks: Int = 1, runnable: BukkitRunnable.() -> Unit): BukkitTask =
+fun delay(ticks: Int = 1, runnable: (BukkitRunnable) -> Unit): BukkitTask =
     delay(ticks, false, runnable)
 
-
-fun delay(ticks: Int = 1, async: Boolean, runnable: BukkitRunnable.() -> Unit): BukkitTask =
+fun delay(ticks: Int = 1, async: Boolean, runnable: (BukkitRunnable) -> Unit): BukkitTask =
     delay(ticks, null, async, runnable)
 
-fun repeatingTask(delay: Int, period: Int, times: Int = -1, unit: TimeUnit? = null, async: Boolean = false, runnable: BukkitRunnable.() -> Unit): BukkitTask {
+fun repeatingTask(ticks: Int, period: Int = ticks, times: Int = -1, unit: TimeUnit? = null, async: Boolean = false, runnable: (BukkitRunnable) -> Unit): BukkitTask {
     return if (async) {
-        createRunnable(times, runnable).runTaskTimerAsynchronously(LynxConfig.javaPlugin, unit.toTicks(delay.toLong()), unit.toTicks(period.toLong()))
+        createRunnable(times, runnable).runTaskTimerAsynchronously(LynxConfig.javaPlugin, unit.toTicks(ticks.toLong()), unit.toTicks(period.toLong()))
     } else {
-        createRunnable(times, runnable).runTaskTimer(LynxConfig.javaPlugin, unit.toTicks(delay.toLong()), unit.toTicks(period.toLong()))
+        createRunnable(times, runnable).runTaskTimer(LynxConfig.javaPlugin, unit.toTicks(ticks.toLong()), unit.toTicks(period.toLong()))
     }
 }
 
