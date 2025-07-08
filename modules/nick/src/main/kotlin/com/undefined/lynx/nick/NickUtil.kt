@@ -10,6 +10,7 @@ import java.util.*
 
 object NickUtil {
 
+    @JvmStatic
     @JvmOverloads
     fun setName(player: Player, name: String, reloadPlayer: Boolean = true) {
         addOrRemove(trueNames, player.uniqueId, name)
@@ -20,6 +21,7 @@ object NickUtil {
         }
     }
 
+    @JvmStatic
     @JvmOverloads
     fun setSkin(player: Player, skin: Skin, reloadPlayer: Boolean = true) {
         addOrRemove(trueSkins, player.uniqueId, skin)
@@ -30,6 +32,7 @@ object NickUtil {
         }
     }
 
+    @JvmStatic
     @JvmOverloads
     fun setSkin(player: Player, texture: String, signature: String, reloadPlayer: Boolean = true) = setSkin(player, Skin(texture, signature), reloadPlayer)
 
@@ -41,22 +44,29 @@ object NickUtil {
         }
     }
 
-
+    @JvmStatic
     fun reloadPlayerMeta(player: Player) = NickManager.reloadPlayerMeta(player)
 
+    @JvmStatic
     fun reloadPlayerMetaGlobal(player: Player) = NickManager.reloadPlayerMetaGlobal(player)
 
+    @JvmStatic
     fun getTruePlayerName(player: Player): String = trueNames[player.uniqueId] ?: player.name
 
+    @JvmStatic
     fun getPlayerSkin(player: Player): Skin = NMSManager.nms.nick.getSkin(player)
 
+    @JvmStatic
     fun getTruePlayerSkin(player: Player): Skin = trueSkins[player.uniqueId] ?: getPlayerSkin(player)
 
+    @JvmStatic
     fun isNameNicked(player: Player): Boolean = trueNames.containsKey(player.uniqueId)
 
+    @JvmStatic
     @JvmOverloads
     fun resetName(player: Player, reloadPlayer: Boolean = true) = trueNames[player.uniqueId]?.let { setName(player, it, reloadPlayer) }
 
+    @JvmStatic
     @JvmOverloads
     fun resetSkin(player: Player, reloadPlayer: Boolean = true) = trueSkins[player.uniqueId]?.let { setSkin(player, it, reloadPlayer) }
 

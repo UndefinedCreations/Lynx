@@ -41,13 +41,9 @@ object NickManager : Listener {
     }
 
     fun reloadPlayerMetaGlobal(player: Player) {
-        Bukkit.getOnlinePlayers().forEach {
-            it.hidePlayer(LynxConfig.javaPlugin, player)
-        }
+        for (player in Bukkit.getOnlinePlayers()) player.hidePlayer(LynxConfig.javaPlugin, player)
         Bukkit.getScheduler().runTaskLater(LynxConfig.javaPlugin, Runnable {
-            Bukkit.getOnlinePlayers().forEach {
-                it.showPlayer(LynxConfig.javaPlugin, player)
-            }
+            for (player in Bukkit.getOnlinePlayers()) player.showPlayer(LynxConfig.javaPlugin, player)
         }, 1)
     }
 }

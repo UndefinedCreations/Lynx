@@ -1,6 +1,7 @@
 package com.undefined.lynx.event
 
 import com.undefined.lynx.LynxConfig
+import com.undefined.lynx.util.RunBlock
 import org.bukkit.event.Event
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -28,7 +29,7 @@ object Events {
     @JvmOverloads
     fun <T : Event> event(
         eventClass: Class<T>,
-        block: EventBlock<T>,
+        block: RunBlock<T>,
         priority: EventPriority = EventPriority.NORMAL,
         ignoreCancelled: Boolean = false,
     ): Listener = LynxListener().apply {

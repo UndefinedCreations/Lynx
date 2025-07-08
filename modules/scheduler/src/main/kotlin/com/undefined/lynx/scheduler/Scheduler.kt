@@ -1,6 +1,7 @@
 package com.undefined.lynx.scheduler
 
 import com.undefined.lynx.LynxConfig
+import com.undefined.lynx.util.RunBlock
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scheduler.BukkitTask
 import java.util.concurrent.TimeUnit
@@ -9,15 +10,15 @@ import kotlin.math.floor
 
 object Scheduler {
     @JvmStatic
-    fun sync(runnable: SchedulerBlock) = sync { runnable.run(it) }
+    fun sync(runnable: RunBlock<BukkitRunnable>) = sync { runnable.run(it) }
     @JvmStatic
-    fun async(runnable: SchedulerBlock) = async { runnable.run(it) }
-    @JvmStatic
-    @JvmOverloads
-    fun delay(ticks: Int, unit: TimeUnit? = null, async: Boolean = false, runnable: SchedulerBlock) = delay(ticks, unit, async) { runnable.run(it) }
+    fun async(runnable: RunBlock<BukkitRunnable>) = async { runnable.run(it) }
     @JvmStatic
     @JvmOverloads
-    fun repeatingTask(ticks: Int, period: Int = ticks, times: Int = -1, unit: TimeUnit? = null, async: Boolean = false, runnable: SchedulerBlock) =
+    fun delay(ticks: Int, unit: TimeUnit? = null, async: Boolean = false, runnable: RunBlock<BukkitRunnable>) = delay(ticks, unit, async) { runnable.run(it) }
+    @JvmStatic
+    @JvmOverloads
+    fun repeatingTask(ticks: Int, period: Int = ticks, times: Int = -1, unit: TimeUnit? = null, async: Boolean = false, runnable: RunBlock<BukkitRunnable>) =
         repeatingTask(ticks, period, times, unit, async) { runnable.run(it) }
 }
 

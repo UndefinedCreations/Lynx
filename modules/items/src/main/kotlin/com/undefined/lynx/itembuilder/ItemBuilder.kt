@@ -1,6 +1,7 @@
 package com.undefined.lynx.itembuilder
 
 import com.undefined.lynx.adventure.toLegacyText
+import com.undefined.lynx.util.RunBlock
 import net.kyori.adventure.text.Component
 import org.bukkit.ChatColor
 import org.bukkit.Material
@@ -145,7 +146,7 @@ class ItemBuilder {
          }
      }
 
-    fun <T : ItemMeta> meta(clazz: Class<T>, consumer: ItemBuilderBlock<T>) = apply {
+    fun <T : ItemMeta> meta(clazz: Class<T>, consumer: RunBlock<T>) = apply {
         (getItemMeta(bukkitMeta!!) as T).let {
             bukkitMeta = it
             consumer.run(bukkitMeta!! as T)
