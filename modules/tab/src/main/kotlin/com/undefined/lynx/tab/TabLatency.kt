@@ -8,6 +8,7 @@ enum class TabLatency(val latency: Int) {
     BAR_1(1200);
 
     companion object {
+        @JvmStatic
         fun fromPing(ping: Int) =
             when {
                 ping < 149 -> BAR_5

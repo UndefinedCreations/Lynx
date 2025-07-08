@@ -34,8 +34,6 @@ open class AbstractTabLayout(
             NMSManager.nms.scoreboard.setTeamPrefix(team, defaultText)
             teams[x] = team
         }
-
-        TabLayoutManager.activeTabLayout.add(this)
     }
 
     fun setTextJson(index: Int, string: String, view: List<Player> = viewers) {

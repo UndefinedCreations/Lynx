@@ -6,17 +6,18 @@ import net.kyori.adventure.text.Component
 
 object FillTabOption {
 
-    internal var fakeName: String = "".toJson()
+    internal var fakeName: String = ""
     internal var latency: TabLatency = TabLatency.BAR_1
 
+    @JvmStatic
     fun setFillNameString(fillName: String) {
         fakeName = fillName.toJson()
     }
-
+    @JvmStatic
     fun setFillName(fillName: Component) {
         fakeName = fillName.toJson()
     }
-
+    @JvmStatic
     fun setLatency(tabLatency: TabLatency) {
         latency = tabLatency
     }

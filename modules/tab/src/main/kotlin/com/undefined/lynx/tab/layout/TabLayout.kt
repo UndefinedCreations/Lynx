@@ -6,13 +6,14 @@ import com.undefined.lynx.adventure.toJson
 import com.undefined.lynx.tab.DefaultTabSkin
 import com.undefined.lynx.tab.TabLatency
 import com.undefined.lynx.tab.runRunnable
+import com.undefined.lynx.util.RunBlock
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 
 class TabLayout @JvmOverloads constructor(
     async: Boolean = true,
-    texture: String = DefaultTabSkin.TEXTURE,
-    sign: String = DefaultTabSkin.SIGN,
+    texture: String = DefaultTabSkin.SKIN.texture,
+    sign: String = DefaultTabSkin.SKIN.signature,
     defaultText: String = "",
     kotlinDSL: TabLayout.() -> Unit = {}
 ): AbstractTabLayout(
@@ -25,13 +26,31 @@ class TabLayout @JvmOverloads constructor(
     @JvmOverloads
     constructor(
         async: Boolean = true,
-        skin: Skin,
+        skin: Skin = DefaultTabSkin.SKIN,
         defaultText: String = "",
         kotlinDSL: TabLayout.() -> Unit = {}
     ): this(async, skin.texture, skin.texture, defaultText.toJson(), kotlinDSL)
 
+    @JvmOverloads
+    constructor(
+        async: Boolean = true,
+        skin: Skin = DefaultTabSkin.SKIN,
+        defaultText: String = "",
+        block: RunBlock<TabLayout>
+    ): this(async, skin.texture, skin.texture, defaultText.toJson(), { block.run(this) })
+
+    @JvmOverloads
+    constructor(
+        async: Boolean = true,
+        texture: String = DefaultTabSkin.SKIN.texture,
+        sign: String = DefaultTabSkin.SKIN.signature,
+        defaultText: String = "",
+        block: RunBlock<TabLayout>
+    ): this(async, texture, sign, defaultText) { block.run(this) }
+
     init {
         kotlinDSL()
+        TabLayoutManager.activeTabLayout.add(this)
     }
 
     fun setText(index: Int, text: String) = apply {
@@ -54,6 +73,7 @@ class TabLayout @JvmOverloads constructor(
         setSkin(index, skin.texture, skin.signature)
         runnable[index]?.apply { this.skin = null }
     }
+    @JvmOverloads
     fun setPlayer(index: Int, player: Player, prefix: String = "", suffix: String = "") = apply {
         setText(index, "$prefix${player.name}${suffix}")
         setLatency(index, TabLatency.fromPing(player.ping))
@@ -120,8 +140,15 @@ class TabLayout @JvmOverloads constructor(
 
 fun tabLayout(
     async: Boolean = true,
-    texture: String = DefaultTabSkin.TEXTURE,
-    sign: String = DefaultTabSkin.SIGN,
+    texture: String = DefaultTabSkin.SKIN.texture,
+    sign: String = DefaultTabSkin.SKIN.signature,
     defaultText: String = "",
     kotlinDSL: TabLayout.() -> Unit = {}
 ) = TabLayout(async, texture, sign, defaultText, kotlinDSL)
+
+fun tabLayout(
+    async: Boolean = true,
+    skin: Skin = DefaultTabSkin.SKIN,
+    defaultText: String = "",
+    kotlinDSL: TabLayout.() -> Unit = {}
+) = tabLayout(async, skin.texture, skin.signature, defaultText, kotlinDSL)

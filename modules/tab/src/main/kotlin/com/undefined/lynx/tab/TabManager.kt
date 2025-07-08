@@ -76,4 +76,6 @@ object TabManager {
 
 }
 
-internal fun runRunnable(runnable: Runnable, async: Boolean) = if (async) CompletableFuture.supplyAsync { runnable.run() } else runnable.run()
+internal fun runRunnable(runnable: Runnable, async: Boolean) {
+    if (async) CompletableFuture.supplyAsync { runnable.run() } else runnable.run()
+}

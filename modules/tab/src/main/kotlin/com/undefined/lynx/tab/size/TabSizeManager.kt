@@ -22,8 +22,8 @@ object TabSizeManager {
         for (num in 0..80) {
             val serverPlayer = TabManager.createFakePlayer(
                 order,
-                DefaultTabSkin.TEXTURE,
-                DefaultTabSkin.SIGN
+                DefaultTabSkin.SKIN.texture,
+                DefaultTabSkin.SKIN.signature
             )
             serverPlayers.add(serverPlayer)
             TabManager.addTeamEntry(team, order)

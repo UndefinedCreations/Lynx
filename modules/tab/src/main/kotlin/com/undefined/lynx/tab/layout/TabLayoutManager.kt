@@ -11,7 +11,7 @@ import org.bukkit.event.player.PlayerQuitEvent
 
 object TabLayoutManager: Listener {
 
-    internal val activeTabLayout: MutableList<AbstractTabLayout> = mutableListOf()
+    internal val activeTabLayout: MutableList<TabLayout> = mutableListOf()
 
     internal val badTeam = TabManager.createTeam(TabManager.order(81))
 
