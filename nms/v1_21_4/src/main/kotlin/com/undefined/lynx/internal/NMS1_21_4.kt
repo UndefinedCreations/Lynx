@@ -76,6 +76,8 @@ object NMS1_21_4: NMS, Listener {
     private var idMap: HashMap<UUID, UUID> = hashMapOf()
     private var cooldownMap: MutableList<Int> = mutableListOf()
 
+    var clickData: NPCInteract.() -> Unit = {}
+
     init {
         Bukkit.getOnlinePlayers().forEach { startPacketListener(it) }
         Bukkit.getPluginManager().registerEvents(this, LynxConfig.javaPlugin)
@@ -144,7 +146,6 @@ object NMS1_21_4: NMS, Listener {
             }
         }
     }
-
     override val playerMeta: NMS.PlayerMeta by lazy {
         object : NMS.PlayerMeta {
             override fun sendClientboundPlayerInfoRemovePacketList(
@@ -248,8 +249,6 @@ object NMS1_21_4: NMS, Listener {
             }
         }
     }
-
-
     override val nick: NMS.Nick by lazy {
         object : NMS.Nick {
             override fun setSkin(player: Player, texture: String, signature: String) = playerMeta.setSkin(player.serverPlayer(), texture, signature)
@@ -290,9 +289,6 @@ object NMS1_21_4: NMS, Listener {
             override fun updateAbilities(player: Player) = player.serverPlayer().onUpdateAbilities()
         }
     }
-
-    var clickData: NPCInteract.() -> Unit = {}
-
     override val npc: NMS.NPC by lazy {
         object : NMS.NPC {
             override fun createServerPlayer(name: String, texture: String, signature: String): Any {
@@ -397,7 +393,6 @@ object NMS1_21_4: NMS, Listener {
             private fun getServerLevel(): ServerLevel = (Bukkit.getWorlds().first() as CraftWorld).handle
         }
     }
-
     override val scoreboard: NMS.Scoreboard by lazy {
         object : NMS.Scoreboard {
             override fun createObjective(

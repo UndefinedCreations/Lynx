@@ -1,3 +1,5 @@
+@file:Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+
 package com.undefined.lynx.sql
 
 import com.zaxxer.hikari.HikariConfig
@@ -7,7 +9,7 @@ import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import java.sql.ResultSet
 
-class MySQL(
+class MySQL @JvmOverloads constructor(
     ip: String,
     port: Int,
     database: String,
