@@ -44,6 +44,7 @@ import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.attribute.Attribute
 import org.bukkit.craftbukkit.v1_21_R3.CraftServer
 import org.bukkit.craftbukkit.v1_21_R3.CraftWorld
 import org.bukkit.craftbukkit.v1_21_R3.entity.CraftPlayer
@@ -320,39 +321,39 @@ object NMS1_21_4: NMS, Listener {
             }
 
             override fun getName(serverPlayer: Any): String  {
-                val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Server player isn't a server player.")
+                val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
                 return serverPlayer.gameProfile.name
             }
 
-            override fun sendSpawnPacket(serverPlayer: Any, location: Location, player: List<Player>?) {
-                val fakeServerPlayer = serverPlayer as ServerPlayer
-                fakeServerPlayer.setPos(location.x, location.y, location.z)
-                fakeServerPlayer.moveTo(location.x, location.y, location.z, location.yaw, location.pitch)
+            override fun sendSpawnPacket(serverPlayer: Any, location: Location, player: List<Player>) {
+                val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
+                serverPlayer.setPos(location.x, location.y, location.z)
+                serverPlayer.moveTo(location.x, location.y, location.z, location.yaw, location.pitch)
 
-                val serverEntity = ServerEntity(getServerLevel(), fakeServerPlayer, 0, false, {}, mutableSetOf())
+                val serverEntity = ServerEntity(getServerLevel(), serverPlayer, 0, false, {}, mutableSetOf())
 
-                val addPlayer = ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, fakeServerPlayer)
-                val addEntity = ClientboundAddEntityPacket(fakeServerPlayer, serverEntity)
+                val addPlayer = ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, serverPlayer)
+                val addEntity = ClientboundAddEntityPacket(serverPlayer, serverEntity)
 
-                val data = fakeServerPlayer.entityData
+                val data = serverPlayer.entityData
                 val bitmask: Byte = (0x01 or 0x04 or 0x08 or 0x10 or 0x20 or 0x40 or 127).toByte()
                 data.set(EntityDataAccessor(17, EntityDataSerializers.BYTE), bitmask)
-                val metaDataPacket = data.nonDefaultValues?.let { ClientboundSetEntityDataPacket(fakeServerPlayer.id, it) }
+                val metaDataPacket = data.nonDefaultValues?.let { ClientboundSetEntityDataPacket(serverPlayer.id, it) }
 
-                (player ?: Bukkit.getOnlinePlayers()).sendPackets(addPlayer, addEntity, metaDataPacket)
+                player.sendPackets(addPlayer, addEntity, metaDataPacket)
             }
 
             override fun onClick(consumer: NPCInteract.() -> Unit) {
                 clickData = consumer
             }
 
-            override fun setItem(serverPlayer: Any, slot: Int, itemStack: ItemStack?, players: List<UUID>?) {
-                val fakeServerPlayer = serverPlayer as ServerPlayer
+            override fun setItem(serverPlayer: Any, slot: Int, itemStack: ItemStack?, players: List<UUID>) {
+                val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
                 val itemStack = itemStack ?: ItemStack(Material.AIR)
                 val nmsItemServer = CraftItemStack.asNMSCopy(itemStack)
                 val nmsSlot = EquipmentSlot.entries.filter { it.id == slot }.getOrNull(0) ?: return
-                players.sendPacket(ClientboundSetEquipmentPacket(
-                    fakeServerPlayer.id,
+                players.sendPackets(ClientboundSetEquipmentPacket(
+                    serverPlayer.id,
                     mutableListOf(
                         Pair(
                             nmsSlot,
@@ -362,25 +363,38 @@ object NMS1_21_4: NMS, Listener {
                 ))
             }
 
-            override fun remove(serverPlayer: Any) {
-                val serverPlayer = serverPlayer as ServerPlayer
-                Bukkit.getOnlinePlayers().sendPackets(ClientboundRemoveEntitiesPacket(serverPlayer.id))
+            override fun sendRemovePacket(serverPlayer: Any, player: List<UUID>) {
+                val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
+                player.sendPackets(ClientboundRemoveEntitiesPacket(serverPlayer.id))
             }
 
             override fun getUUID(serverPlayer: Any): UUID = (serverPlayer as ServerPlayer).uuid
 
             override fun getID(serverPlayer: Any): Int = (serverPlayer as ServerPlayer).id
 
-            override fun sendTeleportPacket(serverPlayer: Any, location: Location, players: List<UUID>?) {
-                val serverPlayer = serverPlayer as ServerPlayer
+            override fun sendTeleportPacket(serverPlayer: Any, location: Location, players: List<UUID>) {
+                val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
                 serverPlayer.setPos(location.x, location.y, location.z)
                 Entity::class.java.getPrivateMethod(MAPPING.SET_ROT, Float::class.java, Float::class.java).invoke(location.yaw, location.pitch)
-                players.sendPacket(ClientboundTeleportEntityPacket(
+                players.sendPackets(ClientboundTeleportEntityPacket(
                     serverPlayer.id,
                     PositionMoveRotation.of(serverPlayer),
                     setOf(),
                     false
                 ))
+            }
+
+            override fun setScale(serverPlayer: Any, scale: Double) {
+                val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
+                serverPlayer.craftAttributes.getAttribute(Attribute.SCALE)?.baseValue = scale
+            }
+
+            override fun sendUpdateAttributesPacket(
+                serverPlayer: Any,
+                players: List<UUID>
+            ) {
+                val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
+                players.sendPackets(ClientboundUpdateAttributesPacket(serverPlayer.id, serverPlayer.attributes.attributesToUpdate))
             }
 
             private fun getServer(): MinecraftServer = (Bukkit.getServer() as CraftServer).server
@@ -520,19 +534,14 @@ object NMS1_21_4: NMS, Listener {
 
 }
 
-private fun List<UUID>?.sendPacket(vararg packets: Packet<*>) = (this?.mapNotNull { Bukkit.getPlayer(it) } ?: Bukkit.getOnlinePlayers()).sendPackets(*packets)
-
+private fun List<UUID>.sendPackets(vararg packet: Packet<*>) = this.mapNotNull { Bukkit.getPlayer(it) }.sendPackets(*packet)
 private fun Player.serverPlayer(): ServerPlayer = (this as CraftPlayer).handle
-
 private fun Player.sendPackets(vararg packets: Packet<*>?) {
     val connection = serverPlayer().connection
     packets.filterNotNull().forEach { connection.send(it) }
 }
-
 private fun Collection<Player>.sendPackets(vararg packet: Packet<*>?) {
     for (player in this) {
         player.sendPackets(*packet)
     }
 }
-
-fun AdventureComponent.toNMS(): MutableComponent = MinecraftComponentSerializer.get().serialize(this) as MutableComponent

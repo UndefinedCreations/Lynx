@@ -10,6 +10,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 
 class NPCListener : Listener {
 
@@ -17,14 +18,11 @@ class NPCListener : Listener {
     fun playerWorldChangeEvent(event: PlayerChangedWorldEvent) {
         val world = event.player.world
         Bukkit.getScheduler().runTaskAsynchronously(LynxConfig.javaPlugin, Runnable {
-            autoLoadNPCS.filter {
-                it.visibleTo?.contains(event.player.uniqueId) ?: true
-            }.filter {
-                world == it.location.world
-            }.forEach {
-                NMSManager.nms.npc.sendSpawnPacket(it.serverPlayer, it.location, listOf(event.player))
-                it.resentItems(listOf(event.player))
+            for (npc in autoLoadNPCS.filter { it.visibleTo?.contains(event.player.uniqueId) ?: true }.filter { world == it.location.world }.toList()) {
+                NMSManager.nms.npc.sendSpawnPacket(npc.serverPlayer, npc.location, listOf(event.player))
+                npc.resentItems(listOf(event.player))
             }
+
         })
     }
 

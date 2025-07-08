@@ -3,7 +3,6 @@ package com.undefined.lynx.nms
 import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.Skin
 import com.undefined.lynx.team.NameTagVisibility
-import net.md_5.bungee.api.chat.BaseComponent
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -60,13 +59,15 @@ interface NMS {
     interface NPC {
         fun createServerPlayer(name: String, texture: String, signature: String): Any
         fun getName(serverPlayer: Any): String
-        fun sendSpawnPacket(serverPlayer: Any, location: Location, player: List<Player>? = null)
+        fun sendSpawnPacket(serverPlayer: Any, location: Location, player: List<Player>)
         fun onClick(consumer: NPCInteract.() -> Unit)
-        fun setItem(serverPlayer: Any, slot: Int, itemStack: ItemStack?, players: List<UUID>?)
-        fun remove(serverPlayer: Any)
+        fun setItem(serverPlayer: Any, slot: Int, itemStack: ItemStack?, players: List<UUID>)
+        fun sendRemovePacket(serverPlayer: Any, player: List<UUID>)
         fun getUUID(serverPlayer: Any): UUID
         fun getID(serverPlayer: Any): Int
-        fun sendTeleportPacket(serverPlayer: Any, location: Location, players: List<UUID>?)
+        fun sendTeleportPacket(serverPlayer: Any, location: Location, players: List<UUID>)
+        fun setScale(serverPlayer: Any, scale: Double)
+        fun sendUpdateAttributesPacket(serverPlayer: Any, players: List<UUID>)
     }
 
     interface Scoreboard {
