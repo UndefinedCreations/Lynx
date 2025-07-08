@@ -15,9 +15,14 @@ fun String.sendDebug() = LoggerUtil.sendDebug(this)
 fun String.sendTrace() = LoggerUtil.sendTrace(this)
 
 object LoggerUtil {
+    @JvmStatic
     fun sendError(message: Any) = LynxConfig.javaPlugin.logger.severe(message.toString())
+    @JvmStatic
     fun sendWarn(message: Any) = LynxConfig.javaPlugin.logger.warning(message.toString())
+    @JvmStatic
     fun sendInfo(message: Any) = LynxConfig.javaPlugin.logger.info(message.toString())
+    @JvmStatic
     fun sendDebug(message: Any) = LynxConfig.javaPlugin.logger.config(message.toString())
+    @JvmStatic
     fun sendTrace(message: Any) = LynxConfig.javaPlugin.logger.fine(message.toString())
 }
