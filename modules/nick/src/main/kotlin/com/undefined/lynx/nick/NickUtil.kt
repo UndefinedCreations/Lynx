@@ -1,10 +1,12 @@
 package com.undefined.lynx.nick
 
+import com.google.gson.JsonParser
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.Skin
 import com.undefined.lynx.nick.NickManager.trueNames
 import com.undefined.lynx.nick.NickManager.trueSkins
 import org.bukkit.entity.Player
+import java.util.Base64
 import kotlin.collections.set
 
 object NickUtil {
@@ -58,7 +60,21 @@ object NickUtil {
 
     @JvmOverloads
     fun resetSkin(player: Player, reloadPlayer: Boolean = true) = trueSkins[player.uniqueId]?.let { setSkin(player, it, reloadPlayer) }
+
+    fun setClientSideCape(player: Player, cape: Cape) {
+        val currentSkin = getPlayerSkin(player)
+        val json = JsonParser.parseString(String(Base64.getDecoder().decode(currentSkin.texture))).asJsonObject
+        val capeJson = json.get("textures").asJsonObject.get("CAPE").asJsonObject
+        val modifiedJson = capeJson.apply { addProperty("url", cape.texture) }
+        val modifiedTextureJson = json.get("textures").asJsonObject.apply { add("CAPE", modifiedJson) }
+        val finalJson = json.apply { add("textures", modifiedTextureJson) }
+        setSkin(player, Base64.getEncoder().encodeToString(finalJson.toString().toByteArray()), currentSkin.signature, false)
+        reloadPlayerMeta(player)
+    }
 }
+
+
+fun Player.setClientCape(cape: Cape) = NickUtil.setClientSideCape(this, cape)
 
 fun Player.setName(name: String, reloadPlayer: Boolean = true) = NickUtil.setName(this, name, reloadPlayer)
 
