@@ -456,12 +456,12 @@ object NMS1_21_4: NMS, Listener {
 
             override fun setTeamPrefix(team: Any, prefix: String) {
                 val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
-                setPrivateField(team, MAPPING.SET_PREFIX, CraftChatMessage.fromJSONOrNull(prefix))
+                team.setPrivateField(MAPPING.SET_PREFIX, CraftChatMessage.fromJSONOrNull(prefix))
             }
 
             override fun setTeamSuffix(team: Any, suffix: String) {
                 val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
-                setPrivateField(team, MAPPING.SET_SUFFIX, CraftChatMessage.fromJSONOrNull(suffix))
+                team.setPrivateField(MAPPING.SET_SUFFIX, CraftChatMessage.fromJSONOrNull(suffix))
             }
 
             override fun setTeamSeeFriendlyInvisibles(team: Any, canSee: Boolean) {

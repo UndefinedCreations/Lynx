@@ -23,6 +23,7 @@ inline fun <reified T : Event> event(
     )
 }
 
+@Suppress("UNCHECKED_CAST")
 object Events {
     @JvmStatic
     @JvmOverloads
@@ -37,7 +38,7 @@ object Events {
             this,
             priority,
             { _, event ->
-                if (eventClass.isInstance(event)) block
+                if (eventClass.isInstance(event)) block.run(event as T)
             },
             LynxConfig.javaPlugin,
             ignoreCancelled,

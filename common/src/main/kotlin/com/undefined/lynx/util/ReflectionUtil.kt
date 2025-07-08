@@ -17,8 +17,8 @@ fun <T : Any> Any.getPrivateField(clazz: Class<*>, name: String): T =
 fun <T : Any> Any.getPrivateField(name: String): T =
     javaClass.getDeclaredField(name).apply { isAccessible = true }[this] as T
 
-inline fun <reified T : Any> Any.setPrivateField(name: String, data: Any) {
-    T::class.java.getDeclaredField(name).run {
+fun Any.setPrivateField(name: String, data: Any) {
+    this::class.java.getDeclaredField(name).run {
         isAccessible = true
         set(this@setPrivateField, data)
     }

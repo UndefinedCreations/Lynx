@@ -1,29 +1,13 @@
 package com.undefined.lynx.itembuilder
 
 import com.undefined.lynx.adventure.toLegacyText
-import com.undefined.lynx.itembuilder.meta.*
-import com.undefined.lynx.itembuilder.meta.armor.ArmorMeta
-import com.undefined.lynx.itembuilder.meta.armor.LeatherArmorMeta
-import com.undefined.lynx.itembuilder.meta.banner.BannerMeta
-import com.undefined.lynx.itembuilder.meta.banner.ShieldMeta
-import com.undefined.lynx.itembuilder.meta.book.BookMeta
-import com.undefined.lynx.itembuilder.meta.book.KnowledgeBookMeta
-import com.undefined.lynx.itembuilder.meta.book.WriteableBookMeta
-import com.undefined.lynx.itembuilder.meta.firework.FireworkEffectMeta
-import com.undefined.lynx.itembuilder.meta.firework.FireworkMeta
-import com.undefined.lynx.util.component
-import com.undefined.lynx.util.legacySectionString
-import com.undefined.lynx.util.miniMessage
 import net.kyori.adventure.text.Component
-import net.md_5.bungee.api.chat.BaseComponent
-import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
 import org.bukkit.enchantments.Enchantment
-import org.bukkit.enchantments.EnchantmentTarget
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemRarity
 import org.bukkit.inventory.ItemStack
@@ -39,38 +23,40 @@ class ItemBuilder {
     private var itemStack: ItemStack? = null
     private var material: Material? = null
 
-    var name: String? = null
-    var lore: MutableList<String> = mutableListOf()
-    var amount: Int = 1
-    var customModelData = 0
-    var persistentDataContainers: HashMap<NamespacedKey, PDCInfo<*, *>> = hashMapOf()
-    var enchantments: HashMap<Enchantment, Int> = HashMap()
-    var unbreakable: Boolean = false
-    var flags: MutableList<ItemFlag> = mutableListOf()
-    var attributeModifiers: HashMap<Attribute, AttributeModifier> = hashMapOf()
-    var hideToolTips: Boolean = false
-    var maxStackSize = -1
-    var itemRarity: ItemRarity? = null
-    var damage: Int = -1
-    var maxDamage: Int = -1
+    private var name: String? = null
+    private var lore: MutableList<String> = mutableListOf()
+    private var amount: Int = 1
+    private var customModelData = 0
+    private var persistentDataContainers: HashMap<NamespacedKey, PDCInfo<*, *>> = hashMapOf()
+    private var enchantments: HashMap<Enchantment, Int> = HashMap()
+    private var unbreakable: Boolean = false
+    private var flags: MutableList<ItemFlag> = mutableListOf()
+    private var attributeModifiers: HashMap<Attribute, AttributeModifier> = hashMapOf()
+    private var hideToolTips: Boolean = false
+    private var maxStackSize = -1
+    private var itemRarity: ItemRarity? = null
+    private var damage: Int = -1
+    private var maxDamage: Int = -1
 
-    private var itemMeta: ItemBuildMeta? = null
+    private var bukkitMeta: ItemMeta? = null
 
+    @JvmOverloads
     constructor(material: Material, dsl: ItemBuilder.() -> Unit = {}) {
         this.dsl = dsl
         this.material = material
+        itemStack = ItemStack(material)
+        bukkitMeta = itemStack!!.itemMeta
     }
 
+    @JvmOverloads
     constructor(itemStack: ItemStack, dsl: ItemBuilder.() -> Unit = {}) {
         this.dsl = dsl
         this.itemStack = itemStack
         this.material = itemStack.type
-        val itemMeta = itemStack.itemMeta ?: return
-        setName(itemMeta.itemName)
-        itemMeta.lore?.let { setStringLore(it) }
+        bukkitMeta = itemStack.itemMeta ?: return
+        setName(bukkitMeta!!.itemName)
+        bukkitMeta!!.lore?.let { setStringLore(it) }
         setAmount(itemStack.amount)
-        this.itemMeta = getItemMeta()
-        this.itemMeta?.let { setItemCache(it, itemMeta) }
     }
 
     fun setName(name: Component): ItemBuilder = apply {
@@ -152,13 +138,18 @@ class ItemBuilder {
         this.maxDamage = maxDamage
     }
 
-    fun <T: ItemBuildMeta> meta(consumer: T.() -> Unit): ItemBuilder {
-        val meta = itemMeta as? T ?: run {
-            itemMeta = getItemMeta()
-            itemMeta as T
+     fun <T : ItemMeta> meta(consumer: (T) -> Unit) = apply {
+         (getItemMeta(bukkitMeta!!) as T).let {
+             bukkitMeta = it
+             consumer(it)
+         }
+     }
+
+    fun <T : ItemMeta> meta(clazz: Class<T>, consumer: ItemBuilderBlock<T>) = apply {
+        (getItemMeta(bukkitMeta!!) as T).let {
+            bukkitMeta = it
+            consumer.run(bukkitMeta!! as T)
         }
-        consumer(meta)
-        return this
     }
 
     fun build(): ItemStack {
@@ -167,7 +158,7 @@ class ItemBuilder {
         item.addUnsafeEnchantments(enchantments)
         item.amount = this.amount
 
-        var meta = item.itemMeta ?: return item
+        val meta = bukkitMeta ?: item.itemMeta ?: return item
 
         meta.setDisplayName(name)
         meta.lore = this.lore
@@ -185,47 +176,12 @@ class ItemBuilder {
         if (damage >= 0) damageable?.damage = damage
         if (maxDamage >= 0) damageable?.setMaxDamage(maxDamage)
 
-        meta = damageable ?: meta
-
-        item.itemMeta = itemMeta?.let { setMetaFromCache(it, meta) } ?: meta
-        return item
+        return item.apply { itemMeta = meta }
     }
 
-    private fun setMetaFromCache(itemBuildMeta: ItemBuildMeta, itemMeta: ItemMeta): ItemMeta {
-        val method = itemBuildMeta::class.java.getDeclaredMethod("setMetaFromCache", ItemMeta::class.java)
-        method.isAccessible = true
-        return method.invoke(itemBuildMeta, itemMeta) as ItemMeta
-    }
-
-    private fun setItemCache(itemBuildMeta: ItemBuildMeta, itemMeta: ItemMeta) {
-        val method = itemBuildMeta::class.java.getDeclaredMethod("setItemCache", ItemMeta::class.java)
-        method.isAccessible = true
-        method.invoke(itemBuildMeta, itemMeta)
-    }
-
-    private fun getItemMeta(): ItemBuildMeta? = when {
-        material!!.name.contains("LEATHER_") -> LeatherArmorMeta()
-        material!!.name.contains("BANNER") -> BannerMeta()
-        material!!.name.contains("SPAWN_EGG") -> SpawnEggMeta()
-        EnchantmentTarget.ARMOR.includes(material!!) -> ArmorMeta()
-        material!! == Material.AXOLOTL_BUCKET -> AxolotlBucketMeta()
-        material!! == Material.WRITABLE_BOOK -> WriteableBookMeta()
-        material!! == Material.WRITTEN_BOOK -> BookMeta()
-        material!! == Material.BUNDLE -> BundleMeta()
-        material!! == Material.COMPASS -> CompassMeta()
-        material!! == Material.CROSSBOW -> CrossbowMeta()
-        material!! == Material.FIREWORK_STAR -> FireworkEffectMeta()
-        material!! == Material.FIREWORK_ROCKET -> FireworkMeta()
-        material!! == Material.KNOWLEDGE_BOOK -> KnowledgeBookMeta()
-        material!! == Material.MAP -> MapMeta()
-        material!! == Material.GOAT_HORN -> MusicInstrumentMeta()
-        material!! == Material.OMINOUS_BOTTLE -> OminousBottleMeta()
-        material!! == Material.POTION -> PotionMeta()
-        material!! == Material.SHIELD -> ShieldMeta()
-        material!! == Material.SUSPICIOUS_STEW -> SuspiciousStewMeta()
-        material!! == Material.TROPICAL_FISH_BUCKET -> TropicalFishBucketMeta()
-        material!! == Material.PLAYER_HEAD -> SkullMeta()
-        else -> null
+    private fun getItemMeta(meta: ItemMeta): ItemMeta = when {
+        material!! == Material.PLAYER_HEAD -> SkullMeta(meta as org.bukkit.inventory.meta.SkullMeta)
+        else -> meta
     }
 
 }
