@@ -20,16 +20,14 @@ import org.bukkit.scoreboard.Scoreboard
 class Sidebar @JvmOverloads constructor(
     title: String,
     scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
-    kotlinDSL: Sidebar.() -> Unit = {}
+    block: RunBlock<Sidebar> = RunBlock {}
 ): AbstractSideBar(title, scoreboard) {
 
-    @JvmOverloads constructor(title: String, scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard, block: RunBlock<Sidebar>): this(title, scoreboard, { block.run(this) })
-    @JvmOverloads constructor(title: Component, scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard, block: RunBlock<Sidebar>): this(title.toLegacyText(), scoreboard, { block.run(this) })
-    @JvmOverloads constructor(title: Component, scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard, kotlinDSL: Sidebar.() -> Unit = {}): this(title.toLegacyText(), scoreboard, kotlinDSL)
+    @JvmOverloads constructor(title: Component, scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard, block: RunBlock<Sidebar> = RunBlock {}): this(title.toLegacyText(), scoreboard, block)
 
 
     init {
-        kotlinDSL()
+        block.run(this)
         ScoreboardManager.activeSidebars.add(this)
     }
 

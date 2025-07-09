@@ -2,7 +2,7 @@ package com.undefined.lynx.npc
 
 
 import com.undefined.lynx.NMSManager
-import com.undefined.lynx.nms.NPCInteract
+import com.undefined.lynx.nms.EntityInteract
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -15,7 +15,7 @@ open class NPC(
     internal var location: Location
 ) {
 
-    internal var clickActions: MutableList<NPCInteract.() -> Unit> = mutableListOf()
+    internal var clickActions: MutableList<EntityInteract.() -> Unit> = mutableListOf()
 
     private val itemStacks: HashMap<Int, ItemStack> = hashMapOf()
 
@@ -23,7 +23,7 @@ open class NPC(
         itemStacks.forEach { item -> NMSManager.nms.npc.setItem(serverPlayer, item.key, item.value, players?.map { it.uniqueId } ?: Bukkit.getOnlinePlayers().map { it.uniqueId }) }
     }
 
-    fun onClick(onClick: NPCInteract.() -> Unit) {
+    fun onClick(onClick: EntityInteract.() -> Unit) {
         clickActions.add(onClick)
     }
 

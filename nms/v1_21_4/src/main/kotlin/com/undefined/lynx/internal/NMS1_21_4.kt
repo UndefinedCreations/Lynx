@@ -7,15 +7,17 @@ import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.Skin
 import com.undefined.lynx.nms.ClickType
 import com.undefined.lynx.nms.NMS
-import com.undefined.lynx.nms.NPCInteract
+import com.undefined.lynx.nms.EntityInteract
 import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.team.NameTagVisibility
 import com.undefined.lynx.util.execute
+import com.undefined.lynx.util.executePrivateMethod
 import com.undefined.lynx.util.getPrivateField
 import com.undefined.lynx.util.getPrivateMethod
 import com.undefined.lynx.util.setPrivateField
 import net.minecraft.ChatFormatting
 import net.minecraft.network.Connection
+import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.numbers.BlankFormat
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
@@ -29,9 +31,14 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.network.CommonListenerCookie
 import net.minecraft.server.network.ServerCommonPacketListenerImpl
 import net.minecraft.server.network.ServerGamePacketListenerImpl
+import net.minecraft.util.Brightness
+import net.minecraft.world.entity.Display
 import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.EquipmentSlot
+import net.minecraft.world.entity.Interaction
 import net.minecraft.world.entity.PositionMoveRotation
+import net.minecraft.world.entity.animal.Pig
 import net.minecraft.world.item.component.ResolvableProfile
 import net.minecraft.world.scores.Objective
 import net.minecraft.world.scores.PlayerTeam
@@ -41,9 +48,14 @@ import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.World
 import org.bukkit.attribute.Attribute
+import org.bukkit.block.data.BlockData
 import org.bukkit.craftbukkit.v1_21_R3.CraftServer
 import org.bukkit.craftbukkit.v1_21_R3.CraftWorld
+import org.bukkit.craftbukkit.v1_21_R3.block.CraftBlock
+import org.bukkit.craftbukkit.v1_21_R3.block.CraftBlockStates
+import org.bukkit.craftbukkit.v1_21_R3.block.data.CraftBlockData
 import org.bukkit.craftbukkit.v1_21_R3.entity.CraftPlayer
 import org.bukkit.craftbukkit.v1_21_R3.inventory.CraftItemStack
 import org.bukkit.craftbukkit.v1_21_R3.scoreboard.CraftScoreboard
@@ -56,6 +68,9 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.scoreboard.Scoreboard
+import org.bukkit.util.Transformation
+import org.joml.Quaternionf
+import org.joml.Vector3f
 import java.util.*
 
 @Suppress("NAME_SHADOWING")
@@ -73,10 +88,25 @@ object NMS1_21_4: NMS, Listener {
         const val SET_SUFFIX = "h"
     }
 
+    object DISPLAY_MAPPING {
+        val DATA_TRANSLATION_ID = getAccessor<Vector3f>("s")
+        val DATA_SCALE_ID = getAccessor<Vector3f>("t")
+        val DATA_LEFT_ROTATION_ID = getAccessor<Quaternionf>("u")
+        val DATA_RIGHT_ROTATION_ID = getAccessor<Quaternionf>("ay")
+        val DATA_BILLBOARD_RENDER_CONSTRAINTS_ID = getAccessor<Byte>("az")
+
+        fun <T> getAccessor(string: String): EntityDataAccessor<T> {
+            return Display::class.java.getDeclaredField(string).let {
+                it.isAccessible = true
+                return@let it.get(null) as EntityDataAccessor<T>
+            }
+        }
+    }
+
     private var idMap: HashMap<UUID, UUID> = hashMapOf()
     private var cooldownMap: MutableList<Int> = mutableListOf()
 
-    var clickData: NPCInteract.() -> Unit = {}
+    private val clicks: MutableList<EntityInteract.() -> Unit> = mutableListOf()
 
     init {
         Bukkit.getOnlinePlayers().forEach { startPacketListener(it) }
@@ -106,16 +136,14 @@ object NMS1_21_4: NMS, Listener {
                     val action = this.getPrivateField<Any>(ServerboundInteractPacket::class.java, MAPPING.ServerboundInteractPacket_ACTION)
                     val actionType = action::class.java.getPrivateMethod(MAPPING.ServerboundInteractionPacket_GET_TYPE).execute(action)
                     when(actionType.toString()) {
-                        "ATTACK" -> {
-                            clickData(NPCInteract(entityID, ClickType.LEFT, player))
-                        }
+                        "ATTACK" -> for (run in clicks) run(EntityInteract(entityID, ClickType.LEFT, player))
                         "INTERACT" -> {
                             if (cooldownMap.contains(entityID)) {
                                 cooldownMap.remove(entityID)
                                 return@DuplexHandler
                             }
                             cooldownMap.add(entityID)
-                            clickData(NPCInteract(entityID, ClickType.RIGHT, player))
+                            for (run in clicks) run(EntityInteract(entityID, ClickType.RIGHT, player))
                         }
                     }
                 }
@@ -335,8 +363,8 @@ object NMS1_21_4: NMS, Listener {
                 player.sendPackets(addPlayer, addEntity, metaDataPacket)
             }
 
-            override fun onClick(consumer: NPCInteract.() -> Unit) {
-                clickData = consumer
+            override fun onClick(consumer: EntityInteract.() -> Unit) {
+                clicks.add(consumer)
             }
 
             override fun setItem(serverPlayer: Any, slot: Int, itemStack: ItemStack?, players: List<UUID>) {
@@ -360,12 +388,12 @@ object NMS1_21_4: NMS, Listener {
                 player.sendPackets(ClientboundRemoveEntitiesPacket(serverPlayer.id))
             }
 
-            override fun getUUID(serverPlayer: Any): UUID = (serverPlayer as ServerPlayer).uuid
+            override fun getUUID(serverPlayer: Any): UUID = (serverPlayer as Entity).uuid
 
-            override fun getID(serverPlayer: Any): Int = (serverPlayer as ServerPlayer).id
+            override fun getID(serverPlayer: Any): Int = (serverPlayer as Entity).id
 
             override fun sendTeleportPacket(serverPlayer: Any, location: Location, players: List<UUID>) {
-                val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
+                val serverPlayer = serverPlayer as? Entity ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
                 serverPlayer.setPos(location.x, location.y, location.z)
                 Entity::class.java.getPrivateMethod(MAPPING.SET_ROT, Float::class.java, Float::class.java).invoke(location.yaw, location.pitch)
                 players.sendPackets(ClientboundTeleportEntityPacket(
@@ -522,7 +550,169 @@ object NMS1_21_4: NMS, Listener {
 
         }
     }
+    override val display: NMS.Display by lazy {
+        object : NMS.Display {
 
+            override fun setLocation(display: Any, location: Location) {
+                val display = display as? Entity ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                display.setPos(location.x, location.y, location.z)
+                Entity::class.java.getPrivateMethod(MAPPING.SET_ROT, Float::class.java, Float::class.java).invoke(display, location.yaw, location.pitch)
+            }
+
+            override fun createServerEntity(display: Any, world: World): Any {
+                val display = display as? Entity ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                return ServerEntity((world as CraftWorld).handle, display, 0, false, {}, mutableSetOf())
+            }
+
+            override fun spawn(
+                display: Any,
+                serverEntity: Any,
+                players: List<Player>
+            ) {
+                val display = display as? Entity ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                val serverEntity = serverEntity as? ServerEntity ?: throw IllegalArgumentException("Class passed was not an Server Entity")
+                players.sendPackets(display.getAddEntityPacket(serverEntity))
+            }
+
+            override fun setScale(display: Any, vector3f: Vector3f) {
+                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                display.entityData.set(DISPLAY_MAPPING.DATA_SCALE_ID, vector3f)
+            }
+            override fun setLeftRotation(display: Any, quaternionf: Quaternionf) {
+                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                display.entityData.set(DISPLAY_MAPPING.DATA_LEFT_ROTATION_ID, quaternionf)
+            }
+            override fun setRightRotation(display: Any, quaternionf: Quaternionf) {
+                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                display.entityData.set(DISPLAY_MAPPING.DATA_RIGHT_ROTATION_ID, quaternionf)
+            }
+            override fun setTranslation(display: Any, vector3f: Vector3f) {
+                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                display.entityData.set(DISPLAY_MAPPING.DATA_TRANSLATION_ID, vector3f)
+            }
+            override fun setInterpolationDuration(display: Any, duration: Int) {
+                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                display.transformationInterpolationDuration = duration
+            }
+            override fun setInterpolationDelay(display: Any, duration: Int) {
+                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                display.transformationInterpolationDelay = duration
+            }
+            override fun setTeleportDuration(display: Any, duration: Int) {
+                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                display.entityData.set(Display.DATA_POS_ROT_INTERPOLATION_DURATION_ID, duration)
+            }
+            override fun setBillboardRender(display: Any, byte: Byte) {
+                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                display.entityData.set(DISPLAY_MAPPING.DATA_BILLBOARD_RENDER_CONSTRAINTS_ID, byte)
+            }
+            override fun setBrightnessOverride(display: Any, int: Int) {
+                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                display.brightnessOverride = Brightness.unpack(int)
+            }
+            override fun setViewRange(display: Any, view: Float) {
+                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                display.viewRange = view
+            }
+            override fun setShadowRadius(display: Any, shadowRadius: Float) {
+                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                display.shadowRadius = shadowRadius
+            }
+            override fun setShadowStrength(display: Any, shadowStrength: Float) {
+                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                display.shadowStrength = shadowStrength
+            }
+            override fun setWidth(display: Any, width: Float) {
+                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                display.width = width
+            }
+            override fun setHeight(display: Any, height: Float) {
+                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                display.height = height
+            }
+            override fun updateAllEntityData(display: Any, players: List<Player>) {
+                val display = display as? Entity ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                val pack = display.entityData.packDirty() ?: return
+                players.sendPackets(ClientboundSetEntityDataPacket(display.id, pack))
+            }
+            override fun removeEntityPacket(display: Any, players: List<Player>) {
+                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                players.sendPackets(ClientboundRemoveEntitiesPacket(display.id))
+            }
+
+            override val textDisplay: NMS.Display.TextDisplay by lazy {
+                object : NMS.Display.TextDisplay {
+
+                    override fun createTextDisplay(world: World): Any = Display.TextDisplay(EntityType.TEXT_DISPLAY, (world as CraftWorld).handle)
+
+                    override fun setText(display: Any, json: String) {
+                        val display = display as? Display.TextDisplay ?: throw IllegalArgumentException("Class passed was not an Text Display Entity")
+                        display.text = CraftChatMessage.fromJSONOrNull(json)
+                    }
+
+                    override fun setLineWidth(display: Any, width: Int) {
+                        val display = display as? Display.TextDisplay ?: throw IllegalArgumentException("Class passed was not an Text Display Entity")
+                        display.entityData.set(Display.TextDisplay.DATA_LINE_WIDTH_ID, width)
+                    }
+
+                    override fun setBackgroundColor(display: Any, backgroundID: Int) {
+                        val display = display as? Display.TextDisplay ?: throw IllegalArgumentException("Class passed was not an Text Display Entity")
+                        display.entityData.set(Display.TextDisplay.DATA_BACKGROUND_COLOR_ID, backgroundID)
+                    }
+
+                    override fun setTextOpacity(display: Any, textOpacity: Byte) {
+                        val display = display as? Display.TextDisplay ?: throw IllegalArgumentException("Class passed was not an Text Display Entity")
+                        display.textOpacity = textOpacity
+                    }
+
+                    override fun setStyleFlags(display: Any, styleFlags: Byte) {
+                        val display = display as? Display.TextDisplay ?: throw IllegalArgumentException("Class passed was not an Text Display Entity")
+                        display.flags = styleFlags
+                    }
+
+                    override fun getStyleFlag(display: Any): Byte {
+                        val display = display as? Display.TextDisplay ?: throw IllegalArgumentException("Class passed was not an Text Display Entity")
+                        return display.flags
+                    }
+                }
+            }
+            override val blockDisplay: NMS.Display.BlockDisplay by lazy {
+                object : NMS.Display.BlockDisplay {
+                    override fun createBlockDisplay(world: World): Any = Display.BlockDisplay(EntityType.BLOCK_DISPLAY, (world as CraftWorld).handle)
+
+                    override fun setBlock(display: Any, block: BlockData) {
+                        val display = display as? Display.BlockDisplay ?: throw IllegalArgumentException("Class passed was not an Block Display Entity")
+                        display.blockState = (block as CraftBlockData).state
+                    }
+                }
+            }
+            override val itemDisplay: NMS.Display.ItemDisplay by lazy {
+                object : NMS.Display.ItemDisplay {
+                    override fun createItemDisplay(world: World): Any = Display.ItemDisplay(EntityType.ITEM_DISPLAY, (world as CraftWorld).handle)
+
+                    override fun setItem(display: Any, itemStack: ItemStack) {
+                        val display = display as? Display.ItemDisplay ?: throw IllegalArgumentException("Class passed was not an Item Display Entity")
+                        display.itemStack = CraftItemStack.asNMSCopy(itemStack)
+                    }
+                }
+            }
+            override val interaction: NMS.Display.Interaction by lazy {
+                object : NMS.Display.Interaction {
+                    override fun createInteraction(world: World): Any = Interaction(EntityType.INTERACTION, (world as CraftWorld).handle)
+
+                    override fun setWidth(display: Any, width: Float) {
+                        val interaction = display as? Interaction ?: throw IllegalArgumentException("Class passed was not an Interaction Entity")
+                        interaction.width = width
+                    }
+
+                    override fun setHeight(display: Any, height: Float) {
+                        val interaction = display as? Interaction ?: throw IllegalArgumentException("Class passed was not an Interaction Entity")
+                        interaction.height = height
+                    }
+                }
+            }
+        }
+    }
 }
 
 private fun List<UUID>.sendPackets(vararg packet: Packet<*>) = this.mapNotNull { Bukkit.getPlayer(it) }.sendPackets(*packet)

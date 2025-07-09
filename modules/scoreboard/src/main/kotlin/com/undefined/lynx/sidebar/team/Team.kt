@@ -19,14 +19,13 @@ class Team @JvmOverloads constructor(
     scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
     private val async: Boolean = false,
     order: Int = 1,
-    kotlinDSL: Team.() -> Unit = {}
+    block: RunBlock<Team> = RunBlock {}
 ): AbstractTeam(autoLoad, scoreboard, async, order) {
 
-    @JvmOverloads constructor(autoLoad: Boolean = true, scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard, async: Boolean = false, order: Int = 1, block: RunBlock<Team>): this(autoLoad, scoreboard, async, order) { block.run(this) }
 
     init {
         ScoreboardManager.activeTeams.add(this)
-        kotlinDSL()
+        block.run(this)
     }
 
     var color: ChatColor = ChatColor.WHITE

@@ -27,6 +27,7 @@ dependencies {
 
     implementation(project(":"))
     implementation(project(":modules:tab"))
+    implementation(project(":modules:display"))
 
     implementation("net.kyori:adventure-api:4.17.0")
     implementation("net.kyori:adventure-text-minimessage:4.17.0")

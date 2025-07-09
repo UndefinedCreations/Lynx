@@ -10,27 +10,24 @@ import kotlin.math.floor
 
 object Scheduler {
     @JvmStatic
-    fun sync(runnable: RunBlock<BukkitRunnable>) = sync { runnable.run(it) }
+    fun sync(runnable: RunBlock<BukkitRunnable>) = createRunnable(runnable).runTask(LynxConfig.javaPlugin)
     @JvmStatic
-    fun async(runnable: RunBlock<BukkitRunnable>) = async { runnable.run(it) }
+    fun async(runnable: RunBlock<BukkitRunnable>) = createRunnable(runnable).runTaskAsynchronously(LynxConfig.javaPlugin)
     @JvmStatic
     @JvmOverloads
-    fun delay(ticks: Int, unit: TimeUnit? = null, async: Boolean = false, runnable: RunBlock<BukkitRunnable>) = delay(ticks, unit, async) { runnable.run(it) }
+    fun delay(ticks: Int, unit: TimeUnit? = null, async: Boolean = false, runnable: RunBlock<BukkitRunnable>) =
+        if (async) createRunnable(runnable).runTaskLaterAsynchronously(LynxConfig.javaPlugin, unit.toTicks(ticks.toLong())) else createRunnable(runnable).runTaskLater(LynxConfig.javaPlugin, unit.toTicks(ticks.toLong()))
     @JvmStatic
     @JvmOverloads
     fun repeatingTask(ticks: Int, period: Int = ticks, times: Int = -1, unit: TimeUnit? = null, async: Boolean = false, runnable: RunBlock<BukkitRunnable>) =
-        repeatingTask(ticks, period, times, unit, async) { runnable.run(it) }
+        if (async) createRunnable(times, runnable).runTaskTimerAsynchronously(LynxConfig.javaPlugin, unit.toTicks(ticks.toLong()), unit.toTicks(period.toLong())) else
+            createRunnable(times, runnable).runTaskTimer(LynxConfig.javaPlugin, unit.toTicks(ticks.toLong()), unit.toTicks(period.toLong()))
 }
 
-fun sync(runnable: (BukkitRunnable) -> Unit) = createRunnable(runnable).runTask(LynxConfig.javaPlugin)
-fun async(runnable: (BukkitRunnable) -> Unit) = createRunnable(runnable).runTaskAsynchronously(LynxConfig.javaPlugin)
+fun sync(runnable: (BukkitRunnable) -> Unit) = Scheduler.sync(runnable)
+fun async(runnable: (BukkitRunnable) -> Unit) = Scheduler.async(runnable)
 
-fun delay(ticks: Int, unit: TimeUnit? = null, async: Boolean = false, runnable: (BukkitRunnable) -> Unit) =
-    if (async) {
-        createRunnable(runnable).runTaskLaterAsynchronously(LynxConfig.javaPlugin, unit.toTicks(ticks.toLong()))
-    } else {
-        createRunnable(runnable).runTaskLater(LynxConfig.javaPlugin, unit.toTicks(ticks.toLong()))
-    }
+fun delay(ticks: Int, unit: TimeUnit? = null, async: Boolean = false, runnable: (BukkitRunnable) -> Unit) = Scheduler.delay(ticks, unit, async, runnable)
 
 fun delay(ticks: Int = 1, runnable: (BukkitRunnable) -> Unit): BukkitTask =
     delay(ticks, false, runnable)
@@ -38,13 +35,8 @@ fun delay(ticks: Int = 1, runnable: (BukkitRunnable) -> Unit): BukkitTask =
 fun delay(ticks: Int = 1, async: Boolean, runnable: (BukkitRunnable) -> Unit): BukkitTask =
     delay(ticks, null, async, runnable)
 
-fun repeatingTask(ticks: Int, period: Int = ticks, times: Int = -1, unit: TimeUnit? = null, async: Boolean = false, runnable: (BukkitRunnable) -> Unit): BukkitTask {
-    return if (async) {
-        createRunnable(times, runnable).runTaskTimerAsynchronously(LynxConfig.javaPlugin, unit.toTicks(ticks.toLong()), unit.toTicks(period.toLong()))
-    } else {
-        createRunnable(times, runnable).runTaskTimer(LynxConfig.javaPlugin, unit.toTicks(ticks.toLong()), unit.toTicks(period.toLong()))
-    }
-}
+fun repeatingTask(ticks: Int, period: Int = ticks, times: Int = -1, unit: TimeUnit? = null, async: Boolean = false, runnable: (BukkitRunnable) -> Unit): BukkitTask =
+    Scheduler.repeatingTask(ticks, period, times, unit, async, runnable)
 
 fun repeatingTask(ticks: Int = 1, runnable: BukkitRunnable.() -> Unit): BukkitTask =
     repeatingTask(0, ticks, -1, false, runnable)
@@ -120,20 +112,20 @@ private fun TimeUnit?.toTicks(amount: Long): Long {
     return floor((this.convert(amount, TimeUnit.SECONDS) * 20.0)).toLong()
 }
 
-private fun createRunnable(runnable: BukkitRunnable.() -> Unit): BukkitRunnable {
+private fun createRunnable(runnable: RunBlock<BukkitRunnable>): BukkitRunnable {
     return object : BukkitRunnable() {
         override fun run() {
-            runnable()
+            runnable.run(this)
         }
     }
 }
 
 
-private fun createRunnable(times: Int = -1, runnable: BukkitRunnable.() -> Unit): BukkitRunnable {
+private fun createRunnable(times: Int = -1, runnable: RunBlock<BukkitRunnable>): BukkitRunnable {
     var amount = 0
     return object : BukkitRunnable() {
         override fun run() {
-            runnable()
+            runnable.run(this)
             if (times == -1) return
             amount++
             if (amount >= times) cancel()

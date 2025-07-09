@@ -19,7 +19,7 @@ import org.bukkit.persistence.PersistentDataType
 @Suppress("UNCHECKED_CAST")
 class ItemBuilder {
 
-    private var dsl: ItemBuilder.() -> Unit
+    private var dsl: RunBlock<ItemBuilder>
 
     private var itemStack: ItemStack? = null
     private var material: Material? = null
@@ -42,7 +42,7 @@ class ItemBuilder {
     private var bukkitMeta: ItemMeta? = null
 
     @JvmOverloads
-    constructor(material: Material, dsl: ItemBuilder.() -> Unit = {}) {
+    constructor(material: Material, dsl: RunBlock<ItemBuilder> = RunBlock {}) {
         this.dsl = dsl
         this.material = material
         itemStack = ItemStack(material)
@@ -50,7 +50,7 @@ class ItemBuilder {
     }
 
     @JvmOverloads
-    constructor(itemStack: ItemStack, dsl: ItemBuilder.() -> Unit = {}) {
+    constructor(itemStack: ItemStack, dsl: RunBlock<ItemBuilder> = RunBlock {}) {
         this.dsl = dsl
         this.itemStack = itemStack
         this.material = itemStack.type
@@ -154,7 +154,7 @@ class ItemBuilder {
     }
 
     fun build(): ItemStack {
-        dsl(this)
+        dsl.run(this)
         val item = itemStack ?: ItemStack(material!!)
         item.addUnsafeEnchantments(enchantments)
         item.amount = this.amount

@@ -20,7 +20,7 @@ object TabSize {
     @JvmOverloads
     fun fillTab(
         player: Player,
-        fakePlayerName: Component = FillTabOption.fakeName.miniMessage(),
+        fakePlayerName: Component,
         fakePlayerLatency: TabLatency = FillTabOption.latency,
         async: Boolean = true
     ) = TabSizeManager.addPlayer(player, fakePlayerName.toJson(), fakePlayerLatency, async)

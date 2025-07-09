@@ -1,6 +1,5 @@
 package com.undefined.lynx.npc
 
-//import com.undefined.lynx.NMSManager
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.npc.NPCManager.autoLoadNPCS
@@ -21,7 +20,6 @@ class NPCListener : Listener {
                 NMSManager.nms.npc.sendSpawnPacket(npc.serverPlayer, npc.location, listOf(event.player))
                 npc.resentItems(listOf(event.player))
             }
-
         })
     }
 

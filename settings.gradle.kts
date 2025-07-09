@@ -13,5 +13,6 @@ include(
     ":modules:scheduler",
     ":modules:sql",
     ":modules:scoreboard",
-    ":modules:tab"
+    ":modules:tab",
+    ":modules:display"
 )

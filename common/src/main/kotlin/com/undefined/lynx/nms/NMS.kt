@@ -5,9 +5,13 @@ import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.team.NameTagVisibility
 import org.bukkit.ChatColor
 import org.bukkit.Location
+import org.bukkit.World
+import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
+import org.joml.Quaternionf
+import org.joml.Vector3f
 import java.util.*
 
 interface NMS {
@@ -17,11 +21,11 @@ interface NMS {
     val npc: NPC
     val scoreboard: Scoreboard
     val playerMeta: PlayerMeta
+    val display: Display
 
     interface ItemBuilder {
         fun setSkullTexture(skullMeta: SkullMeta, texture: String): SkullMeta
     }
-
     interface PlayerMeta {
 
         fun sendClientboundPlayerInfoRemovePacketList(uuid: List<UUID>, players: List<Player>)
@@ -46,7 +50,6 @@ interface NMS {
 
 
     }
-
     interface Nick {
         fun setSkin(player: Player, texture: String, signature: String)
         fun setName(player: Player, name: String)
@@ -55,12 +58,11 @@ interface NMS {
         fun sendClientboundGameEventPacket(player: Player)
         fun updateAbilities(player: Player)
     }
-
     interface NPC {
         fun createServerPlayer(name: String, texture: String, signature: String): Any
         fun getName(serverPlayer: Any): String
         fun sendSpawnPacket(serverPlayer: Any, location: Location, player: List<Player>)
-        fun onClick(consumer: NPCInteract.() -> Unit)
+        fun onClick(consumer: EntityInteract.() -> Unit)
         fun setItem(serverPlayer: Any, slot: Int, itemStack: ItemStack?, players: List<UUID>)
         fun sendRemovePacket(serverPlayer: Any, player: List<UUID>)
         fun getUUID(serverPlayer: Any): UUID
@@ -69,7 +71,6 @@ interface NMS {
         fun setScale(serverPlayer: Any, scale: Double)
         fun sendUpdateAttributesPacket(serverPlayer: Any, players: List<UUID>)
     }
-
     interface Scoreboard {
 
         /**
@@ -164,5 +165,59 @@ interface NMS {
         fun sendClientboundSetPlayerTeamPacketRemove(team: Any, players: List<Player>)
 
     }
+    interface Display {
+        fun setLocation(display: Any, location: Location)
+        fun createServerEntity(display: Any, world: World): Any
+        fun spawn(display: Any, serverEntity: Any, players: List<Player>)
+        fun setScale(display: Any, vector3f: Vector3f)
+        fun setLeftRotation(display: Any, quaternionf: Quaternionf)
+        fun setRightRotation(display: Any, quaternionf: Quaternionf)
+        fun setTranslation(display: Any, vector3f: Vector3f)
+        fun setInterpolationDuration(display: Any, duration: Int)
+        fun setInterpolationDelay(display: Any, duration: Int)
+        fun setTeleportDuration(display: Any, duration: Int)
+        fun setBillboardRender(display: Any, byte: Byte)
+        fun setBrightnessOverride(display: Any, int: Int)
+        fun setViewRange(display: Any, view: Float)
+        fun setShadowRadius(display: Any, shadowRadius: Float)
+        fun setShadowStrength(display: Any, shadowStrength: Float)
+        fun setWidth(display: Any, width: Float)
+        fun setHeight(display: Any, height: Float)
+        fun updateAllEntityData(display: Any, players: List<Player>)
+        fun removeEntityPacket(display: Any, players: List<Player>)
 
+        val textDisplay: TextDisplay
+        val blockDisplay: BlockDisplay
+        val itemDisplay: ItemDisplay
+        val interaction: Interaction
+
+        interface TextDisplay {
+
+            fun createTextDisplay(world: World): Any
+            fun setText(display: Any, json: String)
+            fun setLineWidth(display: Any, width: Int)
+            fun setBackgroundColor(display: Any, backgroundID: Int)
+            fun setTextOpacity(display: Any, textOpacity: Byte)
+            fun setStyleFlags(display: Any, styleFlags: Byte)
+            fun getStyleFlag(display: Any): Byte
+
+        }
+
+        interface BlockDisplay {
+            fun createBlockDisplay(world: World): Any
+            fun setBlock(display: Any, block: BlockData)
+        }
+
+        interface ItemDisplay {
+            fun createItemDisplay(world: World): Any
+            fun setItem(display: Any, itemStack: ItemStack)
+        }
+
+        interface Interaction {
+            fun createInteraction(world: World): Any
+            fun setWidth(display: Any, width: Float)
+            fun setHeight(display: Any, height: Float)
+        }
+
+    }
 }

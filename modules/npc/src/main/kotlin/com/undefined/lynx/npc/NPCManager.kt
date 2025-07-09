@@ -5,6 +5,7 @@ import com.undefined.lynx.NMSManager
 import com.undefined.lynx.Skin
 import com.undefined.lynx.npc.NPCManager.DEFAULT_NAME
 import com.undefined.lynx.npc.NPCManager.DEFAULT_SKIN
+import com.undefined.lynx.util.RunBlock
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
@@ -28,8 +29,11 @@ object NPCManager : Listener {
 
         Bukkit.getPluginManager().registerEvents(NPCListener(), LynxConfig.javaPlugin)
         NMSManager.nms.npc.onClick {
-            val id = this.entityID
-            spawnedNPC.filter { it.getEntityID() == id }.forEach { it.clickActions.forEach { it(this) } }
+            spawnedNPC.firstOrNull() { it.getEntityID() == this.entityID }?.let {
+                Bukkit.getScheduler().runTask(LynxConfig.javaPlugin, Runnable {
+                    for (run in it.clickActions) run(this)
+                })
+            }
         }
 
     }
@@ -46,14 +50,14 @@ object NPCManager : Listener {
         signature: String = DEFAULT_SKIN.signature,
         visibleTo: List<UUID>? = null,
         autoLoad: Boolean = true,
-        kotlinDSL: (NPC) -> Unit = {}
+        dsl: RunBlock<NPC> = RunBlock {}
     ): NPC {
         val serverPlayer = NMSManager.nms.npc.createServerPlayer(name, texture, signature)
         NMSManager.nms.npc.sendSpawnPacket(serverPlayer, location, visibleTo?.map { Bukkit.getPlayer(it) } ?: Bukkit.getOnlinePlayers().toList())
         val npc = NPC(serverPlayer, visibleTo?.toMutableList(), location)
         if (autoLoad) autoLoadNPCS.add(npc)
         spawnedNPC.add(npc)
-        kotlinDSL(npc)
+        dsl.run(npc)
         return npc
     }
 
@@ -65,8 +69,8 @@ object NPCManager : Listener {
         skin: Skin,
         visibleTo: List<UUID>? = null,
         autoLoad: Boolean = true,
-        kotlinDSL: (NPC) -> Unit = {}
-    ) = spawnNPC(location, name, skin.texture, skin.signature, visibleTo, autoLoad, kotlinDSL)
+        dsl: RunBlock<NPC> = RunBlock {}
+    ) = spawnNPC(location, name, skin.texture, skin.signature, visibleTo, autoLoad, dsl)
 
 }
 
@@ -77,15 +81,15 @@ fun Location.spawnNPC(
     signature: String = DEFAULT_SKIN.signature,
     visibleTo: List<UUID>? = null,
     autoLoad: Boolean = true,
-    kotlinDSL: (NPC) -> Unit = {}
-) = NPCManager.spawnNPC(this, name, texture, signature, visibleTo, autoLoad, kotlinDSL)
+    dsl: RunBlock<NPC> = RunBlock {}
+) = NPCManager.spawnNPC(this, name, texture, signature, visibleTo, autoLoad, dsl)
 
 fun Location.spawnNPC(
     name: String = DEFAULT_NAME,
     skin: Skin,
     visibleTo: List<UUID>? = null,
     autoLoad: Boolean = true,
-    kotlinDSL: (NPC) -> Unit = {}
-) = NPCManager.spawnNPC(this, name, skin, visibleTo, autoLoad, kotlinDSL)
+    dsl: RunBlock<NPC> = RunBlock {}
+) = NPCManager.spawnNPC(this, name, skin, visibleTo, autoLoad, dsl)
 
 fun World.getNPC(uuid: UUID): NPC? = NPCManager.spawnedNPC.filter { it.getUUID() == uuid }.getOrNull(0)

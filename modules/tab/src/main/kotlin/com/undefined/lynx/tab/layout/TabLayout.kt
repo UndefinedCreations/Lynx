@@ -11,12 +11,12 @@ import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 
 class TabLayout @JvmOverloads constructor(
-    async: Boolean = true,
     texture: String = DefaultTabSkin.SKIN.texture,
     sign: String = DefaultTabSkin.SKIN.signature,
     defaultText: String = "",
-    kotlinDSL: TabLayout.() -> Unit = {}
-): AbstractTabLayout(
+    async: Boolean = true,
+    block: RunBlock<TabLayout> = RunBlock {}
+) : AbstractTabLayout(
     async,
     texture,
     sign,
@@ -25,31 +25,14 @@ class TabLayout @JvmOverloads constructor(
 
     @JvmOverloads
     constructor(
-        async: Boolean = true,
-        skin: Skin = DefaultTabSkin.SKIN,
+        skin: Skin,
         defaultText: String = "",
-        kotlinDSL: TabLayout.() -> Unit = {}
-    ): this(async, skin.texture, skin.texture, defaultText.toJson(), kotlinDSL)
-
-    @JvmOverloads
-    constructor(
         async: Boolean = true,
-        skin: Skin = DefaultTabSkin.SKIN,
-        defaultText: String = "",
-        block: RunBlock<TabLayout>
-    ): this(async, skin.texture, skin.texture, defaultText.toJson(), { block.run(this) })
-
-    @JvmOverloads
-    constructor(
-        async: Boolean = true,
-        texture: String = DefaultTabSkin.SKIN.texture,
-        sign: String = DefaultTabSkin.SKIN.signature,
-        defaultText: String = "",
-        block: RunBlock<TabLayout>
-    ): this(async, texture, sign, defaultText) { block.run(this) }
+        block: RunBlock<TabLayout> = RunBlock {}
+    ) : this(skin.texture, skin.texture, defaultText.toJson(), async, block)
 
     init {
-        kotlinDSL()
+        block.run(this)
         TabLayoutManager.activeTabLayout.add(this)
     }
 
@@ -139,16 +122,16 @@ class TabLayout @JvmOverloads constructor(
 }
 
 fun tabLayout(
-    async: Boolean = true,
     texture: String = DefaultTabSkin.SKIN.texture,
     sign: String = DefaultTabSkin.SKIN.signature,
     defaultText: String = "",
+    async: Boolean = true,
     kotlinDSL: TabLayout.() -> Unit = {}
-) = TabLayout(async, texture, sign, defaultText, kotlinDSL)
+) = TabLayout( texture, sign, defaultText, async,kotlinDSL)
 
 fun tabLayout(
-    async: Boolean = true,
     skin: Skin = DefaultTabSkin.SKIN,
     defaultText: String = "",
+    async: Boolean = true,
     kotlinDSL: TabLayout.() -> Unit = {}
-) = tabLayout(async, skin.texture, skin.signature, defaultText, kotlinDSL)
+) = tabLayout(skin.texture, skin.signature, defaultText, async, kotlinDSL)
