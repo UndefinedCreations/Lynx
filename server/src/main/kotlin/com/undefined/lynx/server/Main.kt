@@ -3,6 +3,8 @@ package com.undefined.lynx.server
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.display.implementions.Interaction
 import com.undefined.lynx.display.implementions.TextDisplay
+import com.undefined.lynx.sidebar.sidebar.sidebar
+import com.undefined.lynx.util.miniMessage
 import com.undefined.stellar.StellarCommand
 import com.undefined.stellar.StellarConfig
 import org.bukkit.entity.Player
@@ -16,9 +18,10 @@ class Main : JavaPlugin() {
 
         StellarCommand("test")
             .addExecution<Player> {
-                Interaction(sender.location)
-                    .setHeight(1f)
-                    .sendMetaDataUpdate()
+                sidebar("Testing") {
+                    addDynamicPlayerLine("test") { "<red>test".miniMessage() }
+                    addViewer(sender)
+                }
 
             }.register()
 
