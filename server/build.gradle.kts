@@ -18,16 +18,20 @@ repositories {
         name = "undefined-releases"
         url = uri("https://repo.undefinedcreations.com/releases")
     }
+    maven { url = uri("https://repo.dmulloy2.net/repository/public/") }
 }
 
 dependencies {
     compileOnly(libs.spigot)
+
+    compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
 
     implementation("com.undefined:stellar:1.0.0")
 
     implementation(project(":"))
     implementation(project(":modules:tab"))
     implementation(project(":modules:display"))
+    implementation(project(":modules:protocol"))
 
     implementation("net.kyori:adventure-api:4.17.0")
     implementation("net.kyori:adventure-text-minimessage:4.17.0")

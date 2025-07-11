@@ -22,6 +22,7 @@ interface NMS {
     val scoreboard: Scoreboard
     val playerMeta: PlayerMeta
     val display: Display
+    val  protocol: Protocol
 
     interface ItemBuilder {
         fun setSkullTexture(skullMeta: SkullMeta, texture: String): SkullMeta
@@ -219,5 +220,8 @@ interface NMS {
             fun setHeight(display: Any, height: Float)
         }
 
+    }
+    interface Protocol {
+        var onJoin: (Pair<Player, Int>) -> Unit
     }
 }

@@ -30,4 +30,4 @@ fun <T : Any> Any.executePrivateMethod(name: String, vararg args: Any?): T =
 fun Class<*>.getPrivateMethod(name: String, vararg args: Class<*>): Method =
     getDeclaredMethod(name, *args).apply { this.isAccessible = true }
 
-fun Method.execute(instance: Any, vararg parameters: Any): Any = this(instance, *parameters)
+fun Method.execute(instance: Any?, vararg parameters: Any): Any = this(instance, *parameters)

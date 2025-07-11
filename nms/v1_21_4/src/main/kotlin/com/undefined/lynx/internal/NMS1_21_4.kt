@@ -2,25 +2,26 @@ package com.undefined.lynx.internal
 
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
-import com.mojang.datafixers.util.Pair
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.Skin
 import com.undefined.lynx.nms.ClickType
-import com.undefined.lynx.nms.NMS
 import com.undefined.lynx.nms.EntityInteract
+import com.undefined.lynx.nms.NMS
 import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.team.NameTagVisibility
 import com.undefined.lynx.util.execute
-import com.undefined.lynx.util.executePrivateMethod
 import com.undefined.lynx.util.getPrivateField
 import com.undefined.lynx.util.getPrivateMethod
 import com.undefined.lynx.util.setPrivateField
 import net.minecraft.ChatFormatting
 import net.minecraft.network.Connection
-import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.numbers.BlankFormat
 import net.minecraft.network.protocol.Packet
+import net.minecraft.network.protocol.common.ServerboundClientInformationPacket
+import net.minecraft.network.protocol.configuration.ServerboundFinishConfigurationPacket
+import net.minecraft.network.protocol.configuration.ServerboundSelectKnownPacks
 import net.minecraft.network.protocol.game.*
+import net.minecraft.network.protocol.handshake.ClientIntentionPacket
 import net.minecraft.network.syncher.EntityDataAccessor
 import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.server.MinecraftServer
@@ -32,29 +33,17 @@ import net.minecraft.server.network.CommonListenerCookie
 import net.minecraft.server.network.ServerCommonPacketListenerImpl
 import net.minecraft.server.network.ServerGamePacketListenerImpl
 import net.minecraft.util.Brightness
-import net.minecraft.world.entity.Display
-import net.minecraft.world.entity.Entity
-import net.minecraft.world.entity.EntityType
-import net.minecraft.world.entity.EquipmentSlot
-import net.minecraft.world.entity.Interaction
-import net.minecraft.world.entity.PositionMoveRotation
-import net.minecraft.world.entity.animal.Pig
+import net.minecraft.world.entity.*
 import net.minecraft.world.item.component.ResolvableProfile
 import net.minecraft.world.scores.Objective
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
 import net.minecraft.world.scores.criteria.ObjectiveCriteria
-import org.bukkit.Bukkit
-import org.bukkit.ChatColor
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.World
+import org.bukkit.*
 import org.bukkit.attribute.Attribute
 import org.bukkit.block.data.BlockData
 import org.bukkit.craftbukkit.v1_21_R3.CraftServer
 import org.bukkit.craftbukkit.v1_21_R3.CraftWorld
-import org.bukkit.craftbukkit.v1_21_R3.block.CraftBlock
-import org.bukkit.craftbukkit.v1_21_R3.block.CraftBlockStates
 import org.bukkit.craftbukkit.v1_21_R3.block.data.CraftBlockData
 import org.bukkit.craftbukkit.v1_21_R3.entity.CraftPlayer
 import org.bukkit.craftbukkit.v1_21_R3.inventory.CraftItemStack
@@ -64,11 +53,11 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerLoginEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.scoreboard.Scoreboard
-import org.bukkit.util.Transformation
 import org.joml.Quaternionf
 import org.joml.Vector3f
 import java.util.*
@@ -114,7 +103,7 @@ object NMS1_21_4: NMS, Listener {
     }
 
     @EventHandler
-    fun onJoin(event: PlayerJoinEvent) {
+    fun onJoin(event: PlayerLoginEvent) {
         startPacketListener(event.player)
     }
 
@@ -131,20 +120,31 @@ object NMS1_21_4: NMS, Listener {
         val pipeline = channel.pipeline()
         pipeline.addBefore("packet_handler", idMap[player.uniqueId].toString(), DuplexHandler(
             {
-                if (this is ServerboundInteractPacket) {
-                    val entityID = this.getPrivateField<Int>(ServerboundInteractPacket::class.java, MAPPING.ServerboundInteractPacket_ENTITYID)
-                    val action = this.getPrivateField<Any>(ServerboundInteractPacket::class.java, MAPPING.ServerboundInteractPacket_ACTION)
-                    val actionType = action::class.java.getPrivateMethod(MAPPING.ServerboundInteractionPacket_GET_TYPE).execute(action)
-                    when(actionType.toString()) {
-                        "ATTACK" -> for (run in clicks) run(EntityInteract(entityID, ClickType.LEFT, player))
-                        "INTERACT" -> {
-                            if (cooldownMap.contains(entityID)) {
-                                cooldownMap.remove(entityID)
-                                return@DuplexHandler
+                when(this) {
+                    is ServerboundInteractPacket -> {
+                        val entityID = this.getPrivateField<Int>(ServerboundInteractPacket::class.java, MAPPING.ServerboundInteractPacket_ENTITYID)
+                        val action = this.getPrivateField<Any>(ServerboundInteractPacket::class.java, MAPPING.ServerboundInteractPacket_ACTION)
+                        val actionType = action::class.java.getPrivateMethod(MAPPING.ServerboundInteractionPacket_GET_TYPE).execute(action)
+                        when(actionType.toString()) {
+                            "ATTACK" -> for (run in clicks) run(EntityInteract(entityID, ClickType.LEFT, player))
+                            "INTERACT" -> {
+                                if (cooldownMap.contains(entityID)) {
+                                    cooldownMap.remove(entityID)
+                                    return@DuplexHandler
+                                }
+                                cooldownMap.add(entityID)
+                                for (run in clicks) run(EntityInteract(entityID, ClickType.RIGHT, player))
                             }
-                            cooldownMap.add(entityID)
-                            for (run in clicks) run(EntityInteract(entityID, ClickType.RIGHT, player))
                         }
+                    }
+                    is ServerboundSelectKnownPacks -> {
+                        println(this.knownPacks)
+                    }
+                }
+            }, {
+                when (this) {
+                    is ServerboundSelectKnownPacks -> {
+                        println(this.knownPacks)
                     }
                 }
             }
@@ -161,6 +161,12 @@ object NMS1_21_4: NMS, Listener {
         idMap.remove(player.uniqueId)
     }
 
+
+    override val protocol: NMS.Protocol by lazy {
+        object : NMS.Protocol {
+            override var onJoin: (Pair<Player, Int>) -> Unit = {}
+        }
+    }
     override val itemBuilder: NMS.ItemBuilder by lazy {
         object : NMS.ItemBuilder {
             override fun setSkullTexture(skullMeta: SkullMeta, texture: String): SkullMeta {
@@ -375,7 +381,7 @@ object NMS1_21_4: NMS, Listener {
                 players.sendPackets(ClientboundSetEquipmentPacket(
                     serverPlayer.id,
                     mutableListOf(
-                        Pair(
+                        com.mojang.datafixers.util.Pair(
                             nmsSlot,
                             nmsItemServer
                         )

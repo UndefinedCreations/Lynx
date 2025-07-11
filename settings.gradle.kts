@@ -14,5 +14,6 @@ include(
     ":modules:sql",
     ":modules:scoreboard",
     ":modules:tab",
-    ":modules:display"
+    ":modules:display",
+    ":modules:protocol"
 )

@@ -1,13 +1,17 @@
 package com.undefined.lynx.server
 
+import com.comphenix.protocol.ProtocolLibrary
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.display.implementions.Interaction
 import com.undefined.lynx.display.implementions.TextDisplay
+import com.undefined.lynx.event.event
 import com.undefined.lynx.sidebar.sidebar.sidebar
 import com.undefined.lynx.util.miniMessage
 import com.undefined.stellar.StellarCommand
 import com.undefined.stellar.StellarConfig
 import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerLoginEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.java.JavaPlugin
 
 class Main : JavaPlugin() {
@@ -24,6 +28,8 @@ class Main : JavaPlugin() {
                 }
 
             }.register()
+
+
 
     }
 
