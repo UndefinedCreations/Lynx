@@ -1,8 +1,7 @@
 package com.undefined.lynx.server;
 
 import com.undefined.lynx.event.Events;
-import com.undefined.lynx.scheduler.Scheduler;
-import com.undefined.lynx.tab.TabLatency;
+import com.undefined.lynx.sidebar.sidebar.lines.UpdatableLine;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerJoinEvent;
 
@@ -14,6 +13,9 @@ public class Test {
         }, EventPriority.HIGH, true);
 
 
+        new UpdatableLine(() -> {
+            return "test";
+        });
 
 //        new ItemBuilder(Material.DIAMOND_CHESTPLATE)
 //                .meta(SkullMeta.class, meta -> {

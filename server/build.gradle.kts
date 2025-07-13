@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     java
     kotlin("jvm")
-    id("com.undefinedcreations.nova") version "0.0.5"
+    id("com.undefinedcreations.nova") version "0.0.8"
     id("com.gradleup.shadow")
 }
 
@@ -26,8 +26,7 @@ dependencies {
     implementation("com.undefined:stellar:1.0.0")
 
     implementation(project(":"))
-    implementation(project(":modules:tab"))
-    implementation(project(":modules:display"))
+
 
     implementation("net.kyori:adventure-api:4.17.0")
     implementation("net.kyori:adventure-text-minimessage:4.17.0")

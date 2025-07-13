@@ -17,7 +17,7 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 
 @Suppress("UNCHECKED_CAST")
-class ItemBuilder {
+open class ItemBuilder {
 
     private var dsl: RunBlock<ItemBuilder>
 
@@ -60,93 +60,93 @@ class ItemBuilder {
         setAmount(itemStack.amount)
     }
 
-    fun setName(name: Component): ItemBuilder = apply {
+    open fun setName(name: Component): ItemBuilder = apply {
         this.name = name.toLegacyText()
     }
-    fun setName(name: String): ItemBuilder = apply {
+    open fun setName(name: String): ItemBuilder = apply {
         this.name = "${ChatColor.RESET}$name"
     }
-    fun setLore(lore: List<Component>): ItemBuilder = apply {
+    open fun setLore(lore: List<Component>): ItemBuilder = apply {
         this.lore = lore.map { it.toLegacyText() }.toMutableList()
     }
-    fun setLore(vararg lore: Component) = setLore(lore.toList())
-    fun setStringLore(vararg lore: String) = setStringLore(lore.toList())
-    fun setStringLore(lore: List<String>) = apply {
+    open fun setLore(vararg lore: Component) = setLore(lore.toList())
+    open fun setStringLore(vararg lore: String) = setStringLore(lore.toList())
+    open fun setStringLore(lore: List<String>) = apply {
         this.lore = lore.toMutableList()
     }
-    fun addLore(vararg lore: Component): ItemBuilder = apply {
+    open fun addLore(vararg lore: Component): ItemBuilder = apply {
         this.lore.addAll(lore.map { it.toLegacyText() }.toList())
     }
-    fun addLore(vararg lore: String): ItemBuilder = apply {
+    open fun addLore(vararg lore: String): ItemBuilder = apply {
         this.lore.addAll(lore.toList())
     }
-    fun setAmount(amount: Int): ItemBuilder = apply {
+    open fun setAmount(amount: Int): ItemBuilder = apply {
         this.amount = amount
     }
-    fun addAmount(amount: Int): ItemBuilder = apply {
+    open fun addAmount(amount: Int): ItemBuilder = apply {
         this.amount += amount
     }
-    fun setCustomModelData(customModelData: Int): ItemBuilder = apply {
+    open fun setCustomModelData(customModelData: Int): ItemBuilder = apply {
         this.customModelData = customModelData
     }
-    fun <P, C : Any> addPersistentData(key: NamespacedKey, persistentDataType: PersistentDataType<P, C>, value: C): ItemBuilder = apply {
+    open fun <P, C : Any> addPersistentData(key: NamespacedKey, persistentDataType: PersistentDataType<P, C>, value: C): ItemBuilder = apply {
         this.persistentDataContainers[key] = PDCInfo(persistentDataType, value)
     }
-    fun addEnchantment(enchantment: Enchantment, level: Int = 1): ItemBuilder = apply {
+    open fun addEnchantment(enchantment: Enchantment, level: Int = 1): ItemBuilder = apply {
         this.enchantments[enchantment] = level
     }
-    fun setEnchantments(enchantments: HashMap<Enchantment, Int>): ItemBuilder = apply {
+    open fun setEnchantments(enchantments: HashMap<Enchantment, Int>): ItemBuilder = apply {
         this.enchantments = enchantments
     }
-    fun setUnbreakable(unbreakable: Boolean): ItemBuilder = apply {
+    open fun setUnbreakable(unbreakable: Boolean): ItemBuilder = apply {
         this.unbreakable = unbreakable
     }
-    fun addFlag(flag: ItemFlag): ItemBuilder = apply {
+    open fun addFlag(flag: ItemFlag): ItemBuilder = apply {
         this.flags.add(flag)
     }
-    fun addFlags(vararg flag: ItemFlag): ItemBuilder = apply {
+    open fun addFlags(vararg flag: ItemFlag): ItemBuilder = apply {
         this.flags.addAll(flag)
     }
-    fun addFlags(flag: List<ItemFlag>): ItemBuilder = apply {
+    open fun addFlags(flag: List<ItemFlag>): ItemBuilder = apply {
         this.flags.addAll(flag)
     }
-    fun setFlags(flags: List<ItemFlag>): ItemBuilder = apply {
+    open fun setFlags(flags: List<ItemFlag>): ItemBuilder = apply {
         this.flags = flags.toMutableList()
     }
-    fun addAttributeModifier(attribute: Attribute, modifier: AttributeModifier): ItemBuilder = apply {
+    open fun addAttributeModifier(attribute: Attribute, modifier: AttributeModifier): ItemBuilder = apply {
         this.attributeModifiers[attribute] = modifier
     }
-    fun addAttributeModifiers(attributeModifiers: HashMap<Attribute, AttributeModifier>): ItemBuilder = apply {
+    open fun addAttributeModifiers(attributeModifiers: HashMap<Attribute, AttributeModifier>): ItemBuilder = apply {
         for ((attribute, modifier) in attributeModifiers) this.attributeModifiers[attribute] = modifier
     }
-    fun setAttributeModifiers(attributeModifiers: HashMap<Attribute, AttributeModifier>): ItemBuilder = apply {
+    open fun setAttributeModifiers(attributeModifiers: HashMap<Attribute, AttributeModifier>): ItemBuilder = apply {
         this.attributeModifiers = attributeModifiers
     }
-    fun hideTooltips(hideToolTips: Boolean): ItemBuilder = apply {
+    open fun hideTooltips(hideToolTips: Boolean): ItemBuilder = apply {
         this.hideToolTips = hideToolTips
     }
-    fun setMaxStackSize(maxStackSize: Int): ItemBuilder {
+    open fun setMaxStackSize(maxStackSize: Int): ItemBuilder {
         this.maxStackSize = maxStackSize
         return this
     }
-    fun setItemRarity(itemRarity: ItemRarity): ItemBuilder = apply {
+    open fun setItemRarity(itemRarity: ItemRarity): ItemBuilder = apply {
         this.itemRarity = itemRarity
     }
-    fun setDamage(damage: Int) = apply {
+    open fun setDamage(damage: Int) = apply {
         this.damage = damage
     }
-    fun setMaxDamage(maxDamage: Int) = apply {
+    open fun setMaxDamage(maxDamage: Int) = apply {
         this.maxDamage = maxDamage
     }
 
-     fun <T : ItemMeta> meta(consumer: (T) -> Unit) = apply {
+    open fun <T : ItemMeta> meta(consumer: (T) -> Unit) = apply {
          (getItemMeta(bukkitMeta!!) as T).let {
              bukkitMeta = it
              consumer(it)
          }
      }
 
-    fun <T : ItemMeta> meta(clazz: Class<T>, consumer: RunBlock<T>) = apply {
+    open fun <T : ItemMeta> meta(clazz: Class<T>, consumer: RunBlock<T>) = apply {
         (getItemMeta(bukkitMeta!!) as T).let {
             bukkitMeta = it
             consumer.run(bukkitMeta!! as T)

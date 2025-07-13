@@ -4,122 +4,122 @@ import com.undefined.lynx.NMSManager
 import com.undefined.lynx.adventure.toJson
 import com.undefined.lynx.adventure.toLegacyText
 import com.undefined.lynx.sidebar.ScoreboardManager
-import com.undefined.lynx.sidebar.checkAsyncAndApply
-import com.undefined.lynx.sidebar.sidebar.line.PlayerLine
-import com.undefined.lynx.sidebar.sidebar.line.PlayerTimerLine
-import com.undefined.lynx.sidebar.sidebar.line.TeamLine
-import com.undefined.lynx.sidebar.sidebar.line.TimerLine
+import com.undefined.lynx.sidebar.order
+import com.undefined.lynx.sidebar.sidebar.lines.BasicLine
+import com.undefined.lynx.sidebar.sidebar.lines.Line
+import com.undefined.lynx.sidebar.sidebar.lines.UpdatableLine
+import com.undefined.lynx.sidebar.sidebar.lines.UpdatablePlayerLine
+import com.undefined.lynx.sidebar.sidebar.lines.UpdatablePlayerTimerLine
+import com.undefined.lynx.sidebar.sidebar.lines.UpdatableTimerLine
+import com.undefined.lynx.util.ReturnBlock
 import com.undefined.lynx.util.RunBlock
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
-import org.bukkit.block.sign.Side
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Scoreboard
 
 @Suppress("UNUSED")
 class Sidebar @JvmOverloads constructor(
     title: String,
-    scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
+    internal val scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
     block: RunBlock<Sidebar> = RunBlock {}
-): AbstractSideBar(title, scoreboard) {
+) {
+
+    internal val players: MutableList<Player> = mutableListOf()
+    internal val objective = NMSManager.nms.scoreboard.createObjective(scoreboard, title.toJson())
+
+    internal val lines: MutableList<BasicLine> = mutableListOf()
 
     @JvmOverloads constructor(title: Component, scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard, block: RunBlock<Sidebar> = RunBlock {}): this(title.toLegacyText(), scoreboard, block)
-
 
     init {
         block.run(this)
         ScoreboardManager.activeSidebars.add(this)
     }
 
-    @JvmOverloads
-    fun updateDynamicLines(async: Boolean = false) = checkAsyncAndApply(async) {
-        lines.filterIsInstance<TeamLine>().forEach { NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(it.sideBarTeam.team, players) }
+    fun setTitle(title: String) {
+        NMSManager.nms.scoreboard.setTitle(objective, title.toJson())
+        NMSManager.nms.scoreboard.sendClientboundSetObjectivePacket(objective, 2, players)
     }
-    fun setTitle(title: String) = apply { setTitleJson(title.toJson()) }
-    fun setTitle(title: Component) = apply { setTitleJson(title.toJson()) }
-    fun addBlankLine() = addEmptyLine()
-    fun addEmptyLine() = addLine(Component.empty())
-    fun addLine(line: Component) = apply { addLineWithJson(line.toJson()) }
-    fun addLine(line: String) = apply { addLineWithJson(line.toJson()) }
-    fun removeLine(line: Component) = apply { removeLineJson(line.toJson()) }
-    fun removeLine(line: String) = apply { removeLineJson(line.toJson()) }
-    fun removeDynamicLine(id: Any) = apply {
-        lines.filterIsInstance<TeamLine>().firstOrNull { it.sideBarTeam.id == id }?.run {
-            NMSManager.nms.scoreboard.sendClientboundResetScorePacket(this.order, objective, players)
-            lines.remove(this)
-            if (this is TimerLine) this.task?.cancel()
-        }
-    }
-    fun addStringDynamicPlayerLine(id: Any, run: Player.() -> String) = addDynamicPlayerLineJson(id) { run(this).toJson() }
-    fun addDynamicPlayerLine(id: Any, run: Player.() -> Component) = apply { addDynamicPlayerLineJson(id) { run(this).toJson() } }
-    fun modifyStringDynamicPlayerLine(id: Any, run: Player.() -> String) = apply { modifyDynamicPlayerLineJson(id) { run(this).toJson() } }
-    fun modifyDynamicPlayerLine(id: Any, run: Player.() -> Component) = apply { modifyDynamicPlayerLineJson(id) { run(this).toJson() } }
-    fun updateStringDynamicPlayerLine(id: Any) = updateDynamicPlayerLine(id, players)
-    fun updateDynamicPlayerLine(id: Any, vararg player: Player) = updateDynamicPlayerLine(id, player.toList())
-    fun updateDynamicPlayerLine(id: Any, toUpdate: List<Player>) = apply {
-        lines.filterIsInstance<PlayerLine>().firstOrNull { it.sideBarTeam.id == id }?.let { line ->
-            for (player in toUpdate.filter { this.players.contains(it) }) for (player in players) updateTeamPrefix(line.sideBarTeam.team, line.run(player), listOf(player))
-        }
-    }
-    fun addStringDynamicLine(id: Any, line: String) = apply { addDynamicLineJson(id, line.toJson()) }
-    fun addDynamicLine(id: Any, line: Component) = apply { addDynamicLineJson(id, line.toJson()) }
-    @JvmOverloads
-    fun modifyStringDynamicLine(id: Any, line: String, update: Boolean = true) = apply { modifyDynamicLineJson(id, line.toJson(), update) }
-    @JvmOverloads
-    fun modifyDynamicLine(id: Any, line: Component, update: Boolean = true) = apply { modifyDynamicLineJson(id, line.toJson(), update) }
-    @JvmOverloads
-    fun addStringDynamicTimerLine(id: Any, ticks: Int = updateTimerTick, async: Boolean = true, run: () -> String) = apply { addDynamicTimerLineJson(id, ticks, async) { run().toJson() } }
-    @JvmOverloads
-    fun addDynamicTimerLine(id: Any, ticks: Int = updateTimerTick, async: Boolean = true, run: () -> Component) = apply { addDynamicTimerLineJson(id, ticks, async) { run().toJson() } }
-    fun modifyStringDynamicTimerLine(id: Any, run: () -> String) = apply { modifyDynamicTimerLineJson(id) { run().toJson() } }
-    fun modifyDynamicTimerLine(id: Any, run: () -> Component) = apply { modifyDynamicTimerLineJson(id) { run().toJson() } }
-    @JvmOverloads
-    fun addStringDynamicPlayerTimerLine(id: Any, ticks: Int = updateTimerTick, async: Boolean = false, run: Player.() -> String) = apply { addDynamicPlayerTimerLineJson(id, ticks, async) { run(this).toJson() } }
-    @JvmOverloads
-    fun addDynamicPlayerTimerLine(id: Any, ticks: Int = updateTimerTick, async: Boolean = false, run: Player.() -> Component) = apply { addDynamicPlayerTimerLineJson(id, ticks, async) { run(this).toJson() } }
-    fun modifyDynamicPlayerTimerLine(id: Any, run: Player.() -> Component) = apply { modifyDynamicPlayerTimerLineJson(id) { run(this).toJson() } }
-    fun modifyStringDynamicPlayerTimerLine(id: Any, run: Player.() -> String) = apply { modifyDynamicPlayerTimerLineJson(id) { run(this).toJson() } }
-    fun updateTimerTick(ticks: Int) = apply { updateTimerTick = ticks }
-    fun addViewer(player: Player) = addViewers(listOf(player))
-    fun addViewers(list: List<Player>) {
-        val list = list.filter { !players.contains(it) }
-        list.forEach { player -> ScoreboardManager.activeSidebars.firstOrNull { it.players.contains(player) }?.run { this.removeViewer(player) } }
-        NMSManager.nms.scoreboard.sendClientboundSetObjectivePacket(objective, 0, list)
-        NMSManager.nms.scoreboard.sendClientboundSetDisplayObjectivePacket(objective, list)
 
-        for (line in lines) {
-            when (line) {
-                is PlayerTimerLine -> for (player in players) updateTeamPrefix(line.sideBarTeam.team, line.run(player), listOf(player))
-                is PlayerLine -> for (player in players) updateTeamPrefix(line.sideBarTeam.team, line.run(player), listOf(player))
-                is TeamLine -> NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(line.sideBarTeam.team, players)
-            }
-            NMSManager.nms.scoreboard.sendSetScorePacket(line.order, line.text.toJson(), objective, 0, list)
-        }
-        players.addAll(list)
+    fun setTitle(title: Component) {
+        NMSManager.nms.scoreboard.setTitle(objective, title.toJson())
+        NMSManager.nms.scoreboard.sendClientboundSetObjectivePacket(objective, 2, players)
     }
+
+    fun addEmptyLine() = apply { addLine(Line("")) }
+    fun addBlankLine() = addEmptyLine()
+
+    fun addLine(line: BasicLine) = apply {
+        if (lines.size >= 15) return@apply
+        line.setUpLine(this)
+        lines.add(line)
+    }
+
+    fun addUpdatableLine(run: () -> String) = UpdatableLine(run).apply { addLine(this) }
+    fun addComponentUpdatableLine(run: () -> Component) = UpdatableLine().apply {
+        setComponentUpdatable(run)
+        addLine(this)
+    }
+    fun addUpdatablePlayerLine(run: ReturnBlock<Player, String>) = UpdatablePlayerLine(run).apply { addLine(this) }
+    fun addComponentUpdatablePlayerLine(run: ReturnBlock<Player, Component>) = UpdatablePlayerLine().apply {
+        setComponentUpdatable(run)
+        addLine(this)
+    }
+    @JvmOverloads
+    fun addUpdatablePlayerTimerLine(
+        ticks: Int,
+        async: Boolean = false,
+        run: ReturnBlock<Player, String>
+    ) = UpdatablePlayerTimerLine(ticks, async, run).apply { addLine(this) }
+    @JvmOverloads
+    fun addComponentUpdatablePlayerTimerLine(
+        ticks: Int,
+        async: Boolean = false,
+        run: ReturnBlock<Player, Component>
+    ) = UpdatablePlayerTimerLine(ticks, async).apply {
+        setComponentUpdatable(run)
+        addLine(this)
+    }
+    @JvmOverloads
+    fun addUpdatableTimerLine(
+        ticks: Int,
+        async: Boolean = false,
+        run: () -> String
+    ) = UpdatableTimerLine(ticks, async, run).apply { addLine(this) }
+    @JvmOverloads
+    fun addComponentUpdatableTimerLine(
+        ticks: Int,
+        async: Boolean = false,
+        run: () -> Component
+    ) = UpdatableTimerLine(ticks, async).apply {
+        setComponentUpdatable(run)
+        addLine(this)
+    }
+
+    fun addViewers(playerList: List<Player>) = apply {
+        players.addAll(playerList)
+        NMSManager.nms.scoreboard.sendClientboundSetObjectivePacket(objective, 0, playerList)
+        NMSManager.nms.scoreboard.sendClientboundSetDisplayObjectivePacket(objective, playerList)
+        for (line in lines) line.addPlayers(playerList)
+    }
+
+    fun addViewer(player: Player) = addViewers(listOf(player))
+
     fun removeViewer(player: Player) = removeViewers(listOf(player))
-    fun removeViewers(list: List<Player>) = apply {
-        NMSManager.nms.scoreboard.sendClientboundSetObjectivePacket(objective, 1, list)
-        lines.filterIsInstance<TeamLine>().forEach { NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketRemove(it.sideBarTeam.team, list) }
-        players.removeAll(list)
+
+    fun removeViewers(playerList: List<Player>) = apply {
+        NMSManager.nms.scoreboard.sendClientboundSetObjectivePacket(objective, 1, playerList)
+        for (line in lines) line.removePlayers(playerList)
+        players.removeAll(playerList)
     }
-    fun remove() = apply {
-        for (line in lines) {
-            when(line) {
-                is TeamLine -> removeDynamicLine(line.sideBarTeam.id)
-                else -> removeLine(line.text)
-            }
-        }
+
+    fun clear() = apply {
+        removeViewers(players)
         lines.clear()
-        removeViewers(players)
-        ScoreboardManager.activeSidebars.remove(this)
     }
-    fun resend() = apply {
-        val active = mutableListOf<Player>()
-        active.addAll(players)
-        removeViewers(players)
-        addViewers(active)
-    }
+
+    internal fun nextOrderId(): String = order(lines.size + 1)
 }
 
 fun sidebar(
