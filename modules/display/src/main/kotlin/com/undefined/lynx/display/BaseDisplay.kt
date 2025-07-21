@@ -20,7 +20,7 @@ abstract class BaseDisplay(
     internal var clicks: MutableList<RunBlock<EntityInteract>> = mutableListOf()
 
     init {
-        NMSManager.nms.display.setLocation(display, location)
+        NMSManager.nms.display.setEntityLocation(display, location)
         serverEntity = NMSManager.nms.display.createServerEntity(display, location.world!!)
         NMSManager.nms.display.sendClientboundAddEntityPacket(display, serverEntity, players().toList())
         DisplayManager.activeDisplay.add(this)
@@ -61,8 +61,8 @@ abstract class BaseDisplay(
     }
 
     fun teleport(location: Location) = apply {
-        NMSManager.nms.display.setLocation(display, location)
-        NMSManager.nms.npc.sendTeleportPacket(display, location, players().toList())
+        NMSManager.nms.display.setEntityLocation(display, location)
+        NMSManager.nms.npc.sendTeleportPacket(display, players().toList())
         this.location = location
     }
 

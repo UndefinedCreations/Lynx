@@ -61,7 +61,6 @@ interface NMS {
     }
     interface NPC {
         fun createServerPlayer(name: String, texture: String, signature: String): Any
-        fun setEntityPostion(serverPlayer: Any, location: Location)
         fun sendClientboundPlayerInfoUpdatePacketAddPlayer(serverPlayer: Any, players: List<Player>)
         fun sendClientboundSetEntityDataPacket(serverPlayer: Any, players: List<Player>)
         fun getName(serverPlayer: Any): String
@@ -69,7 +68,7 @@ interface NMS {
         fun setItem(serverPlayer: Any, slot: Int, itemStack: ItemStack?, players: List<Player>)
         fun getUUID(serverPlayer: Any): UUID
         fun getID(serverPlayer: Any): Int
-        fun sendTeleportPacket(serverPlayer: Any, location: Location, players: List<Player>)
+        fun sendTeleportPacket(serverPlayer: Any, players: List<Player>)
         fun setScale(serverPlayer: Any, scale: Double)
         fun sendUpdateAttributesPacket(serverPlayer: Any, players: List<Player>)
         fun setPos(serverPlayer: Any, pose: Pose)
@@ -185,7 +184,7 @@ interface NMS {
 
     }
     interface Display {
-        fun setLocation(display: Any, location: Location)
+        fun setEntityLocation(display: Any, location: Location)
         fun createServerEntity(display: Any, world: World): Any
         fun sendClientboundAddEntityPacket(display: Any, serverEntity: Any, players: List<Player>)
         fun setScale(display: Any, vector3f: Vector3f)

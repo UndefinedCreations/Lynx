@@ -11,7 +11,6 @@ include(
     ":server",
     ":core",
     ":common",
-    ":nms:v1_21_4",
     ":modules:items",
     ":modules:nick",
     ":modules:npc",
@@ -21,5 +20,7 @@ include(
     ":modules:sql",
     ":modules:scoreboard",
     ":modules:tab",
-    ":modules:display"
+    ":modules:display",
+    ":nms:v1_21_4",
+    ":nms:v1_21_5"
 )

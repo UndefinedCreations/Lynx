@@ -29,6 +29,7 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.network.CommonListenerCookie
 import net.minecraft.server.network.ServerGamePacketListenerImpl
+import net.minecraft.server.network.ServerPlayerConnection
 import net.minecraft.util.Brightness
 import net.minecraft.world.entity.*
 import net.minecraft.world.item.component.ResolvableProfile
@@ -39,13 +40,13 @@ import net.minecraft.world.scores.criteria.ObjectiveCriteria
 import org.bukkit.*
 import org.bukkit.attribute.Attribute
 import org.bukkit.block.data.BlockData
-import org.bukkit.craftbukkit.v1_21_R3.CraftServer
-import org.bukkit.craftbukkit.v1_21_R3.CraftWorld
-import org.bukkit.craftbukkit.v1_21_R3.block.data.CraftBlockData
-import org.bukkit.craftbukkit.v1_21_R3.entity.CraftPlayer
-import org.bukkit.craftbukkit.v1_21_R3.inventory.CraftItemStack
-import org.bukkit.craftbukkit.v1_21_R3.scoreboard.CraftScoreboard
-import org.bukkit.craftbukkit.v1_21_R3.util.CraftChatMessage
+import org.bukkit.craftbukkit.v1_21_R4.CraftServer
+import org.bukkit.craftbukkit.v1_21_R4.CraftWorld
+import org.bukkit.craftbukkit.v1_21_R4.block.data.CraftBlockData
+import org.bukkit.craftbukkit.v1_21_R4.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_21_R4.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_21_R4.scoreboard.CraftScoreboard
+import org.bukkit.craftbukkit.v1_21_R4.util.CraftChatMessage
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -60,7 +61,7 @@ import java.net.SocketAddress
 import java.util.*
 
 @Suppress("NAME_SHADOWING")
-object NMS1_21_4: NMS, Listener {
+object NMS1_21_5: NMS, Listener {
 
     private var idMap: HashMap<UUID, UUID> = hashMapOf()
     private var cooldownMap: MutableList<Int> = mutableListOf()
@@ -85,15 +86,15 @@ object NMS1_21_4: NMS, Listener {
     private fun startPacketListener(player: Player) {
         idMap[player.uniqueId] = UUID.randomUUID()
         val serverPlayer = player.serverPlayer()
-        val connection = Mapping1_21_4.connection.get(serverPlayer.connection) as Connection
+        val connection = Mapping1_21_5.connection.get(serverPlayer.connection) as Connection
         val channel = connection.channel
         val pipeline = channel.pipeline()
         pipeline.addBefore("packet_handler", idMap[player.uniqueId].toString(), DuplexHandler(
             {
                 if (this is ServerboundInteractPacket) {
-                    val entityID = Mapping1_21_4.serverBoundInteractPacketEntityId.get(this) as Int
-                    val action = Mapping1_21_4.serverBoundInteractPacketAction.get(this)
-                    val actionType = action::class.java.getPrivateMethod(Mapping1_21_4.ServerboundInteractionPacket_GET_TYPE)
+                    val entityID = Mapping1_21_5.serverBoundInteractPacketEntityId.get(this) as Int
+                    val action = Mapping1_21_5.serverBoundInteractPacketAction.get(this)
+                    val actionType = action::class.java.getPrivateMethod(Mapping1_21_5.ServerboundInteractionPacket_GET_TYPE)
                         .invoke(action)
                     when (actionType.toString()) {
                         "ATTACK" -> for (run in clicks) run(EntityInteract(entityID, ClickType.LEFT, player))
@@ -113,7 +114,7 @@ object NMS1_21_4: NMS, Listener {
 
     private fun endPacketListener(player: Player) {
         val serverPlayer = player.serverPlayer()
-        val connection = Mapping1_21_4.connection.get(serverPlayer.connection) as Connection
+        val connection = Mapping1_21_5.connection.get(serverPlayer.connection) as Connection
         val channel = connection.channel
         channel.eventLoop().submit {
             channel.pipeline().remove(idMap[player.uniqueId].toString())
@@ -230,7 +231,7 @@ object NMS1_21_4: NMS, Listener {
 
             override fun setLatency(player: Any, latency: Int) {
                 val serverPlayer = player as? ServerPlayer ?: return
-                Mapping1_21_4.latency.set(serverPlayer.connection, latency)
+                Mapping1_21_5.latency.set(serverPlayer.connection, latency)
             }
         }
     }
@@ -386,7 +387,7 @@ object NMS1_21_4: NMS, Listener {
                 pose: Pose
             ) {
                 val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
-                serverPlayer.entityData.set(Mapping1_21_4.DATA_POSE, net.minecraft.world.entity.Pose.entries.first { it.id() == pose.nmsId })
+                serverPlayer.entityData.set(Mapping1_21_5.DATA_POSE, net.minecraft.world.entity.Pose.entries.first { it.id() == pose.nmsId })
             }
 
             override fun setGravity(
@@ -394,7 +395,7 @@ object NMS1_21_4: NMS, Listener {
                 gravity: Boolean
             ) {
                 val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
-                serverPlayer.entityData.set(Mapping1_21_4.DATA_NO_GRAVITY, gravity)
+                serverPlayer.entityData.set(Mapping1_21_5.DATA_NO_GRAVITY, gravity)
             }
 
             override fun sendClientboundMoveEntityPacketPosRot(
@@ -502,12 +503,12 @@ object NMS1_21_4: NMS, Listener {
 
             override fun setTeamPrefix(team: Any, prefix: String) {
                 val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
-                Mapping1_21_4.teamSetPrefix.set(team, CraftChatMessage.fromJSONOrNull(prefix))
+                Mapping1_21_5.teamSetPrefix.set(team, CraftChatMessage.fromJSONOrNull(prefix))
             }
 
             override fun setTeamSuffix(team: Any, suffix: String) {
                 val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
-                Mapping1_21_4.teamSetSuffix.set(team, CraftChatMessage.fromJSONOrNull(suffix))
+                Mapping1_21_5.teamSetSuffix.set(team, CraftChatMessage.fromJSONOrNull(suffix))
             }
 
             override fun setTeamSeeFriendlyInvisibles(team: Any, canSee: Boolean) {
@@ -522,7 +523,7 @@ object NMS1_21_4: NMS, Listener {
 
             override fun setTeamCollisionRule(team: Any, rule: CollisionRule) {
                 val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
-                team.collisionRule = Team.CollisionRule.byName(rule.name)
+                team.collisionRule = Team.CollisionRule.entries.first { rule.nmsId == it.id }
             }
 
             override fun setTeamColor(team: Any, color: ChatColor) {
@@ -569,12 +570,20 @@ object NMS1_21_4: NMS, Listener {
             override fun setEntityLocation(display: Any, location: Location) {
                 val display = display as? Entity ?: throw IllegalArgumentException("Class passed was not an Display Entity")
                 display.setPos(location.x, location.y, location.z)
-                Mapping1_21_4.entitySetRot.invoke(display, location.yaw, location.pitch)
+                Mapping1_21_5.entitySetRot.invoke(display, location.yaw, location.pitch)
             }
 
             override fun createServerEntity(display: Any, world: World): Any {
                 val display = display as? Entity ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                return ServerEntity((world as CraftWorld).handle, display, 0, false, {}, mutableSetOf())
+                return ServerEntity(
+                    (world as CraftWorld).handle,
+                    display,
+                    0,
+                    false,
+                    {},
+                    { packet, uuidList -> },
+                    mutableSetOf<ServerPlayerConnection>()
+                )
             }
 
             override fun sendClientboundAddEntityPacket(
@@ -589,19 +598,19 @@ object NMS1_21_4: NMS, Listener {
 
             override fun setScale(display: Any, vector3f: Vector3f) {
                 val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.entityData.set(Mapping1_21_4.DISPLAY_MAPPING.DATA_SCALE_ID, vector3f)
+                display.entityData.set(Mapping1_21_5.DISPLAY_MAPPING.DATA_SCALE_ID, vector3f)
             }
             override fun setLeftRotation(display: Any, quaternionf: Quaternionf) {
                 val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.entityData.set(Mapping1_21_4.DISPLAY_MAPPING.DATA_LEFT_ROTATION_ID, quaternionf)
+                display.entityData.set(Mapping1_21_5.DISPLAY_MAPPING.DATA_LEFT_ROTATION_ID, quaternionf)
             }
             override fun setRightRotation(display: Any, quaternionf: Quaternionf) {
                 val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.entityData.set(Mapping1_21_4.DISPLAY_MAPPING.DATA_RIGHT_ROTATION_ID, quaternionf)
+                display.entityData.set(Mapping1_21_5.DISPLAY_MAPPING.DATA_RIGHT_ROTATION_ID, quaternionf)
             }
             override fun setTranslation(display: Any, vector3f: Vector3f) {
                 val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.entityData.set(Mapping1_21_4.DISPLAY_MAPPING.DATA_TRANSLATION_ID, vector3f)
+                display.entityData.set(Mapping1_21_5.DISPLAY_MAPPING.DATA_TRANSLATION_ID, vector3f)
             }
             override fun setInterpolationDuration(display: Any, duration: Int) {
                 val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
@@ -617,7 +626,7 @@ object NMS1_21_4: NMS, Listener {
             }
             override fun setBillboardRender(display: Any, byte: Byte) {
                 val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.entityData.set(Mapping1_21_4.DISPLAY_MAPPING.DATA_BILLBOARD_RENDER_CONSTRAINTS_ID, byte)
+                display.entityData.set(Mapping1_21_5.DISPLAY_MAPPING.DATA_BILLBOARD_RENDER_CONSTRAINTS_ID, byte)
             }
             override fun setBrightnessOverride(display: Any, int: Int) {
                 val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")

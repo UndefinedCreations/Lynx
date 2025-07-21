@@ -54,7 +54,7 @@ object NPCManager : Listener {
         dsl: RunBlock<NPC> = RunBlock {}
     ): NPC {
         val serverPlayer = NMSManager.nms.npc.createServerPlayer(name, texture, signature)
-        NMSManager.nms.npc.setEntityPostion(serverPlayer, location)
+        NMSManager.nms.display.setEntityLocation(serverPlayer, location)
         val serverEntity = NMSManager.nms.display.createServerEntity(serverPlayer, location.world!!)
         val team = NMSManager.nms.scoreboard.createTeam(Bukkit.getScoreboardManager()!!.mainScoreboard, UUID.randomUUID().toString())
         NMSManager.nms.scoreboard.addTeamEntry(team, name)

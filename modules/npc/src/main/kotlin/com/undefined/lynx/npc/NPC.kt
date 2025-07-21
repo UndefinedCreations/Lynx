@@ -86,7 +86,8 @@ open class NPC(
     fun removeViewer(player: Player) = removeViewers(listOf(player))
 
     fun teleport(location: Location, players: List<Player> = players()) = apply {
-        NMSManager.nms.npc.sendTeleportPacket(serverPlayer, location, players)
+        NMSManager.nms.display.setEntityLocation(serverPlayer, location)
+        NMSManager.nms.npc.sendTeleportPacket(serverPlayer, players)
         this.location = location
     }
 
