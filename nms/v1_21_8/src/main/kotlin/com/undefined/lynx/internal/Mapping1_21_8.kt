@@ -26,15 +26,15 @@ object Mapping1_21_8 {
     val teamSetPrefix: Field = PlayerTeam::class.java.getDeclaredField("g").apply { isAccessible = true }
     val teamSetSuffix: Field = PlayerTeam::class.java.getDeclaredField("h").apply { isAccessible = true }
 
-    val DATA_POSE = getAccessor<Pose>(Entity::class.java, "aq")
-    val DATA_NO_GRAVITY = getAccessor<Boolean>(Entity::class.java, "aR")
+    val DATA_POSE = getAccessor<Pose>(Entity::class.java, "aD")
+    val DATA_NO_GRAVITY = getAccessor<Boolean>(Entity::class.java, "bo")
 
     object DISPLAY_MAPPING {
         val DATA_TRANSLATION_ID = getAccessor<Vector3f>(Display::class.java, "s")
         val DATA_SCALE_ID = getAccessor<Vector3f>(Display::class.java, "t")
         val DATA_LEFT_ROTATION_ID = getAccessor<Quaternionf>(Display::class.java, "u")
-        val DATA_RIGHT_ROTATION_ID = getAccessor<Quaternionf>(Display::class.java, "ay")
-        val DATA_BILLBOARD_RENDER_CONSTRAINTS_ID = getAccessor<Byte>(Display::class.java, "az")
+        val DATA_RIGHT_ROTATION_ID = getAccessor<Quaternionf>(Display::class.java, "aM")
+        val DATA_BILLBOARD_RENDER_CONSTRAINTS_ID = getAccessor<Byte>(Display::class.java, "aN")
 
 
     }

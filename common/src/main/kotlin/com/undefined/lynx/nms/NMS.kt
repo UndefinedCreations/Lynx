@@ -34,8 +34,6 @@ interface NMS {
         fun sendClientboundPlayerInfoAddPacket(player: Any, players: List<Player>)
         fun sendClientboundPlayerInfoUpdateListedPacket(player: Any, players: List<Player>)
 
-        fun setServerPlayerOrder(player: Any, order: Int)
-
         fun sendClientboundPlayerInfoRemovePacket(player: List<Player>, players: List<Player>) = sendClientboundPlayerInfoRemovePacketList(player.map { it.uniqueId }, players)
         fun sendClientboundPlayerInfoAddPacketPlayer(player: Player, players: List<Player>)
         fun sendClientboundPlayerInfoUpdateListedPacketPlayer(player: Player, players: List<Player>)

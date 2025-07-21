@@ -179,11 +179,6 @@ object NMS1_21_8: NMS, Listener {
                 )
             )
 
-            override fun setServerPlayerOrder(player: Any, order: Int) {
-                val serverPlayer = player as? ServerPlayer ?: return
-                serverPlayer.listOrder = order
-            }
-
             override fun sendClientboundPlayerInfoUpdateListedPacketPlayer(
                 player: Player,
                 players: List<Player>

@@ -12,8 +12,7 @@ import org.joml.Vector3f
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 
-
-object Mapping1_21_5 {
+object Mapping1_21_1 {
 
     val connection: Field = ServerCommonPacketListenerImpl::class.java.getDeclaredField("e").apply { isAccessible = true }
     val latency: Field = ServerCommonPacketListenerImpl::class.java.getDeclaredField("o").apply { isAccessible = true }
@@ -27,7 +26,7 @@ object Mapping1_21_5 {
     val teamSetSuffix: Field = PlayerTeam::class.java.getDeclaredField("h").apply { isAccessible = true }
 
     val DATA_POSE = getAccessor<Pose>(Entity::class.java, "aq")
-    val DATA_NO_GRAVITY = getAccessor<Boolean>(Entity::class.java, "aU")
+    val DATA_NO_GRAVITY = getAccessor<Boolean>(Entity::class.java, "aR")
 
     object DISPLAY_MAPPING {
         val DATA_TRANSLATION_ID = getAccessor<Vector3f>(Display::class.java, "s")

@@ -1,6 +1,7 @@
 package com.undefined.lynx
 
 import com.undefined.lynx.exception.UnsupportedVersionException
+import com.undefined.lynx.internal.NMS1_21_1
 import com.undefined.lynx.internal.NMS1_21_3
 import com.undefined.lynx.internal.NMS1_21_4
 import com.undefined.lynx.internal.NMS1_21_5
@@ -13,6 +14,8 @@ object NMSManager {
     val nms: NMS by lazy { versions[version]?.let { it() } ?: throw UnsupportedVersionException(versions.keys) }
     private val version by lazy { Bukkit.getBukkitVersion().split("-")[0] }
     private val versions: Map<String, () -> NMS> = mapOf(
+        "1.21" to { NMS1_21_1 },
+        "1.21.1" to { NMS1_21_1 },
         "1.21.2" to { NMS1_21_3 },
         "1.21.3" to { NMS1_21_3 },
         "1.21.4" to { NMS1_21_4 },
