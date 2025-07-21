@@ -9,6 +9,7 @@ import com.undefined.lynx.util.RunBlock
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
+import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 import java.util.*
 
@@ -48,13 +49,15 @@ object NPCManager : Listener {
         name: String = DEFAULT_NAME,
         texture: String = DEFAULT_SKIN.texture,
         signature: String = DEFAULT_SKIN.signature,
-        visibleTo: List<UUID>? = null,
+        visibleTo: List<Player>? = null,
         autoLoad: Boolean = true,
         dsl: RunBlock<NPC> = RunBlock {}
     ): NPC {
         val serverPlayer = NMSManager.nms.npc.createServerPlayer(name, texture, signature)
-        NMSManager.nms.npc.sendSpawnPacket(serverPlayer, location, visibleTo?.map { Bukkit.getPlayer(it) } ?: Bukkit.getOnlinePlayers().toList())
-        val npc = NPC(serverPlayer, visibleTo?.toMutableList(), location)
+        val team = NMSManager.nms.scoreboard.createTeam(Bukkit.getScoreboardManager()!!.mainScoreboard, UUID.randomUUID().toString())
+        val players = visibleTo ?: Bukkit.getOnlinePlayers().toList()
+        val npc = NPC(serverPlayer, team, visibleTo?.toMutableList(), location)
+        npc.addViewers(players)
         if (autoLoad) autoLoadNPCS.add(npc)
         spawnedNPC.add(npc)
         dsl.run(npc)
@@ -67,7 +70,7 @@ object NPCManager : Listener {
         location: Location,
         name: String = DEFAULT_NAME,
         skin: Skin,
-        visibleTo: List<UUID>? = null,
+        visibleTo: List<Player>? = null,
         autoLoad: Boolean = true,
         dsl: RunBlock<NPC> = RunBlock {}
     ) = spawnNPC(location, name, skin.texture, skin.signature, visibleTo, autoLoad, dsl)
@@ -79,7 +82,7 @@ fun Location.spawnNPC(
     name: String = DEFAULT_NAME,
     texture: String = DEFAULT_SKIN.texture,
     signature: String = DEFAULT_SKIN.signature,
-    visibleTo: List<UUID>? = null,
+    visibleTo: List<Player>? = null,
     autoLoad: Boolean = true,
     dsl: RunBlock<NPC> = RunBlock {}
 ) = NPCManager.spawnNPC(this, name, texture, signature, visibleTo, autoLoad, dsl)
@@ -87,7 +90,7 @@ fun Location.spawnNPC(
 fun Location.spawnNPC(
     name: String = DEFAULT_NAME,
     skin: Skin,
-    visibleTo: List<UUID>? = null,
+    visibleTo: List<Player>? = null,
     autoLoad: Boolean = true,
     dsl: RunBlock<NPC> = RunBlock {}
 ) = NPCManager.spawnNPC(this, name, skin, visibleTo, autoLoad, dsl)

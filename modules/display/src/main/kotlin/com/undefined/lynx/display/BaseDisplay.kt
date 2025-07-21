@@ -38,7 +38,7 @@ abstract class BaseDisplay(
 
     fun addViewers(players: List<Player>) = apply {
         NMSManager.nms.display.spawn(display, serverEntity, players)
-        NMSManager.nms.display.updateAllEntityData(display, players)
+        NMSManager.nms.display.updateEntityData(display, players)
         visibleTo?.addAll(players)
     }
 
@@ -62,13 +62,13 @@ abstract class BaseDisplay(
 
     fun teleport(location: Location) = apply {
         NMSManager.nms.display.setLocation(display, location)
-        NMSManager.nms.npc.sendTeleportPacket(display, location, players().map { it.uniqueId })
+        NMSManager.nms.npc.sendTeleportPacket(display, location, players().toList())
         this.location = location
     }
 
     @JvmOverloads
     fun sendMetaDataUpdate(players: List<Player> = players().toList()) = apply {
-        NMSManager.nms.display.updateAllEntityData(display, players)
+        NMSManager.nms.display.updateEntityData(display, players)
     }
 
     private fun players() = visibleTo ?: Bukkit.getOnlinePlayers()

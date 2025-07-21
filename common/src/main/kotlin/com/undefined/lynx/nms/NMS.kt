@@ -1,6 +1,7 @@
 package com.undefined.lynx.nms
 
 import com.undefined.lynx.Skin
+import com.undefined.lynx.npc.Pose
 import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.team.NameTagVisibility
 import org.bukkit.ChatColor
@@ -63,13 +64,30 @@ interface NMS {
         fun getName(serverPlayer: Any): String
         fun sendSpawnPacket(serverPlayer: Any, location: Location, player: List<Player>)
         fun onClick(consumer: EntityInteract.() -> Unit)
-        fun setItem(serverPlayer: Any, slot: Int, itemStack: ItemStack?, players: List<UUID>)
-        fun sendRemovePacket(serverPlayer: Any, player: List<UUID>)
+        fun setItem(serverPlayer: Any, slot: Int, itemStack: ItemStack?, players: List<Player>)
+        fun sendRemovePacket(serverPlayer: Any, players: List<Player>)
         fun getUUID(serverPlayer: Any): UUID
         fun getID(serverPlayer: Any): Int
-        fun sendTeleportPacket(serverPlayer: Any, location: Location, players: List<UUID>)
+        fun sendTeleportPacket(serverPlayer: Any, location: Location, players: List<Player>)
         fun setScale(serverPlayer: Any, scale: Double)
-        fun sendUpdateAttributesPacket(serverPlayer: Any, players: List<UUID>)
+        fun sendUpdateAttributesPacket(serverPlayer: Any, players: List<Player>)
+        fun setPos(serverPlayer: Any, pose: Pose)
+        fun setGravity(serverPlayer: Any, gravity: Boolean)
+        fun sendClientboundMoveEntityPacketPosRot(
+            serverPlayer: Any,
+            deltaX: Short,
+            deltaY: Short,
+            deltaZ: Short,
+            deltaYaw: Byte,
+            deltaPitch: Byte,
+            onGround: Boolean,
+            players: List<Player>
+        )
+        fun sendClientboundRotationPacket(
+            serverPlayer: Any,
+            deltaYaw: Byte,
+            players: List<Player>
+        )
     }
     interface Scoreboard {
 
@@ -183,7 +201,7 @@ interface NMS {
         fun setShadowStrength(display: Any, shadowStrength: Float)
         fun setWidth(display: Any, width: Float)
         fun setHeight(display: Any, height: Float)
-        fun updateAllEntityData(display: Any, players: List<Player>)
+        fun updateEntityData(display: Any, players: List<Player>)
         fun removeEntityPacket(display: Any, players: List<Player>)
 
         val textDisplay: TextDisplay

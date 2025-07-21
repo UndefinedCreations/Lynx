@@ -16,7 +16,7 @@ class NPCListener : Listener {
     fun playerWorldChangeEvent(event: PlayerChangedWorldEvent) {
         val world = event.player.world
         Bukkit.getScheduler().runTaskAsynchronously(LynxConfig.javaPlugin, Runnable {
-            for (npc in autoLoadNPCS.filter { it.visibleTo?.contains(event.player.uniqueId) ?: true }.filter { world == it.location.world }.toList()) {
+            for (npc in autoLoadNPCS.filter { it.visibleTo?.contains(event.player) ?: true }.filter { world == it.location.world }.toList()) {
                 NMSManager.nms.npc.sendSpawnPacket(npc.serverPlayer, npc.location, listOf(event.player))
                 npc.resentItems(listOf(event.player))
             }

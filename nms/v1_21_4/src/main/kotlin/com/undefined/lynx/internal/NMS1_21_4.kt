@@ -9,16 +9,15 @@ import com.undefined.lynx.nms.ClickType
 import com.undefined.lynx.nms.DuplexHandler
 import com.undefined.lynx.nms.NMS
 import com.undefined.lynx.nms.EntityInteract
+import com.undefined.lynx.npc.Pose
 import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.team.NameTagVisibility
 import com.undefined.lynx.util.execute
-import com.undefined.lynx.util.executePrivateMethod
 import com.undefined.lynx.util.getPrivateField
 import com.undefined.lynx.util.getPrivateMethod
 import com.undefined.lynx.util.setPrivateField
 import net.minecraft.ChatFormatting
 import net.minecraft.network.Connection
-import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.numbers.BlankFormat
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
@@ -39,7 +38,6 @@ import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.entity.Interaction
 import net.minecraft.world.entity.PositionMoveRotation
-import net.minecraft.world.entity.animal.Pig
 import net.minecraft.world.item.component.ResolvableProfile
 import net.minecraft.world.scores.Objective
 import net.minecraft.world.scores.PlayerTeam
@@ -54,8 +52,6 @@ import org.bukkit.attribute.Attribute
 import org.bukkit.block.data.BlockData
 import org.bukkit.craftbukkit.v1_21_R3.CraftServer
 import org.bukkit.craftbukkit.v1_21_R3.CraftWorld
-import org.bukkit.craftbukkit.v1_21_R3.block.CraftBlock
-import org.bukkit.craftbukkit.v1_21_R3.block.CraftBlockStates
 import org.bukkit.craftbukkit.v1_21_R3.block.data.CraftBlockData
 import org.bukkit.craftbukkit.v1_21_R3.entity.CraftPlayer
 import org.bukkit.craftbukkit.v1_21_R3.inventory.CraftItemStack
@@ -69,7 +65,6 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.scoreboard.Scoreboard
-import org.bukkit.util.Transformation
 import org.joml.Quaternionf
 import org.joml.Vector3f
 import java.util.*
@@ -100,20 +95,14 @@ object NMS1_21_4: NMS, Listener {
     private fun startPacketListener(player: Player) {
         idMap[player.uniqueId] = UUID.randomUUID()
         val serverPlayer = player.serverPlayer()
-        val connection = serverPlayer.connection.getPrivateField<Connection>(ServerCommonPacketListenerImpl::class.java, Mapping1_21_4.CONNECTION)
+        val connection = Mapping1_21_4.connection.get(serverPlayer.connection) as Connection
         val channel = connection.channel
         val pipeline = channel.pipeline()
         pipeline.addBefore("packet_handler", idMap[player.uniqueId].toString(), DuplexHandler(
             {
                 if (this is ServerboundInteractPacket) {
-                    val entityID = this.getPrivateField<Int>(
-                        ServerboundInteractPacket::class.java,
-                        Mapping1_21_4.ServerboundInteractPacket_ENTITYID
-                    )
-                    val action = this.getPrivateField<Any>(
-                        ServerboundInteractPacket::class.java,
-                        Mapping1_21_4.ServerboundInteractPacket_ACTION
-                    )
+                    val entityID = Mapping1_21_4.serverBoundInteractPacketEntityId.get(this) as Int
+                    val action = Mapping1_21_4.serverBoundInteractPacketAction.get(this)
                     val actionType = action::class.java.getPrivateMethod(Mapping1_21_4.ServerboundInteractionPacket_GET_TYPE)
                         .execute(action)
                     when (actionType.toString()) {
@@ -134,7 +123,7 @@ object NMS1_21_4: NMS, Listener {
 
     private fun endPacketListener(player: Player) {
         val serverPlayer = player.serverPlayer()
-        val connection = serverPlayer.connection.getPrivateField<Connection>(ServerCommonPacketListenerImpl::class.java, Mapping1_21_4.CONNECTION)
+        val connection = Mapping1_21_4.connection.get(serverPlayer.connection) as Connection
         val channel = connection.channel
         channel.eventLoop().submit {
             channel.pipeline().remove(idMap[player.uniqueId].toString())
@@ -251,10 +240,7 @@ object NMS1_21_4: NMS, Listener {
 
             override fun setLatency(player: Any, latency: Int) {
                 val serverPlayer = player as? ServerPlayer ?: return
-                ServerCommonPacketListenerImpl::class.java.getDeclaredField(Mapping1_21_4.LATENCY).run {
-                    isAccessible = true
-                    set(serverPlayer.connection, latency)
-                }
+                Mapping1_21_4.latency.set(serverPlayer.connection, latency)
             }
         }
     }
@@ -348,35 +334,32 @@ object NMS1_21_4: NMS, Listener {
                 clicks.add(consumer)
             }
 
-            override fun setItem(serverPlayer: Any, slot: Int, itemStack: ItemStack?, players: List<UUID>) {
+            override fun setItem(serverPlayer: Any, slot: Int, itemStack: ItemStack?, players: List<Player>) {
                 val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
-                val itemStack = itemStack ?: ItemStack(Material.AIR)
-                val nmsItemServer = CraftItemStack.asNMSCopy(itemStack)
-                val nmsSlot = EquipmentSlot.entries.filter { it.id == slot }.getOrNull(0) ?: return
                 players.sendPackets(ClientboundSetEquipmentPacket(
                     serverPlayer.id,
                     mutableListOf(
                         Pair(
-                            nmsSlot,
-                            nmsItemServer
+                            EquipmentSlot.entries.filter { it.id == slot }.getOrNull(0),
+                            CraftItemStack.asNMSCopy(itemStack ?: ItemStack(Material.AIR))
                         )
                     )
                 ))
             }
 
-            override fun sendRemovePacket(serverPlayer: Any, player: List<UUID>) {
+            override fun sendRemovePacket(serverPlayer: Any, players: List<Player>) {
                 val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
-                player.sendPackets(ClientboundRemoveEntitiesPacket(serverPlayer.id))
+                players.sendPackets(ClientboundRemoveEntitiesPacket(serverPlayer.id))
             }
 
             override fun getUUID(serverPlayer: Any): UUID = (serverPlayer as Entity).uuid
 
             override fun getID(serverPlayer: Any): Int = (serverPlayer as Entity).id
 
-            override fun sendTeleportPacket(serverPlayer: Any, location: Location, players: List<UUID>) {
+            override fun sendTeleportPacket(serverPlayer: Any, location: Location, players: List<Player>) {
                 val serverPlayer = serverPlayer as? Entity ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
                 serverPlayer.setPos(location.x, location.y, location.z)
-                Entity::class.java.getPrivateMethod(Mapping1_21_4.SET_ROT, Float::class.java, Float::class.java).invoke(location.yaw, location.pitch)
+                Mapping1_21_4.entitySetRot.execute(serverPlayer, location.yaw, location.pitch)
                 players.sendPackets(ClientboundTeleportEntityPacket(
                     serverPlayer.id,
                     PositionMoveRotation.of(serverPlayer),
@@ -392,10 +375,59 @@ object NMS1_21_4: NMS, Listener {
 
             override fun sendUpdateAttributesPacket(
                 serverPlayer: Any,
-                players: List<UUID>
+                players: List<Player>
             ) {
                 val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
                 players.sendPackets(ClientboundUpdateAttributesPacket(serverPlayer.id, serverPlayer.attributes.attributesToUpdate))
+            }
+
+            override fun setPos(
+                serverPlayer: Any,
+                pose: Pose
+            ) {
+                val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
+                serverPlayer.entityData.set(Mapping1_21_4.DATA_POSE, net.minecraft.world.entity.Pose.entries.first { it.id() == pose.nmsId })
+            }
+
+            override fun setGravity(
+                serverPlayer: Any,
+                gravity: Boolean
+            ) {
+                val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
+                serverPlayer.entityData.set(Mapping1_21_4.DATA_NO_GRAVITY, gravity)
+            }
+
+            override fun sendClientboundMoveEntityPacketPosRot(
+                serverPlayer: Any,
+                deltaX: Short,
+                deltaY: Short,
+                deltaZ: Short,
+                deltaYaw: Byte,
+                deltaPitch: Byte,
+                onGround: Boolean,
+                players: List<Player>
+            ) {
+                val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
+                players.sendPackets(
+                    ClientboundMoveEntityPacket.PosRot(
+                        serverPlayer.id,
+                        deltaX,
+                        deltaY,
+                        deltaZ,
+                        deltaYaw,
+                        deltaPitch,
+                        onGround
+                    )
+                )
+            }
+
+            override fun sendClientboundRotationPacket(
+                serverPlayer: Any,
+                deltaYaw: Byte,
+                players: List<Player>
+            ) {
+                val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
+                players.sendPackets(ClientboundRotateHeadPacket(serverPlayer, deltaYaw))
             }
 
             private fun getServer(): MinecraftServer = (Bukkit.getServer() as CraftServer).server
@@ -470,12 +502,12 @@ object NMS1_21_4: NMS, Listener {
 
             override fun setTeamPrefix(team: Any, prefix: String) {
                 val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
-                team.setPrivateField(Mapping1_21_4.SET_PREFIX, CraftChatMessage.fromJSONOrNull(prefix))
+                Mapping1_21_4.teamSetPrefix.set(team, CraftChatMessage.fromJSONOrNull(prefix))
             }
 
             override fun setTeamSuffix(team: Any, suffix: String) {
                 val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
-                team.setPrivateField(Mapping1_21_4.SET_SUFFIX, CraftChatMessage.fromJSONOrNull(suffix))
+                Mapping1_21_4.teamSetSuffix.set(team, CraftChatMessage.fromJSONOrNull(suffix))
             }
 
             override fun setTeamSeeFriendlyInvisibles(team: Any, canSee: Boolean) {
@@ -537,7 +569,7 @@ object NMS1_21_4: NMS, Listener {
             override fun setLocation(display: Any, location: Location) {
                 val display = display as? Entity ?: throw IllegalArgumentException("Class passed was not an Display Entity")
                 display.setPos(location.x, location.y, location.z)
-                Entity::class.java.getPrivateMethod(Mapping1_21_4.SET_ROT, Float::class.java, Float::class.java).invoke(display, location.yaw, location.pitch)
+                Mapping1_21_4.entitySetRot.execute(display, location.yaw, location.pitch)
             }
 
             override fun createServerEntity(display: Any, world: World): Any {
@@ -611,7 +643,7 @@ object NMS1_21_4: NMS, Listener {
                 val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
                 display.height = height
             }
-            override fun updateAllEntityData(display: Any, players: List<Player>) {
+            override fun updateEntityData(display: Any, players: List<Player>) {
                 val display = display as? Entity ?: throw IllegalArgumentException("Class passed was not an Display Entity")
                 val pack = display.entityData.packDirty() ?: return
                 players.sendPackets(ClientboundSetEntityDataPacket(display.id, pack))
