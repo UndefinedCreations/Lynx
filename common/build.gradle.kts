@@ -5,4 +5,5 @@ plugins {
 
 dependencies {
     compileOnly(libs.spigot)
+    compileOnly("io.netty:netty-all:4.1.94.Final")
 }

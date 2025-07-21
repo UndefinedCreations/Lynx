@@ -6,6 +6,7 @@ import com.mojang.datafixers.util.Pair
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.Skin
 import com.undefined.lynx.nms.ClickType
+import com.undefined.lynx.nms.DuplexHandler
 import com.undefined.lynx.nms.NMS
 import com.undefined.lynx.nms.EntityInteract
 import com.undefined.lynx.team.CollisionRule
@@ -76,33 +77,6 @@ import java.util.*
 @Suppress("NAME_SHADOWING")
 object NMS1_21_4: NMS, Listener {
 
-    object MAPPING {
-        const val CONNECTION = "e"
-        const val LATENCY = "o"
-        const val ServerboundInteractPacket_ENTITYID = "b"
-        const val ServerboundInteractPacket_ACTION = "c"
-        const val ServerboundInteractionPacket_GET_TYPE = "a"
-        const val SET_ROT = "b"
-
-        const val SET_PREFIX = "g"
-        const val SET_SUFFIX = "h"
-    }
-
-    object DISPLAY_MAPPING {
-        val DATA_TRANSLATION_ID = getAccessor<Vector3f>("s")
-        val DATA_SCALE_ID = getAccessor<Vector3f>("t")
-        val DATA_LEFT_ROTATION_ID = getAccessor<Quaternionf>("u")
-        val DATA_RIGHT_ROTATION_ID = getAccessor<Quaternionf>("ay")
-        val DATA_BILLBOARD_RENDER_CONSTRAINTS_ID = getAccessor<Byte>("az")
-
-        fun <T> getAccessor(string: String): EntityDataAccessor<T> {
-            return Display::class.java.getDeclaredField(string).let {
-                it.isAccessible = true
-                return@let it.get(null) as EntityDataAccessor<T>
-            }
-        }
-    }
-
     private var idMap: HashMap<UUID, UUID> = hashMapOf()
     private var cooldownMap: MutableList<Int> = mutableListOf()
 
@@ -126,16 +100,23 @@ object NMS1_21_4: NMS, Listener {
     private fun startPacketListener(player: Player) {
         idMap[player.uniqueId] = UUID.randomUUID()
         val serverPlayer = player.serverPlayer()
-        val connection = serverPlayer.connection.getPrivateField<Connection>(ServerCommonPacketListenerImpl::class.java, MAPPING.CONNECTION)
+        val connection = serverPlayer.connection.getPrivateField<Connection>(ServerCommonPacketListenerImpl::class.java, Mapping1_21_4.CONNECTION)
         val channel = connection.channel
         val pipeline = channel.pipeline()
         pipeline.addBefore("packet_handler", idMap[player.uniqueId].toString(), DuplexHandler(
             {
                 if (this is ServerboundInteractPacket) {
-                    val entityID = this.getPrivateField<Int>(ServerboundInteractPacket::class.java, MAPPING.ServerboundInteractPacket_ENTITYID)
-                    val action = this.getPrivateField<Any>(ServerboundInteractPacket::class.java, MAPPING.ServerboundInteractPacket_ACTION)
-                    val actionType = action::class.java.getPrivateMethod(MAPPING.ServerboundInteractionPacket_GET_TYPE).execute(action)
-                    when(actionType.toString()) {
+                    val entityID = this.getPrivateField<Int>(
+                        ServerboundInteractPacket::class.java,
+                        Mapping1_21_4.ServerboundInteractPacket_ENTITYID
+                    )
+                    val action = this.getPrivateField<Any>(
+                        ServerboundInteractPacket::class.java,
+                        Mapping1_21_4.ServerboundInteractPacket_ACTION
+                    )
+                    val actionType = action::class.java.getPrivateMethod(Mapping1_21_4.ServerboundInteractionPacket_GET_TYPE)
+                        .execute(action)
+                    when (actionType.toString()) {
                         "ATTACK" -> for (run in clicks) run(EntityInteract(entityID, ClickType.LEFT, player))
                         "INTERACT" -> {
                             if (cooldownMap.contains(entityID)) {
@@ -153,7 +134,7 @@ object NMS1_21_4: NMS, Listener {
 
     private fun endPacketListener(player: Player) {
         val serverPlayer = player.serverPlayer()
-        val connection = serverPlayer.connection.getPrivateField<Connection>(ServerCommonPacketListenerImpl::class.java, MAPPING.CONNECTION)
+        val connection = serverPlayer.connection.getPrivateField<Connection>(ServerCommonPacketListenerImpl::class.java, Mapping1_21_4.CONNECTION)
         val channel = connection.channel
         channel.eventLoop().submit {
             channel.pipeline().remove(idMap[player.uniqueId].toString())
@@ -270,7 +251,7 @@ object NMS1_21_4: NMS, Listener {
 
             override fun setLatency(player: Any, latency: Int) {
                 val serverPlayer = player as? ServerPlayer ?: return
-                ServerCommonPacketListenerImpl::class.java.getDeclaredField(MAPPING.LATENCY).run {
+                ServerCommonPacketListenerImpl::class.java.getDeclaredField(Mapping1_21_4.LATENCY).run {
                     isAccessible = true
                     set(serverPlayer.connection, latency)
                 }
@@ -395,7 +376,7 @@ object NMS1_21_4: NMS, Listener {
             override fun sendTeleportPacket(serverPlayer: Any, location: Location, players: List<UUID>) {
                 val serverPlayer = serverPlayer as? Entity ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
                 serverPlayer.setPos(location.x, location.y, location.z)
-                Entity::class.java.getPrivateMethod(MAPPING.SET_ROT, Float::class.java, Float::class.java).invoke(location.yaw, location.pitch)
+                Entity::class.java.getPrivateMethod(Mapping1_21_4.SET_ROT, Float::class.java, Float::class.java).invoke(location.yaw, location.pitch)
                 players.sendPackets(ClientboundTeleportEntityPacket(
                     serverPlayer.id,
                     PositionMoveRotation.of(serverPlayer),
@@ -489,12 +470,12 @@ object NMS1_21_4: NMS, Listener {
 
             override fun setTeamPrefix(team: Any, prefix: String) {
                 val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
-                team.setPrivateField(MAPPING.SET_PREFIX, CraftChatMessage.fromJSONOrNull(prefix))
+                team.setPrivateField(Mapping1_21_4.SET_PREFIX, CraftChatMessage.fromJSONOrNull(prefix))
             }
 
             override fun setTeamSuffix(team: Any, suffix: String) {
                 val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
-                team.setPrivateField(MAPPING.SET_SUFFIX, CraftChatMessage.fromJSONOrNull(suffix))
+                team.setPrivateField(Mapping1_21_4.SET_SUFFIX, CraftChatMessage.fromJSONOrNull(suffix))
             }
 
             override fun setTeamSeeFriendlyInvisibles(team: Any, canSee: Boolean) {
@@ -556,7 +537,7 @@ object NMS1_21_4: NMS, Listener {
             override fun setLocation(display: Any, location: Location) {
                 val display = display as? Entity ?: throw IllegalArgumentException("Class passed was not an Display Entity")
                 display.setPos(location.x, location.y, location.z)
-                Entity::class.java.getPrivateMethod(MAPPING.SET_ROT, Float::class.java, Float::class.java).invoke(display, location.yaw, location.pitch)
+                Entity::class.java.getPrivateMethod(Mapping1_21_4.SET_ROT, Float::class.java, Float::class.java).invoke(display, location.yaw, location.pitch)
             }
 
             override fun createServerEntity(display: Any, world: World): Any {
@@ -576,19 +557,19 @@ object NMS1_21_4: NMS, Listener {
 
             override fun setScale(display: Any, vector3f: Vector3f) {
                 val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.entityData.set(DISPLAY_MAPPING.DATA_SCALE_ID, vector3f)
+                display.entityData.set(Mapping1_21_4.DISPLAY_MAPPING.DATA_SCALE_ID, vector3f)
             }
             override fun setLeftRotation(display: Any, quaternionf: Quaternionf) {
                 val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.entityData.set(DISPLAY_MAPPING.DATA_LEFT_ROTATION_ID, quaternionf)
+                display.entityData.set(Mapping1_21_4.DISPLAY_MAPPING.DATA_LEFT_ROTATION_ID, quaternionf)
             }
             override fun setRightRotation(display: Any, quaternionf: Quaternionf) {
                 val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.entityData.set(DISPLAY_MAPPING.DATA_RIGHT_ROTATION_ID, quaternionf)
+                display.entityData.set(Mapping1_21_4.DISPLAY_MAPPING.DATA_RIGHT_ROTATION_ID, quaternionf)
             }
             override fun setTranslation(display: Any, vector3f: Vector3f) {
                 val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.entityData.set(DISPLAY_MAPPING.DATA_TRANSLATION_ID, vector3f)
+                display.entityData.set(Mapping1_21_4.DISPLAY_MAPPING.DATA_TRANSLATION_ID, vector3f)
             }
             override fun setInterpolationDuration(display: Any, duration: Int) {
                 val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
@@ -604,7 +585,7 @@ object NMS1_21_4: NMS, Listener {
             }
             override fun setBillboardRender(display: Any, byte: Byte) {
                 val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.entityData.set(DISPLAY_MAPPING.DATA_BILLBOARD_RENDER_CONSTRAINTS_ID, byte)
+                display.entityData.set(Mapping1_21_4.DISPLAY_MAPPING.DATA_BILLBOARD_RENDER_CONSTRAINTS_ID, byte)
             }
             override fun setBrightnessOverride(display: Any, int: Int) {
                 val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")

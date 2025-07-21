@@ -1,6 +1,12 @@
-package com.undefined.lynx.internal
+package com.undefined.lynx.nms
 
-import io.netty.channel.*
+import io.netty.channel.AbstractChannel
+import io.netty.channel.Channel
+import io.netty.channel.ChannelConfig
+import io.netty.channel.ChannelMetadata
+import io.netty.channel.ChannelOutboundBuffer
+import io.netty.channel.DefaultChannelConfig
+import io.netty.channel.EventLoop
 import java.net.SocketAddress
 
 class EmptyChannel(channel: Channel?): AbstractChannel(channel) {
@@ -8,7 +14,7 @@ class EmptyChannel(channel: Channel?): AbstractChannel(channel) {
     private val config: ChannelConfig = DefaultChannelConfig(this)
 
     override fun config(): ChannelConfig {
-        config.setAutoRead(true)
+        config.isAutoRead = true
         return config
     }
 
