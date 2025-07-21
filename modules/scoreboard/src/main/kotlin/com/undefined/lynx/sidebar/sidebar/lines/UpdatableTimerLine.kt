@@ -6,7 +6,6 @@ import com.undefined.lynx.adventure.toJson
 import com.undefined.lynx.sidebar.sidebar.interfaces.TimerLine
 import com.undefined.lynx.util.toMiniMessageOrDefault
 import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
 import org.bukkit.scheduler.BukkitRunnable
 
 class UpdatableTimerLine @JvmOverloads constructor(

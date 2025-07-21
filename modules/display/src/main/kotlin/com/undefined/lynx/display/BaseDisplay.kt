@@ -6,7 +6,7 @@ import com.undefined.lynx.util.RunBlock
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
-import java.util.UUID
+import java.util.*
 
 abstract class BaseDisplay(
     val display: Any,

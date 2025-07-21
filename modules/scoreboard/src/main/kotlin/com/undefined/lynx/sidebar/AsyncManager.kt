@@ -1,7 +1,5 @@
 package com.undefined.lynx.sidebar
 
-import com.undefined.lynx.LynxConfig
-import org.bukkit.Bukkit
 import java.util.concurrent.CompletableFuture
 
 internal inline fun <T> T.checkAsyncAndApply(async: Boolean, crossinline block: T.() -> Unit): T = apply {

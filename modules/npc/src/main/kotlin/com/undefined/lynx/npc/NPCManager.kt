@@ -3,7 +3,6 @@ package com.undefined.lynx.npc
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.Skin
-import com.undefined.lynx.nms.NMS
 import com.undefined.lynx.npc.NPCManager.DEFAULT_NAME
 import com.undefined.lynx.npc.NPCManager.DEFAULT_SKIN
 import com.undefined.lynx.util.RunBlock

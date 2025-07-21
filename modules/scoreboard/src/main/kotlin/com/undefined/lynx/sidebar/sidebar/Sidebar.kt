@@ -5,12 +5,7 @@ import com.undefined.lynx.adventure.toJson
 import com.undefined.lynx.adventure.toLegacyText
 import com.undefined.lynx.sidebar.ScoreboardManager
 import com.undefined.lynx.sidebar.order
-import com.undefined.lynx.sidebar.sidebar.lines.BasicLine
-import com.undefined.lynx.sidebar.sidebar.lines.Line
-import com.undefined.lynx.sidebar.sidebar.lines.UpdatableLine
-import com.undefined.lynx.sidebar.sidebar.lines.UpdatablePlayerLine
-import com.undefined.lynx.sidebar.sidebar.lines.UpdatablePlayerTimerLine
-import com.undefined.lynx.sidebar.sidebar.lines.UpdatableTimerLine
+import com.undefined.lynx.sidebar.sidebar.lines.*
 import com.undefined.lynx.util.ReturnBlock
 import com.undefined.lynx.util.RunBlock
 import net.kyori.adventure.text.Component
