@@ -1,5 +1,6 @@
 package com.undefined.lynx.internal
 
+import com.undefined.lynx.nms.EmptyChannel
 import net.minecraft.network.Connection
 import net.minecraft.network.PacketSendListener
 import net.minecraft.network.protocol.Packet

@@ -517,7 +517,7 @@ object NMS1_21_4: NMS, Listener {
 
             override fun setTeamNameTagVisibility(team: Any, visible: NameTagVisibility) {
                 val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
-                team.nameTagVisibility = Team.Visibility.byName(visible.name)
+                team.nameTagVisibility = Team.Visibility.entries.first { it.id == visible.nmsId }
             }
 
             override fun setTeamCollisionRule(team: Any, rule: CollisionRule) {

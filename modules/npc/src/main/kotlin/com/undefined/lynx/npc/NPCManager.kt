@@ -55,6 +55,7 @@ object NPCManager : Listener {
     ): NPC {
         val serverPlayer = NMSManager.nms.npc.createServerPlayer(name, texture, signature)
         val team = NMSManager.nms.scoreboard.createTeam(Bukkit.getScoreboardManager()!!.mainScoreboard, UUID.randomUUID().toString())
+        NMSManager.nms.scoreboard.addTeamEntry(team, name)
         val players = visibleTo ?: Bukkit.getOnlinePlayers().toList()
         val npc = NPC(serverPlayer, team, visibleTo?.toMutableList(), location)
         npc.addViewers(players)

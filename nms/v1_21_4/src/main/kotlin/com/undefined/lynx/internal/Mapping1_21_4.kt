@@ -25,21 +25,21 @@ object Mapping1_21_4 {
     val teamSetPrefix: Field = PlayerTeam::class.java.getDeclaredField("g").apply { isAccessible = true }
     val teamSetSuffix: Field = PlayerTeam::class.java.getDeclaredField("h").apply { isAccessible = true }
 
-    val DATA_POSE = getAccessor<Pose>("aq")
-    val DATA_NO_GRAVITY = getAccessor<Boolean>("aR")
+    val DATA_POSE = getAccessor<Pose>(Entity::class.java, "aq")
+    val DATA_NO_GRAVITY = getAccessor<Boolean>(Entity::class.java, "aR")
 
     object DISPLAY_MAPPING {
-        val DATA_TRANSLATION_ID = getAccessor<Vector3f>("s")
-        val DATA_SCALE_ID = getAccessor<Vector3f>("t")
-        val DATA_LEFT_ROTATION_ID = getAccessor<Quaternionf>("u")
-        val DATA_RIGHT_ROTATION_ID = getAccessor<Quaternionf>("ay")
-        val DATA_BILLBOARD_RENDER_CONSTRAINTS_ID = getAccessor<Byte>("az")
+        val DATA_TRANSLATION_ID = getAccessor<Vector3f>(Display::class.java, "s")
+        val DATA_SCALE_ID = getAccessor<Vector3f>(Display::class.java, "t")
+        val DATA_LEFT_ROTATION_ID = getAccessor<Quaternionf>(Display::class.java, "u")
+        val DATA_RIGHT_ROTATION_ID = getAccessor<Quaternionf>(Display::class.java, "ay")
+        val DATA_BILLBOARD_RENDER_CONSTRAINTS_ID = getAccessor<Byte>(Display::class.java, "az")
 
 
     }
 
-    fun <T> getAccessor(string: String): EntityDataAccessor<T> {
-        return Display::class.java.getDeclaredField(string).let {
+    fun <T> getAccessor(clazz: Class<*>, string: String): EntityDataAccessor<T> {
+        return clazz.getDeclaredField(string).let {
             it.isAccessible = true
             return@let it.get(null) as EntityDataAccessor<T>
         }

@@ -1,6 +1,7 @@
 package com.undefined.lynx.server
 
 import com.undefined.lynx.LynxConfig
+import com.undefined.lynx.npc.spawnNPC
 import com.undefined.lynx.sidebar.sidebar.lines.UpdatablePlayerLine
 import com.undefined.lynx.sidebar.sidebar.lines.UpdatablePlayerTimerLine
 import com.undefined.lynx.sidebar.sidebar.lines.UpdatableTimerLine
@@ -10,6 +11,7 @@ import com.undefined.stellar.StellarCommand
 import com.undefined.stellar.StellarConfig
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 import kotlin.random.Random
@@ -28,7 +30,16 @@ class Main : JavaPlugin() {
 
         StellarCommand("test")
             .addExecution<Player> {
-                side.addViewers(listOf(sender))
+
+                val npc = sender.location.spawnNPC("Testing")
+                npc.hideName(true)
+
+                var pastLoc: Location? = null
+
+                Bukkit.getScheduler().runTaskTimer(this@Main, Runnable {
+                    if (pastLoc != null) npc.lookAt(pastLoc!!)
+                    pastLoc = sender.location.clone()
+                }, 1, 1)
 
             }.register()
 

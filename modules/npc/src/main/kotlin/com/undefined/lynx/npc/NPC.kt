@@ -11,7 +11,9 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.util.*
+import kotlin.math.atan2
 import kotlin.math.floor
+import kotlin.math.sqrt
 
 open class NPC(
     internal val serverPlayer: Any,
@@ -45,7 +47,7 @@ open class NPC(
     }
 
     fun hideName(hide: Boolean, players: List<Player> = players()) = apply {
-        NMSManager.nms.scoreboard.setTeamNameTagVisibility(team, if (hide) NameTagVisibility.ALWAYS else NameTagVisibility.NEVER)
+        NMSManager.nms.scoreboard.setTeamNameTagVisibility(team, if (hide) NameTagVisibility.NEVER else NameTagVisibility.ALWAYS)
         NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players)
     }
 
@@ -58,8 +60,6 @@ open class NPC(
         NMSManager.nms.npc.setGravity(serverPlayer, gravity)
         NMSManager.nms.display.updateEntityData(serverPlayer, players())
     }
-
-
 
     fun remove() = apply {
         clearOnClick()
@@ -113,6 +113,14 @@ open class NPC(
         NMSManager.nms.npc.sendClientboundRotationPacket(serverPlayer, deltaYaw, players())
 
         this.location = location
+    }
+
+    fun lookAt(location: Location) = apply {
+        val direction = location.toVector().subtract(getLocation().toVector())
+        val newLocation = getLocation().clone().apply {
+            this.direction = direction
+        }
+        moveTo(newLocation)
     }
 
     private fun toDeltaRotation(rotation: Float): Byte = floor(rotation * 256.0f / 360.0f).toInt().toByte()
