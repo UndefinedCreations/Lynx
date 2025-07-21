@@ -13,9 +13,7 @@ import com.undefined.lynx.npc.Pose
 import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.team.NameTagVisibility
 import com.undefined.lynx.util.execute
-import com.undefined.lynx.util.getPrivateField
 import com.undefined.lynx.util.getPrivateMethod
-import com.undefined.lynx.util.setPrivateField
 import net.minecraft.ChatFormatting
 import net.minecraft.network.Connection
 import net.minecraft.network.chat.numbers.BlankFormat
@@ -29,7 +27,6 @@ import net.minecraft.server.level.ServerEntity
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.network.CommonListenerCookie
-import net.minecraft.server.network.ServerCommonPacketListenerImpl
 import net.minecraft.server.network.ServerGamePacketListenerImpl
 import net.minecraft.util.Brightness
 import net.minecraft.world.entity.Display
@@ -312,22 +309,30 @@ object NMS1_21_4: NMS, Listener {
                 return serverPlayer.gameProfile.name
             }
 
-            override fun sendSpawnPacket(serverPlayer: Any, location: Location, player: List<Player>) {
+            override fun setEntityPostion(serverPlayer: Any, location: Location) {
                 val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
                 serverPlayer.setPos(location.x, location.y, location.z)
                 serverPlayer.moveTo(location.x, location.y, location.z, location.yaw, location.pitch)
+            }
 
-                val serverEntity = ServerEntity(getServerLevel(), serverPlayer, 0, false, {}, mutableSetOf())
+            override fun sendClientboundPlayerInfoUpdatePacketAddPlayer(
+                serverPlayer: Any,
+                players: List<Player>
+            ) {
+                val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
+                players.sendPackets(ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, serverPlayer))
+            }
 
-                val addPlayer = ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, serverPlayer)
-                val addEntity = ClientboundAddEntityPacket(serverPlayer, serverEntity)
-
+            override fun sendClientboundSetEntityDataPacket(
+                serverPlayer: Any,
+                players: List<Player>
+            ) {
+                val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
                 val data = serverPlayer.entityData
                 val bitmask: Byte = (0x01 or 0x04 or 0x08 or 0x10 or 0x20 or 0x40 or 127).toByte()
                 data.set(EntityDataAccessor(17, EntityDataSerializers.BYTE), bitmask)
                 val metaDataPacket = data.nonDefaultValues?.let { ClientboundSetEntityDataPacket(serverPlayer.id, it) }
-
-                player.sendPackets(addPlayer, addEntity, metaDataPacket)
+                players.sendPackets(metaDataPacket)
             }
 
             override fun onClick(consumer: EntityInteract.() -> Unit) {
@@ -345,11 +350,6 @@ object NMS1_21_4: NMS, Listener {
                         )
                     )
                 ))
-            }
-
-            override fun sendRemovePacket(serverPlayer: Any, players: List<Player>) {
-                val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
-                players.sendPackets(ClientboundRemoveEntitiesPacket(serverPlayer.id))
             }
 
             override fun getUUID(serverPlayer: Any): UUID = (serverPlayer as Entity).uuid
@@ -577,7 +577,7 @@ object NMS1_21_4: NMS, Listener {
                 return ServerEntity((world as CraftWorld).handle, display, 0, false, {}, mutableSetOf())
             }
 
-            override fun spawn(
+            override fun sendClientboundAddEntityPacket(
                 display: Any,
                 serverEntity: Any,
                 players: List<Player>
@@ -648,9 +648,9 @@ object NMS1_21_4: NMS, Listener {
                 val pack = display.entityData.packDirty() ?: return
                 players.sendPackets(ClientboundSetEntityDataPacket(display.id, pack))
             }
-            override fun removeEntityPacket(display: Any, players: List<Player>) {
-                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                players.sendPackets(ClientboundRemoveEntitiesPacket(display.id))
+            override fun sendClientboundRemoveEntitiesPacket(display: Any, players: List<Player>) {
+                val entity = display as? Entity ?: throw IllegalArgumentException("Class passed was not an Entity")
+                players.sendPackets(ClientboundRemoveEntitiesPacket(entity.id))
             }
 
             override val textDisplay: NMS.Display.TextDisplay by lazy {

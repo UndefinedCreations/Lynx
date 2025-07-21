@@ -3,7 +3,6 @@ package com.undefined.lynx.npc
 
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.nms.EntityInteract
-import com.undefined.lynx.nms.NMS
 import com.undefined.lynx.team.NameTagVisibility
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -11,12 +10,11 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.util.*
-import kotlin.math.atan2
 import kotlin.math.floor
-import kotlin.math.sqrt
 
 open class NPC(
     internal val serverPlayer: Any,
+    internal val serverEntity: Any,
     internal val team: Any,
     internal val visibleTo: MutableList<Player>?,
     internal var location: Location
@@ -64,7 +62,7 @@ open class NPC(
     fun remove() = apply {
         clearOnClick()
         visibleTo?.clear()
-        NMSManager.nms.npc.sendRemovePacket(serverPlayer, players())
+        removeViewers(players())
         NPCManager.autoLoadNPCS.remove(this)
         NPCManager.spawnedNPC.remove(this)
     }
@@ -72,13 +70,16 @@ open class NPC(
     fun addViewer(player: Player) = addViewers(listOf(player))
 
     fun addViewers(players: List<Player>) = apply {
-        NMSManager.nms.npc.sendSpawnPacket(serverPlayer, location, players)
+        NMSManager.nms.npc.sendClientboundPlayerInfoUpdatePacketAddPlayer(serverPlayer, players)
+        NMSManager.nms.display.sendClientboundAddEntityPacket(serverPlayer, serverEntity, players)
+        NMSManager.nms.npc.sendClientboundSetEntityDataPacket(serverPlayer, players)
         NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players)
         visibleTo?.addAll(players)
     }
 
     fun removeViewers(players: List<Player>) = apply {
-        NMSManager.nms.npc.sendRemovePacket(serverPlayer, players)
+        NMSManager.nms.display.sendClientboundRemoveEntitiesPacket(serverPlayer, players)
+        NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketRemove(team, players)
         visibleTo?.removeAll(players)
     }
 
@@ -132,5 +133,5 @@ open class NPC(
 
     fun getEntityID(): Int = NMSManager.nms.npc.getID(serverPlayer)
 
-    private fun players(): List<Player> = visibleTo ?: Bukkit.getOnlinePlayers().toList()
+    private fun players(): List<Player> = (visibleTo ?: Bukkit.getOnlinePlayers().toList()).filter { it.world == getLocation().world }
 }

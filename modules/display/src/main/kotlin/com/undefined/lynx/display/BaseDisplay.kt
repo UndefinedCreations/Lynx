@@ -22,7 +22,7 @@ abstract class BaseDisplay(
     init {
         NMSManager.nms.display.setLocation(display, location)
         serverEntity = NMSManager.nms.display.createServerEntity(display, location.world!!)
-        NMSManager.nms.display.spawn(display, serverEntity, players().toList())
+        NMSManager.nms.display.sendClientboundAddEntityPacket(display, serverEntity, players().toList())
         DisplayManager.activeDisplay.add(this)
     }
 
@@ -37,7 +37,7 @@ abstract class BaseDisplay(
     fun addViewer(player: Player) = addViewers(listOf(player))
 
     fun addViewers(players: List<Player>) = apply {
-        NMSManager.nms.display.spawn(display, serverEntity, players)
+        NMSManager.nms.display.sendClientboundAddEntityPacket(display, serverEntity, players)
         NMSManager.nms.display.updateEntityData(display, players)
         visibleTo?.addAll(players)
     }
@@ -45,7 +45,7 @@ abstract class BaseDisplay(
     fun removeViewer(player: Player) = removeViewers(listOf(player))
 
     fun removeViewers(players: List<Player>) = apply {
-        NMSManager.nms.display.removeEntityPacket(display, players)
+        NMSManager.nms.display.sendClientboundRemoveEntitiesPacket(display, players)
         visibleTo?.removeAll(players)
     }
 

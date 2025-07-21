@@ -61,11 +61,12 @@ interface NMS {
     }
     interface NPC {
         fun createServerPlayer(name: String, texture: String, signature: String): Any
+        fun setEntityPostion(serverPlayer: Any, location: Location)
+        fun sendClientboundPlayerInfoUpdatePacketAddPlayer(serverPlayer: Any, players: List<Player>)
+        fun sendClientboundSetEntityDataPacket(serverPlayer: Any, players: List<Player>)
         fun getName(serverPlayer: Any): String
-        fun sendSpawnPacket(serverPlayer: Any, location: Location, player: List<Player>)
         fun onClick(consumer: EntityInteract.() -> Unit)
         fun setItem(serverPlayer: Any, slot: Int, itemStack: ItemStack?, players: List<Player>)
-        fun sendRemovePacket(serverPlayer: Any, players: List<Player>)
         fun getUUID(serverPlayer: Any): UUID
         fun getID(serverPlayer: Any): Int
         fun sendTeleportPacket(serverPlayer: Any, location: Location, players: List<Player>)
@@ -186,7 +187,7 @@ interface NMS {
     interface Display {
         fun setLocation(display: Any, location: Location)
         fun createServerEntity(display: Any, world: World): Any
-        fun spawn(display: Any, serverEntity: Any, players: List<Player>)
+        fun sendClientboundAddEntityPacket(display: Any, serverEntity: Any, players: List<Player>)
         fun setScale(display: Any, vector3f: Vector3f)
         fun setLeftRotation(display: Any, quaternionf: Quaternionf)
         fun setRightRotation(display: Any, quaternionf: Quaternionf)
@@ -202,7 +203,7 @@ interface NMS {
         fun setWidth(display: Any, width: Float)
         fun setHeight(display: Any, height: Float)
         fun updateEntityData(display: Any, players: List<Player>)
-        fun removeEntityPacket(display: Any, players: List<Player>)
+        fun sendClientboundRemoveEntitiesPacket(display: Any, players: List<Player>)
 
         val textDisplay: TextDisplay
         val blockDisplay: BlockDisplay

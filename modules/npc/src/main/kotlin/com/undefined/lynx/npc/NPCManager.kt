@@ -3,6 +3,7 @@ package com.undefined.lynx.npc
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.Skin
+import com.undefined.lynx.nms.NMS
 import com.undefined.lynx.npc.NPCManager.DEFAULT_NAME
 import com.undefined.lynx.npc.NPCManager.DEFAULT_SKIN
 import com.undefined.lynx.util.RunBlock
@@ -54,10 +55,12 @@ object NPCManager : Listener {
         dsl: RunBlock<NPC> = RunBlock {}
     ): NPC {
         val serverPlayer = NMSManager.nms.npc.createServerPlayer(name, texture, signature)
+        NMSManager.nms.npc.setEntityPostion(serverPlayer, location)
+        val serverEntity = NMSManager.nms.display.createServerEntity(serverPlayer, location.world!!)
         val team = NMSManager.nms.scoreboard.createTeam(Bukkit.getScoreboardManager()!!.mainScoreboard, UUID.randomUUID().toString())
         NMSManager.nms.scoreboard.addTeamEntry(team, name)
         val players = visibleTo ?: Bukkit.getOnlinePlayers().toList()
-        val npc = NPC(serverPlayer, team, visibleTo?.toMutableList(), location)
+        val npc = NPC(serverPlayer, serverEntity, team, visibleTo?.toMutableList(), location)
         npc.addViewers(players)
         if (autoLoad) autoLoadNPCS.add(npc)
         spawnedNPC.add(npc)
