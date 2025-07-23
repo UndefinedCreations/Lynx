@@ -50,7 +50,6 @@ class Sidebar @JvmOverloads constructor(
         line.setUpLine(this)
         lines.add(line)
     }
-
     fun addUpdatableLine(run: () -> String) = UpdatableLine(run).apply { addLine(this) }
     fun addComponentUpdatableLine(run: () -> Component) = UpdatableLine().apply {
         setComponentUpdatable(run)
@@ -114,7 +113,7 @@ class Sidebar @JvmOverloads constructor(
         lines.clear()
     }
 
-    internal fun nextOrderId(): String = order(lines.size + 1)
+    internal fun nextOrderId(): String = "§" + order(lines.size + 1)
 }
 
 fun sidebar(

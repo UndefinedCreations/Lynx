@@ -1,6 +1,7 @@
 package com.undefined.lynx.tab.size
 
 import com.undefined.lynx.NMSManager
+import com.undefined.lynx.adventure.toJson
 import com.undefined.lynx.tab.DefaultTabSkin
 import com.undefined.lynx.tab.TabLatency
 import com.undefined.lynx.tab.TabManager
@@ -28,7 +29,7 @@ object TabSizeManager {
             serverPlayers.add(serverPlayer)
             TabManager.addTeamEntry(team, order)
         }
-        TabManager.modifyTeamName(team, ComponentSerializer.toJson(TextComponent("")).toString(), players)
+        TabManager.modifyTeamName(team, "".toJson(), players)
     }
 
     fun addPlayer(

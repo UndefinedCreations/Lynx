@@ -561,14 +561,14 @@ object NMS1_21_1: NMS, Listener {
                 Mapping1_21_1.entitySetRot.invoke(display, location.yaw, location.pitch)
             }
 
-            override fun createServerEntity(display: Any, world: World): Any {
+            override fun createServerEntity(display: Any, world: World): Any? {
                 val display = display as? Entity ?: throw IllegalArgumentException("Class passed was not an Display Entity")
                 return ServerEntity((world as CraftWorld).handle, display, 0, false, {}, mutableSetOf())
             }
 
             override fun sendClientboundAddEntityPacket(
                 display: Any,
-                serverEntity: Any,
+                serverEntity: Any?,
                 players: List<Player>
             ) {
                 val display = display as? Entity ?: throw IllegalArgumentException("Class passed was not an Display Entity")

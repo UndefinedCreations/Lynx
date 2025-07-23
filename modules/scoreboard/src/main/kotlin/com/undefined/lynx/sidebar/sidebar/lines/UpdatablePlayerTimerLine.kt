@@ -3,6 +3,7 @@ package com.undefined.lynx.sidebar.sidebar.lines
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.adventure.toJson
+import com.undefined.lynx.sidebar.sidebar.Sidebar
 import com.undefined.lynx.sidebar.sidebar.interfaces.TimerLine
 import com.undefined.lynx.util.ReturnBlock
 import com.undefined.lynx.util.toMiniMessageOrDefault
@@ -11,8 +12,8 @@ import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitRunnable
 
 class UpdatablePlayerTimerLine @JvmOverloads constructor(
-    ticks: Int,
-    async: Boolean = false,
+    private val ticks: Int,
+    private val async: Boolean = false,
     run: ReturnBlock<Player, String> = ReturnBlock { "" }
 ): BasicLine(), TimerLine<UpdatablePlayerTimerLine> {
 
@@ -24,10 +25,6 @@ class UpdatablePlayerTimerLine @JvmOverloads constructor(
     }
 
     private var isRunning: Boolean = false
-
-    init {
-        start(ticks, async)
-    }
 
     fun setUpdatable(run: ReturnBlock<Player, String>) = apply {
         jsonRun = ReturnBlock { run.run(it).toMiniMessageOrDefault().toJson() }
@@ -42,6 +39,11 @@ class UpdatablePlayerTimerLine @JvmOverloads constructor(
             bukkitTask.cancel()
             isRunning = !isRunning
         }
+    }
+
+    override fun setUpLine(sidebar: Sidebar) {
+        super.setUpLine(sidebar)
+        start(ticks, async)
     }
 
     override fun start(

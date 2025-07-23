@@ -14,9 +14,9 @@ open class BasicLine {
     internal lateinit var orderId: String
 
     internal open fun setUpLine(sidebar: Sidebar) {
+        sideBar = sidebar
         orderId = sidebar.nextOrderId()
         team = NMSManager.nms.scoreboard.createTeam(sidebar.scoreboard, this.toString())
-        sideBar = sidebar
         NMSManager.nms.scoreboard.addTeamEntry(team, orderId)
         NMSManager.nms.scoreboard.sendSetScorePacket(orderId, EMPTY_JSON, sideBar.objective, 0, sideBar.players)
     }

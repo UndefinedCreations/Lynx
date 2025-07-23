@@ -2,6 +2,7 @@ package com.undefined.lynx
 
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.scoreboard.Objective
 
 object LynxConfig {
     lateinit var javaPlugin: JavaPlugin

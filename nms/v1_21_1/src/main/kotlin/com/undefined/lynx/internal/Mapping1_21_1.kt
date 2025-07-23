@@ -18,24 +18,22 @@ object Mapping1_21_1 {
     val latency: Field = ServerCommonPacketListenerImpl::class.java.getDeclaredField("o").apply { isAccessible = true }
     val serverBoundInteractPacketEntityId: Field = ServerboundInteractPacket::class.java.getDeclaredField("b").apply { isAccessible = true }
     val serverBoundInteractPacketAction: Field = ServerboundInteractPacket::class.java.getDeclaredField("c").apply { isAccessible = true }
-    val entitySetRot: Method = Entity::class.java.getDeclaredMethod("b", Float::class.java,
+    val entitySetRot: Method = Entity::class.java.getDeclaredMethod("a", Float::class.java,
         Float::class.java).apply { isAccessible = true }
     const val ServerboundInteractionPacket_GET_TYPE = "a"
 
     val teamSetPrefix: Field = PlayerTeam::class.java.getDeclaredField("g").apply { isAccessible = true }
     val teamSetSuffix: Field = PlayerTeam::class.java.getDeclaredField("h").apply { isAccessible = true }
 
-    val DATA_POSE = getAccessor<Pose>(Entity::class.java, "aq")
-    val DATA_NO_GRAVITY = getAccessor<Boolean>(Entity::class.java, "aR")
+    val DATA_POSE = getAccessor<Pose>(Entity::class.java, "at")
+    val DATA_NO_GRAVITY = getAccessor<Boolean>(Entity::class.java, "aT")
 
     object DISPLAY_MAPPING {
-        val DATA_TRANSLATION_ID = getAccessor<Vector3f>(Display::class.java, "s")
-        val DATA_SCALE_ID = getAccessor<Vector3f>(Display::class.java, "t")
-        val DATA_LEFT_ROTATION_ID = getAccessor<Quaternionf>(Display::class.java, "u")
-        val DATA_RIGHT_ROTATION_ID = getAccessor<Quaternionf>(Display::class.java, "ay")
-        val DATA_BILLBOARD_RENDER_CONSTRAINTS_ID = getAccessor<Byte>(Display::class.java, "az")
-
-
+        val DATA_TRANSLATION_ID = getAccessor<Vector3f>(Display::class.java, "t")
+        val DATA_SCALE_ID = getAccessor<Vector3f>(Display::class.java, "u")
+        val DATA_LEFT_ROTATION_ID = getAccessor<Quaternionf>(Display::class.java, "v")
+        val DATA_RIGHT_ROTATION_ID = getAccessor<Quaternionf>(Display::class.java, "aD")
+        val DATA_BILLBOARD_RENDER_CONSTRAINTS_ID = getAccessor<Byte>(Display::class.java, "aE")
     }
 
     fun <T> getAccessor(clazz: Class<*>, string: String): EntityDataAccessor<T> {

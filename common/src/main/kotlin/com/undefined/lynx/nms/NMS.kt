@@ -183,8 +183,8 @@ interface NMS {
     }
     interface Display {
         fun setEntityLocation(display: Any, location: Location)
-        fun createServerEntity(display: Any, world: World): Any
-        fun sendClientboundAddEntityPacket(display: Any, serverEntity: Any, players: List<Player>)
+        fun createServerEntity(display: Any, world: World): Any?
+        fun sendClientboundAddEntityPacket(display: Any, serverEntity: Any?, players: List<Player>)
         fun setScale(display: Any, vector3f: Vector3f)
         fun setLeftRotation(display: Any, quaternionf: Quaternionf)
         fun setRightRotation(display: Any, quaternionf: Quaternionf)

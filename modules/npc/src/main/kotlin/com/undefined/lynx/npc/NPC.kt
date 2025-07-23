@@ -14,7 +14,7 @@ import kotlin.math.floor
 
 open class NPC(
     internal val serverPlayer: Any,
-    internal val serverEntity: Any,
+    internal val serverEntity: Any?,
     internal val team: Any,
     internal val visibleTo: MutableList<Player>?,
     internal var location: Location

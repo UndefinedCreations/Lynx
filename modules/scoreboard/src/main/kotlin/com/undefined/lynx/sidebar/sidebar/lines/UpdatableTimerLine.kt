@@ -3,14 +3,15 @@ package com.undefined.lynx.sidebar.sidebar.lines
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.adventure.toJson
+import com.undefined.lynx.sidebar.sidebar.Sidebar
 import com.undefined.lynx.sidebar.sidebar.interfaces.TimerLine
 import com.undefined.lynx.util.toMiniMessageOrDefault
 import net.kyori.adventure.text.Component
 import org.bukkit.scheduler.BukkitRunnable
 
 class UpdatableTimerLine @JvmOverloads constructor(
-    ticks: Int,
-    async: Boolean = false,
+    private val ticks: Int,
+    private val async: Boolean = false,
     run: () -> String = { "" }
 ): BasicLine(), TimerLine<UpdatableTimerLine> {
 
@@ -23,16 +24,17 @@ class UpdatableTimerLine @JvmOverloads constructor(
 
     private var isRunning: Boolean = false
 
-    init {
-        start(ticks, async)
-    }
-
     fun setUpdatable(run: () -> String) = apply {
         jsonRun = { run.invoke().toMiniMessageOrDefault().toJson() }
     }
 
     fun setComponentUpdatable(run: () -> Component) = apply {
         jsonRun = { run.invoke().toJson() }
+    }
+
+    override fun setUpLine(sidebar: Sidebar) {
+        super.setUpLine(sidebar)
+        start(ticks, async)
     }
 
     override fun stop(): UpdatableTimerLine = apply {

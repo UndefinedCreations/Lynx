@@ -9,7 +9,7 @@ import org.bukkit.event.Listener
 inline fun <reified T : Event> event(
     priority: EventPriority = EventPriority.NORMAL,
     ignoreCancelled: Boolean = false,
-    noinline block: (T) -> Unit,
+    noinline block: T.() -> Unit,
 ): Listener = LynxListener().also { listener ->
     LynxConfig.javaPlugin.server.pluginManager.registerEvent(
         T::class.java,

@@ -1,3 +1,4 @@
+import com.undefinedcreations.nova.ServerType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -44,7 +45,8 @@ tasks {
         archiveFileName = "server.jar"
     }
     runServer {
-        minecraftVersion("1.21.5")
+        minecraftVersion("1.20.1")
+        serverType(ServerType.PAPERMC)
         acceptMojangEula()
         perVersionFolder(true)
     }

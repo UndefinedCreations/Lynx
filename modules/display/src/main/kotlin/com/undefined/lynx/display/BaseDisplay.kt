@@ -15,7 +15,7 @@ abstract class BaseDisplay(
     internal var autoLoad: Boolean
 ) {
 
-    internal val serverEntity: Any
+    internal val serverEntity: Any?
 
     internal var clicks: MutableList<RunBlock<EntityInteract>> = mutableListOf()
 

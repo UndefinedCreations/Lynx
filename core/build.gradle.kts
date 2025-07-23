@@ -7,6 +7,10 @@ plugins {
 dependencies {
     compileOnly(libs.spigot)
 
+    api(project(":nms:v1_20_1"))
+    api(project(":nms:v1_20_2"))
+    api(project(":nms:v1_20_4"))
+    api(project(":nms:v1_20_6"))
     api(project(":nms:v1_21_1"))
     api(project(":nms:v1_21_3"))
     api(project(":nms:v1_21_4"))
