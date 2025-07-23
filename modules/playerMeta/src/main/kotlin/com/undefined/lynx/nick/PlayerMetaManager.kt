@@ -1,28 +1,31 @@
 package com.undefined.lynx.nick
 
+import com.undefined.lynx.GameProfile
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.NMSManager
-import com.undefined.lynx.Skin
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.util.*
 
-object NickManager : Listener {
+object PlayerMetaManager : Listener {
 
-    internal val trueNames: HashMap<UUID, String> = hashMapOf()
-    internal val trueSkins: HashMap<UUID, Skin> = hashMapOf()
-
+    internal val trueGameProfile: HashMap<UUID, GameProfile> = hashMapOf()
     init {
         Bukkit.getPluginManager().registerEvents(this, LynxConfig.javaPlugin)
     }
 
     @EventHandler
+    fun onJoin(event: PlayerJoinEvent) {
+        trueGameProfile[event.player.uniqueId] = PlayerMetaUtil.getGameProfile(event.player)
+    }
+
+    @EventHandler
     fun onQuit(event: PlayerQuitEvent) {
-        trueNames.remove(event.player.uniqueId)
-        trueSkins.remove(event.player.uniqueId)
+        trueGameProfile.remove(event.player.uniqueId)
     }
 
     fun reloadPlayerMeta(player: Player) {

@@ -36,16 +36,16 @@ dependencies {
 
 tasks {
     compileKotlin {
-        compilerOptions.jvmTarget = JvmTarget.JVM_21
+        compilerOptions.jvmTarget = JvmTarget.JVM_17
     }
     compileJava {
-        options.release = 21
+        options.release = 17
     }
     shadowJar {
         archiveFileName = "server.jar"
     }
     runServer {
-        minecraftVersion("1.20.1")
+        minecraftVersion("1.19.4")
         serverType(ServerType.PAPERMC)
         acceptMojangEula()
         perVersionFolder(true)
@@ -57,5 +57,5 @@ java {
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(17)
 }

@@ -1,9 +1,11 @@
 package com.undefined.lynx.npc
 
 
+import com.undefined.lynx.GameProfile
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.nms.EntityInteract
 import com.undefined.lynx.team.NameTagVisibility
+import com.undefined.lynx.util.ReturnBlock
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -23,6 +25,27 @@ open class NPC(
     internal var clickActions: MutableList<EntityInteract.() -> Unit> = mutableListOf()
 
     private val itemStacks: HashMap<Int, ItemStack> = hashMapOf()
+
+    private var perPlayerProfile: ReturnBlock<Player, GameProfile>? = null
+
+    @JvmOverloads
+    fun setProfile(gameProfile: GameProfile, players: List<Player> = players()) {
+        NMSManager.nms.playerMeta.setName(serverPlayer, gameProfile.name)
+        NMSManager.nms.playerMeta.setSkin(serverPlayer, gameProfile.skin.texture, gameProfile.skin.signature)
+
+        // Remove NPC
+        NMSManager.nms.display.sendClientboundRemoveEntitiesPacket(serverPlayer, players)
+
+        // Resends NPC
+        NMSManager.nms.npc.sendClientboundPlayerInfoUpdatePacketAddPlayer(serverPlayer, players)
+        NMSManager.nms.display.sendClientboundAddEntityPacket(serverPlayer, serverEntity, players)
+        NMSManager.nms.npc.sendClientboundSetEntityDataPacket(serverPlayer, players)
+    }
+
+    fun setPerPlayerProfile(run: ReturnBlock<Player, GameProfile>) = apply {
+        perPlayerProfile = run
+        for (player in players()) setProfile(run.run(player), listOf(player))
+    }
 
     fun resentItems(players: List<Player> = players()) = apply {
         itemStacks.forEach { item -> NMSManager.nms.npc.setItem(serverPlayer, item.key, item.value, players) }
@@ -61,8 +84,8 @@ open class NPC(
 
     fun remove() = apply {
         clearOnClick()
-        visibleTo?.clear()
         removeViewers(players())
+        visibleTo?.clear()
         NPCManager.autoLoadNPCS.remove(this)
         NPCManager.spawnedNPC.remove(this)
     }
@@ -70,7 +93,20 @@ open class NPC(
     fun addViewer(player: Player) = addViewers(listOf(player))
 
     fun addViewers(players: List<Player>) = apply {
-        NMSManager.nms.npc.sendClientboundPlayerInfoUpdatePacketAddPlayer(serverPlayer, players)
+
+        if (perPlayerProfile == null) {
+            // Sends all the players the same NPC info (GameProfile)
+            NMSManager.nms.npc.sendClientboundPlayerInfoUpdatePacketAddPlayer(serverPlayer, players)
+        } else {
+            // Send the NPC info to all the people separately
+            for (player in players) {
+                val gameProfile = perPlayerProfile!!.run(player)
+                NMSManager.nms.playerMeta.setName(serverPlayer, gameProfile.name)
+                NMSManager.nms.playerMeta.setSkin(serverPlayer, gameProfile.skin.texture, gameProfile.skin.signature)
+                NMSManager.nms.npc.sendClientboundPlayerInfoUpdatePacketAddPlayer(serverPlayer, players)
+            }
+        }
+
         NMSManager.nms.display.sendClientboundAddEntityPacket(serverPlayer, serverEntity, players)
         NMSManager.nms.npc.sendClientboundSetEntityDataPacket(serverPlayer, players)
         NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players)

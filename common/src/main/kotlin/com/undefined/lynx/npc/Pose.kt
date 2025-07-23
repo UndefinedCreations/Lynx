@@ -1,7 +1,6 @@
 package com.undefined.lynx.npc
 
 enum class Pose(val nmsId: Int) {
-
     STANDING(0),
     FALL_FLYING(1),
     SLEEPING(2),
@@ -20,5 +19,4 @@ enum class Pose(val nmsId: Int) {
     SLIDING(15),
     SHOOTING(16),
     INHALING(17);
-
 }

@@ -13,7 +13,7 @@ private val submodules: HashMap<String, String> = hashMapOf(
     ":modules:event" to "event",
     ":modules:items" to "items",
     ":modules:logger" to "logger",
-    ":modules:nick" to "nick",
+    ":modules:playerMeta" to "playerMeta",
     ":modules:npc" to "npc",
     ":modules:scheduler" to "scheduler",
     ":modules:sql" to "sql",
@@ -30,7 +30,7 @@ dependencies {
     api(project(":modules:event"))
     api(project(":modules:items"))
     api(project(":modules:logger"))
-    api(project(":modules:nick"))
+    api(project(":modules:playerMeta"))
     api(project(":modules:npc"))
     api(project(":modules:scheduler"))
     api(project(":modules:sql"))
