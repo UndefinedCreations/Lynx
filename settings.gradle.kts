@@ -21,6 +21,7 @@ include(
     ":modules:scoreboard",
     ":modules:tab",
     ":modules:display",
+    ":nms:v1_17_1",
     ":nms:v1_18_1",
     ":nms:v1_18_2",
     ":nms:v1_19_2",
