@@ -10,7 +10,11 @@ object NMSManager {
     val nms: NMS by lazy { versions[version]?.let { it() } ?: throw UnsupportedVersionException(versions.keys) }
     private val version by lazy { Bukkit.getBukkitVersion().split("-")[0] }
     private val versions: Map<String, () -> NMS> = mapOf(
-//        "1.19.4" to { NMS1_19_4 },
+        "1.19" to { NMS1_19_2 },
+        "1.19.1" to { NMS1_19_2 },
+        "1.19.2" to { NMS1_19_2 },
+        "1.19.3" to { NMS1_19_3 },
+        "1.19.4" to { NMS1_19_4 },
         "1.20" to { NMS1_20_1 },
         "1.20.1" to { NMS1_20_1 },
         "1.20.2" to { NMS1_20_2 },

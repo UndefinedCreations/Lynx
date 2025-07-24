@@ -2,6 +2,7 @@ package com.undefined.lynx.npc
 
 
 import com.undefined.lynx.GameProfile
+import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.nms.EntityInteract
 import com.undefined.lynx.team.NameTagVisibility
@@ -30,16 +31,21 @@ open class NPC(
 
     @JvmOverloads
     fun setProfile(gameProfile: GameProfile, players: List<Player> = players()) {
+
         NMSManager.nms.playerMeta.setName(serverPlayer, gameProfile.name)
         NMSManager.nms.playerMeta.setSkin(serverPlayer, gameProfile.skin.texture, gameProfile.skin.signature)
 
         // Remove NPC
-        NMSManager.nms.display.sendClientboundRemoveEntitiesPacket(serverPlayer, players)
+        NMSManager.nms.entity.sendClientboundRemoveEntitiesPacket(serverPlayer, players)
+        NMSManager.nms.playerMeta.sendClientboundPlayerInfoRemovePacketListServerPlayer(listOf(serverPlayer), players)
 
         // Resends NPC
         NMSManager.nms.npc.sendClientboundPlayerInfoUpdatePacketAddPlayer(serverPlayer, players)
-        NMSManager.nms.display.sendClientboundAddEntityPacket(serverPlayer, serverEntity, players)
+        NMSManager.nms.entity.sendClientboundAddEntityPacket(serverPlayer, serverEntity, players)
         NMSManager.nms.npc.sendClientboundSetEntityDataPacket(serverPlayer, players)
+
+        NMSManager.nms.scoreboard.addTeamEntry(team, gameProfile.name)
+        NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players)
     }
 
     fun setPerPlayerProfile(run: ReturnBlock<Player, GameProfile>) = apply {
@@ -47,6 +53,7 @@ open class NPC(
         for (player in players()) setProfile(run.run(player), listOf(player))
     }
 
+    @JvmOverloads
     fun resentItems(players: List<Player> = players()) = apply {
         itemStacks.forEach { item -> NMSManager.nms.npc.setItem(serverPlayer, item.key, item.value, players) }
     }
@@ -57,16 +64,19 @@ open class NPC(
 
     fun clearOnClick() = apply { clickActions.clear() }
 
+    @JvmOverloads
     fun setItem(slot: Int, item: ItemStack, players: List<Player> = players()) = apply {
         NMSManager.nms.npc.setItem(serverPlayer, slot, item, players)
         itemStacks[slot] = item
     }
 
+    @JvmOverloads
     fun setScale(scale: Double, players: List<Player> = players()) = apply {
         NMSManager.nms.npc.setScale(serverPlayer, scale)
         NMSManager.nms.npc.sendUpdateAttributesPacket(serverPlayer, players)
     }
 
+    @JvmOverloads
     fun hideName(hide: Boolean, players: List<Player> = players()) = apply {
         NMSManager.nms.scoreboard.setTeamNameTagVisibility(team, if (hide) NameTagVisibility.NEVER else NameTagVisibility.ALWAYS)
         NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players)
@@ -74,12 +84,12 @@ open class NPC(
 
     fun setPose(pose: Pose) = apply {
         NMSManager.nms.npc.setPos(serverPlayer, pose)
-        NMSManager.nms.display.updateEntityData(serverPlayer, players())
+        NMSManager.nms.entity.updateEntityData(serverPlayer, players())
     }
 
     fun setGravity(gravity: Boolean) = apply {
         NMSManager.nms.npc.setGravity(serverPlayer, gravity)
-        NMSManager.nms.display.updateEntityData(serverPlayer, players())
+        NMSManager.nms.entity.updateEntityData(serverPlayer, players())
     }
 
     fun remove() = apply {
@@ -97,36 +107,39 @@ open class NPC(
         if (perPlayerProfile == null) {
             // Sends all the players the same NPC info (GameProfile)
             NMSManager.nms.npc.sendClientboundPlayerInfoUpdatePacketAddPlayer(serverPlayer, players)
+            NMSManager.nms.entity.sendClientboundAddEntityPacket(serverPlayer, serverEntity, players)
+            NMSManager.nms.npc.sendClientboundSetEntityDataPacket(serverPlayer, players)
         } else {
             // Send the NPC info to all the people separately
             for (player in players) {
                 val gameProfile = perPlayerProfile!!.run(player)
                 NMSManager.nms.playerMeta.setName(serverPlayer, gameProfile.name)
                 NMSManager.nms.playerMeta.setSkin(serverPlayer, gameProfile.skin.texture, gameProfile.skin.signature)
-                NMSManager.nms.npc.sendClientboundPlayerInfoUpdatePacketAddPlayer(serverPlayer, players)
+                NMSManager.nms.npc.sendClientboundPlayerInfoUpdatePacketAddPlayer(serverPlayer, listOf(player))
+                NMSManager.nms.entity.sendClientboundAddEntityPacket(serverPlayer, serverEntity, listOf(player))
+                NMSManager.nms.npc.sendClientboundSetEntityDataPacket(serverPlayer, listOf(player))
             }
         }
-
-        NMSManager.nms.display.sendClientboundAddEntityPacket(serverPlayer, serverEntity, players)
-        NMSManager.nms.npc.sendClientboundSetEntityDataPacket(serverPlayer, players)
         NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players)
         visibleTo?.addAll(players)
     }
 
     fun removeViewers(players: List<Player>) = apply {
-        NMSManager.nms.display.sendClientboundRemoveEntitiesPacket(serverPlayer, players)
+        NMSManager.nms.entity.sendClientboundRemoveEntitiesPacket(serverPlayer, players)
         NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketRemove(team, players)
         visibleTo?.removeAll(players)
     }
 
     fun removeViewer(player: Player) = removeViewers(listOf(player))
 
+    @JvmOverloads
     fun teleport(location: Location, players: List<Player> = players()) = apply {
-        NMSManager.nms.display.setEntityLocation(serverPlayer, location)
+        NMSManager.nms.entity.setEntityLocation(serverPlayer, location)
         NMSManager.nms.npc.sendTeleportPacket(serverPlayer, players)
         this.location = location
     }
 
+    @JvmOverloads
     fun moveTo(location: Location, players: List<Player> = players()) = apply {
         if (location.distance(getLocation()) > 8) return teleport(location, players)
 
@@ -153,12 +166,13 @@ open class NPC(
         this.location = location
     }
 
-    fun lookAt(location: Location) = apply {
+    @JvmOverloads
+    fun lookAt(location: Location, players: List<Player> = players()) = apply {
         val direction = location.toVector().subtract(getLocation().toVector())
         val newLocation = getLocation().clone().apply {
             this.direction = direction
         }
-        moveTo(newLocation)
+        moveTo(newLocation, players)
     }
 
     private fun toDeltaRotation(rotation: Float): Byte = floor(rotation * 256.0f / 360.0f).toInt().toByte()

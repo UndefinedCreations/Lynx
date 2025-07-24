@@ -542,9 +542,8 @@ object NMS1_20_1: NMS, Listener {
 
         }
     }
-    override val display: NMS.Display by lazy {
-        object : NMS.Display {
-
+    override val entity: NMS.Entity by lazy {
+        object : NMS.Entity {
             override fun setEntityLocation(display: Any, location: Location) {
                 val display = display as? Entity ?: throw IllegalArgumentException("Class passed was not an Display Entity")
                 display.setPos(location.x, location.y, location.z)
@@ -563,6 +562,19 @@ object NMS1_20_1: NMS, Listener {
                 val display = display as? Entity ?: throw IllegalArgumentException("Class passed was not an Display Entity")
                 players.sendPackets(display.addEntityPacket)
             }
+            override fun updateEntityData(display: Any, players: List<Player>) {
+                val display = display as? Entity ?: throw IllegalArgumentException("Class passed was not an Display Entity")
+                val pack = display.entityData.packDirty() ?: return
+                players.sendPackets(ClientboundSetEntityDataPacket(display.id, pack))
+            }
+            override fun sendClientboundRemoveEntitiesPacket(display: Any, players: List<Player>) {
+                val entity = display as? Entity ?: throw IllegalArgumentException("Class passed was not an Entity")
+                players.sendPackets(ClientboundRemoveEntitiesPacket(entity.id))
+            }
+        }
+    }
+    override val display: NMS.Display by lazy {
+        object : NMS.Display {
 
             override fun setScale(display: Any, vector3f: Vector3f) {
                 val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
@@ -618,15 +630,6 @@ object NMS1_20_1: NMS, Listener {
             override fun setHeight(display: Any, height: Float) {
                 val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
                 display.height = height
-            }
-            override fun updateEntityData(display: Any, players: List<Player>) {
-                val display = display as? Entity ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                val pack = display.entityData.packDirty() ?: return
-                players.sendPackets(ClientboundSetEntityDataPacket(display.id, pack))
-            }
-            override fun sendClientboundRemoveEntitiesPacket(display: Any, players: List<Player>) {
-                val entity = display as? Entity ?: throw IllegalArgumentException("Class passed was not an Entity")
-                players.sendPackets(ClientboundRemoveEntitiesPacket(entity.id))
             }
 
             override val textDisplay: NMS.Display.TextDisplay by lazy {
@@ -704,7 +707,6 @@ object NMS1_20_1: NMS, Listener {
     }
 }
 
-private fun List<UUID>.sendPackets(vararg packet: Packet<*>) = this.mapNotNull { Bukkit.getPlayer(it) }.sendPackets(*packet)
 private fun Player.serverPlayer(): ServerPlayer = (this as CraftPlayer).handle
 private fun Player.sendPackets(vararg packets: Packet<*>?) {
     val connection = serverPlayer().connection

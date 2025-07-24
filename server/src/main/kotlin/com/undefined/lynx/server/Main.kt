@@ -1,6 +1,7 @@
 package com.undefined.lynx.server
 
 import com.undefined.lynx.LynxConfig
+import com.undefined.lynx.nick.getGameProfile
 import com.undefined.lynx.nick.setName
 import com.undefined.lynx.nick.setSkin
 import com.undefined.lynx.npc.spawnNPC
@@ -20,7 +21,6 @@ class Main : JavaPlugin() {
     override fun onEnable() {
         StellarConfig.setPlugin(this)
         LynxConfig.setPlugin(this)
-        LynxConfig.setMiniMessage(MiniMessage.miniMessage())
 
         val line = UpdatablePlayerTimerLine(20) { "<aqua>Block <gray>: ${it.inventory.itemInMainHand.type.name}" }
         val side = sidebar("Testing") {
@@ -34,6 +34,9 @@ class Main : JavaPlugin() {
 
                 val npc = sender.location.spawnNPC("Testing")
                 npc.hideName(true)
+                npc.setPerPlayerProfile { it.getGameProfile() }
+
+
 
                 var pastLoc: Location? = null
 

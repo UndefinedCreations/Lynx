@@ -43,11 +43,11 @@ object PlayerMetaManager : Listener {
         player.updateInventory()
     }
 
-    fun reloadPlayerMetaGlobal(player: Player) {
-        for (player in Bukkit.getOnlinePlayers()) player.hidePlayer(LynxConfig.javaPlugin, player)
-        Bukkit.getScheduler().runTaskLater(LynxConfig.javaPlugin, Runnable {
-            for (player in Bukkit.getOnlinePlayers()) player.showPlayer(LynxConfig.javaPlugin, player)
-        }, 1)
+    fun reloadPlayerMetaGlobal(changePlayer: Player) {
+        for (player in Bukkit.getOnlinePlayers().filter { it.world == changePlayer.world }) {
+            player.hidePlayer(LynxConfig.javaPlugin, changePlayer)
+            player.showPlayer(LynxConfig.javaPlugin, changePlayer)
+        }
     }
 }
 

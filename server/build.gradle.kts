@@ -24,7 +24,7 @@ repositories {
 dependencies {
     compileOnly(libs.spigot)
 
-    implementation("com.undefined:stellar:1.0.0")
+    implementation("com.undefined:stellar:1.0.4")
 
     implementation(project(":"))
 
@@ -45,7 +45,7 @@ tasks {
         archiveFileName = "server.jar"
     }
     runServer {
-        minecraftVersion("1.19.4")
+        minecraftVersion("1.19.2")
         serverType(ServerType.PAPERMC)
         acceptMojangEula()
         perVersionFolder(true)

@@ -20,9 +20,9 @@ abstract class BaseDisplay(
     internal var clicks: MutableList<RunBlock<EntityInteract>> = mutableListOf()
 
     init {
-        NMSManager.nms.display.setEntityLocation(display, location)
-        serverEntity = NMSManager.nms.display.createServerEntity(display, location.world!!)
-        NMSManager.nms.display.sendClientboundAddEntityPacket(display, serverEntity, players().toList())
+        NMSManager.nms.entity.setEntityLocation(display, location)
+        serverEntity = NMSManager.nms.entity.createServerEntity(display, location.world!!)
+        NMSManager.nms.entity.sendClientboundAddEntityPacket(display, serverEntity, players().toList())
         DisplayManager.activeDisplay.add(this)
     }
 
@@ -37,15 +37,15 @@ abstract class BaseDisplay(
     fun addViewer(player: Player) = addViewers(listOf(player))
 
     fun addViewers(players: List<Player>) = apply {
-        NMSManager.nms.display.sendClientboundAddEntityPacket(display, serverEntity, players)
-        NMSManager.nms.display.updateEntityData(display, players)
+        NMSManager.nms.entity.sendClientboundAddEntityPacket(display, serverEntity, players)
+        NMSManager.nms.entity.updateEntityData(display, players)
         visibleTo?.addAll(players)
     }
 
     fun removeViewer(player: Player) = removeViewers(listOf(player))
 
     fun removeViewers(players: List<Player>) = apply {
-        NMSManager.nms.display.sendClientboundRemoveEntitiesPacket(display, players)
+        NMSManager.nms.entity.sendClientboundRemoveEntitiesPacket(display, players)
         visibleTo?.removeAll(players)
     }
 
@@ -61,14 +61,14 @@ abstract class BaseDisplay(
     }
 
     fun teleport(location: Location) = apply {
-        NMSManager.nms.display.setEntityLocation(display, location)
+        NMSManager.nms.entity.setEntityLocation(display, location)
         NMSManager.nms.npc.sendTeleportPacket(display, players().toList())
         this.location = location
     }
 
     @JvmOverloads
     fun sendMetaDataUpdate(players: List<Player> = players().toList()) = apply {
-        NMSManager.nms.display.updateEntityData(display, players)
+        NMSManager.nms.entity.updateEntityData(display, players)
     }
 
     private fun players() = visibleTo ?: Bukkit.getOnlinePlayers()

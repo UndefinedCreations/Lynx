@@ -53,13 +53,8 @@ object NPCManager : Listener {
         autoLoad: Boolean = true,
         dsl: RunBlock<NPC> = RunBlock {}
     ): NPC {
-        val serverPlayer = NMSManager.nms.npc.createServerPlayer(name, texture, signature)
-        NMSManager.nms.display.setEntityLocation(serverPlayer, location)
-        val serverEntity = NMSManager.nms.display.createServerEntity(serverPlayer, location.world!!)
-        val team = NMSManager.nms.scoreboard.createTeam(Bukkit.getScoreboardManager()!!.mainScoreboard, UUID.randomUUID().toString())
-        NMSManager.nms.scoreboard.addTeamEntry(team, name)
         val players = visibleTo ?: Bukkit.getOnlinePlayers().toList()
-        val npc = NPC(serverPlayer, serverEntity, team, visibleTo?.toMutableList(), location)
+        val npc = createNPC(name, texture, signature, location, visibleTo)
         npc.addViewers(players)
         if (autoLoad) autoLoadNPCS.add(npc)
         spawnedNPC.add(npc)
@@ -77,6 +72,15 @@ object NPCManager : Listener {
         autoLoad: Boolean = true,
         dsl: RunBlock<NPC> = RunBlock {}
     ) = spawnNPC(location, name, skin.texture, skin.signature, visibleTo, autoLoad, dsl)
+
+    private fun createNPC(name: String, texture: String, signature: String, location: Location, visibleTo: List<Player>?): NPC {
+        val serverPlayer = NMSManager.nms.npc.createServerPlayer(name, texture, signature)
+        NMSManager.nms.entity.setEntityLocation(serverPlayer, location)
+        val serverEntity = NMSManager.nms.entity.createServerEntity(serverPlayer, location.world!!)
+        val team = NMSManager.nms.scoreboard.createTeam(Bukkit.getScoreboardManager()!!.mainScoreboard, UUID.randomUUID().toString())
+        NMSManager.nms.scoreboard.addTeamEntry(team, name)
+        return NPC(serverPlayer, serverEntity, team, visibleTo?.toMutableList(), location)
+    }
 
 }
 

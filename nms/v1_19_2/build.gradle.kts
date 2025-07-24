@@ -9,7 +9,7 @@ repositories {
 }
 
 dependencies {
-    echo("1.19.4", printDebug = true)
+    echo("1.19.2", printDebug = true)
     compileOnly(project(":common"))
 
     compileOnly("net.kyori:adventure-api:4.17.0")

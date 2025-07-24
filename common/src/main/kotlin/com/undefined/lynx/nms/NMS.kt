@@ -23,6 +23,7 @@ interface NMS {
     val scoreboard: Scoreboard
     val playerMeta: PlayerMeta
     val display: Display
+    val entity: Entity
 
     interface ItemBuilder {
         fun setSkullTexture(skullMeta: SkullMeta, texture: String): SkullMeta
@@ -57,6 +58,16 @@ interface NMS {
         fun sendClientboundGameEventPacket(player: Player)
         fun updateAbilities(player: Player)
     }
+
+    interface Entity {
+        fun setEntityLocation(display: Any, location: Location)
+        fun createServerEntity(display: Any, world: World): Any?
+        fun sendClientboundAddEntityPacket(display: Any, serverEntity: Any?, players: List<Player>)
+
+        fun updateEntityData(display: Any, players: List<Player>)
+        fun sendClientboundRemoveEntitiesPacket(display: Any, players: List<Player>)
+    }
+
     interface NPC {
         fun createServerPlayer(name: String, texture: String, signature: String): Any
         fun sendClientboundPlayerInfoUpdatePacketAddPlayer(serverPlayer: Any, players: List<Player>)
@@ -182,9 +193,6 @@ interface NMS {
 
     }
     interface Display {
-        fun setEntityLocation(display: Any, location: Location)
-        fun createServerEntity(display: Any, world: World): Any?
-        fun sendClientboundAddEntityPacket(display: Any, serverEntity: Any?, players: List<Player>)
         fun setScale(display: Any, vector3f: Vector3f)
         fun setLeftRotation(display: Any, quaternionf: Quaternionf)
         fun setRightRotation(display: Any, quaternionf: Quaternionf)
@@ -199,8 +207,6 @@ interface NMS {
         fun setShadowStrength(display: Any, shadowStrength: Float)
         fun setWidth(display: Any, width: Float)
         fun setHeight(display: Any, height: Float)
-        fun updateEntityData(display: Any, players: List<Player>)
-        fun sendClientboundRemoveEntitiesPacket(display: Any, players: List<Player>)
 
         val textDisplay: TextDisplay
         val blockDisplay: BlockDisplay

@@ -6,46 +6,38 @@ import com.mojang.datafixers.util.Pair
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.Skin
 import com.undefined.lynx.exception.UnsupportedFeatureException
-import com.undefined.lynx.nms.ClickType
-import com.undefined.lynx.nms.DuplexHandler
-import com.undefined.lynx.nms.EmptyChannel
-import com.undefined.lynx.nms.EntityInteract
-import com.undefined.lynx.nms.NMS
+import com.undefined.lynx.nms.*
 import com.undefined.lynx.npc.Pose
 import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.team.NameTagVisibility
 import com.undefined.lynx.util.getPrivateMethod
 import net.minecraft.ChatFormatting
+import net.minecraft.core.GlobalPos
 import net.minecraft.network.Connection
 import net.minecraft.network.PacketListener
 import net.minecraft.network.PacketSendListener
-import net.minecraft.network.chat.numbers.BlankFormat
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
 import net.minecraft.network.syncher.EntityDataAccessor
 import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.server.MinecraftServer
-import net.minecraft.server.level.ClientInformation
+import net.minecraft.server.ServerScoreboard
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.server.network.CommonListenerCookie
 import net.minecraft.server.network.ServerGamePacketListenerImpl
-import net.minecraft.util.Brightness
-import net.minecraft.world.entity.*
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.scores.Objective
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
 import net.minecraft.world.scores.criteria.ObjectiveCriteria
 import org.bukkit.*
-import org.bukkit.attribute.Attribute
-import org.bukkit.block.data.BlockData
-import org.bukkit.craftbukkit.v1_20_R3.CraftServer
-import org.bukkit.craftbukkit.v1_20_R3.CraftWorld
-import org.bukkit.craftbukkit.v1_20_R3.block.data.CraftBlockData
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer
-import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack
-import org.bukkit.craftbukkit.v1_20_R3.scoreboard.CraftScoreboard
-import org.bukkit.craftbukkit.v1_20_R3.util.CraftChatMessage
+import org.bukkit.craftbukkit.v1_19_R2.CraftServer
+import org.bukkit.craftbukkit.v1_19_R2.CraftWorld
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_19_R2.scoreboard.CraftScoreboard
+import org.bukkit.craftbukkit.v1_19_R2.util.CraftChatMessage
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -54,13 +46,11 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.scoreboard.Scoreboard
-import org.joml.Quaternionf
-import org.joml.Vector3f
 import java.net.SocketAddress
 import java.util.*
 
 @Suppress("NAME_SHADOWING")
-object NMS1_20_4: NMS, Listener {
+object NMS1_19_3: NMS, Listener {
 
     private var idMap: HashMap<UUID, UUID> = hashMapOf()
     private var cooldownMap: MutableList<Int> = mutableListOf()
@@ -85,15 +75,15 @@ object NMS1_20_4: NMS, Listener {
     private fun startPacketListener(player: Player) {
         idMap[player.uniqueId] = UUID.randomUUID()
         val serverPlayer = player.serverPlayer()
-        val connection = Mapping1_20_4.connection.get(serverPlayer.connection) as Connection
+        val connection = Mapping1_19_3.connection.get(serverPlayer.connection) as Connection
         val channel = connection.channel
         val pipeline = channel.pipeline()
         pipeline.addBefore("packet_handler", idMap[player.uniqueId].toString(), DuplexHandler(
             {
                 if (this is ServerboundInteractPacket) {
-                    val entityID = Mapping1_20_4.serverBoundInteractPacketEntityId.get(this) as Int
-                    val action = Mapping1_20_4.serverBoundInteractPacketAction.get(this)
-                    val actionType = action::class.java.getPrivateMethod(Mapping1_20_4.ServerboundInteractionPacket_GET_TYPE)
+                    val entityID = Mapping1_19_3.serverBoundInteractPacketEntityId.get(this) as Int
+                    val action = Mapping1_19_3.serverBoundInteractPacketAction.get(this)
+                    val actionType = action::class.java.getPrivateMethod(Mapping1_19_3.ServerboundInteractionPacket_GET_TYPE)
                         .invoke(action)
                     when (actionType.toString()) {
                         "ATTACK" -> for (run in clicks) run(EntityInteract(entityID, ClickType.LEFT, player))
@@ -113,7 +103,7 @@ object NMS1_20_4: NMS, Listener {
 
     private fun endPacketListener(player: Player) {
         val serverPlayer = player.serverPlayer()
-        val connection = Mapping1_20_4.connection.get(serverPlayer.connection) as Connection
+        val connection = Mapping1_19_3.connection.get(serverPlayer.connection) as Connection
         val channel = connection.channel
         channel.eventLoop().submit {
             channel.pipeline().remove(idMap[player.uniqueId].toString())
@@ -225,7 +215,7 @@ object NMS1_20_4: NMS, Listener {
 
             override fun setLatency(player: Any, latency: Int) {
                 val serverPlayer = player as? ServerPlayer ?: return
-                Mapping1_20_4.latency.set(serverPlayer.connection, latency)
+                serverPlayer.latency = latency
             }
         }
     }
@@ -245,25 +235,25 @@ object NMS1_20_4: NMS, Listener {
             }
 
             override fun sendClientboundRespawnPacket(player: Player) = player.serverPlayer().run {
+                val serverLevel = level as ServerLevel
                 this.connection.send(ClientboundRespawnPacket(
-                    CommonPlayerSpawnInfo(
-                        serverLevel().dimensionTypeId(),
-                        serverLevel().dimension(),
-                        0,
-                        gameMode.gameModeForPlayer,
-                        null,
-                        false,
-                        false,
-                        lastDeathLocation,
-                        0
-                    ),
-                    3
+                    serverLevel.dimensionTypeId(),
+                    serverLevel.dimension(),
+                    0,
+                    gameMode.gameModeForPlayer,
+                    null,
+                    false,
+                    false,
+                    0,
+                    Optional.of(GlobalPos.of(serverLevel.dimension(), this.blockPosition()))
                 ))
             }
 
-            override fun sendClientboundGameEventPacket(player: Player) = player.sendPackets(
-                ClientboundGameEventPacket(ClientboundGameEventPacket.LEVEL_CHUNKS_LOAD_START, 0f)
-            )
+            override fun sendClientboundGameEventPacket(player: Player)  {
+                player.sendPackets(
+                    ClientboundGameEventPacket(ClientboundGameEventPacket.IMMEDIATE_RESPAWN, 0f)
+                )
+            }
 
             override fun updateAbilities(player: Player) = player.serverPlayer().onUpdateAbilities()
         }
@@ -273,15 +263,11 @@ object NMS1_20_4: NMS, Listener {
         val emptyConnection = object : Connection(null) {
             init {
                 channel = EmptyChannel(null)
-                address = object : SocketAddress() {
-                    private val serialVersionUID = 8207338859896320185L
-                }
+                address = object : SocketAddress() {}
             }
-            override fun flushChannel() {}
             override fun isConnected(): Boolean = true
             override fun send(packet: Packet<*>) {}
             override fun send(packet: Packet<*>, genericfuturelistener: PacketSendListener?) {}
-            override fun send(packet: Packet<*>, genericfuturelistener: PacketSendListener?, flag: Boolean) {}
             override fun setListener(pl: PacketListener?) {}
         }
 
@@ -293,13 +279,12 @@ object NMS1_20_4: NMS, Listener {
                 val server = getServer()
                 val serverLevel = getServerLevel()
 
-                val fakeServerPlayer = ServerPlayer(server, serverLevel, gameProfile, ClientInformation.createDefault())
+                val fakeServerPlayer = ServerPlayer(server, serverLevel, gameProfile)
 
                 val connection = ServerGamePacketListenerImpl(
                     server,
                     emptyConnection,
-                    fakeServerPlayer,
-                    CommonListenerCookie.createInitial(fakeServerPlayer.gameProfile)
+                    fakeServerPlayer
                 )
 
                 fakeServerPlayer.connection = connection
@@ -375,7 +360,7 @@ object NMS1_20_4: NMS, Listener {
                 pose: Pose
             ) {
                 val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
-                serverPlayer.entityData.set(Mapping1_20_4.DATA_POSE, net.minecraft.world.entity.Pose.entries.first { it.name == pose.name })
+                serverPlayer.entityData.set(Mapping1_19_3.DATA_POSE, net.minecraft.world.entity.Pose.entries.first { it.name == pose.name })
             }
 
             override fun setGravity(
@@ -383,7 +368,7 @@ object NMS1_20_4: NMS, Listener {
                 gravity: Boolean
             ) {
                 val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
-                serverPlayer.entityData.set(Mapping1_20_4.DATA_NO_GRAVITY, gravity)
+                serverPlayer.entityData.set(Mapping1_19_3.DATA_NO_GRAVITY, gravity)
             }
 
             override fun sendClientboundMoveEntityPacketPosRot(
@@ -428,15 +413,15 @@ object NMS1_20_4: NMS, Listener {
             override fun createObjective(
                 scoreboard: Scoreboard,
                 title: String
-            ): Any = Objective(
-                (scoreboard as CraftScoreboard).handle,
-                UUID.randomUUID().toString(),
-                ObjectiveCriteria.DUMMY,
-                CraftChatMessage.fromJSONOrNull(title) ?: throw IllegalArgumentException("Can't get component"),
-                ObjectiveCriteria.RenderType.INTEGER,
-                false,
-                BlankFormat.INSTANCE
-            )
+            ): Any  {
+                return Objective(
+                    (scoreboard as CraftScoreboard).handle,
+                    UUID.randomUUID().toString(),
+                    ObjectiveCriteria.DUMMY,
+                    CraftChatMessage.fromJSONOrNull(title) ?: throw IllegalArgumentException("Can't get component"),
+                    ObjectiveCriteria.RenderType.INTEGER
+                )
+            }
 
             override fun setTitle(objective: Any, title: String) {
                 val objective = objective as? Objective ?: return
@@ -457,7 +442,7 @@ object NMS1_20_4: NMS, Listener {
                 players: List<Player>
             ) {
                 val objective = objective as? Objective ?: return
-                players.sendPackets(ClientboundSetDisplayObjectivePacket(net.minecraft.world.scores.DisplaySlot.SIDEBAR, objective))
+                players.sendPackets(ClientboundSetDisplayObjectivePacket(1, objective))
             }
 
             override fun sendSetScorePacket(
@@ -468,13 +453,11 @@ object NMS1_20_4: NMS, Listener {
                 players: List<Player>
             ) {
                 val objective = objective as? Objective ?: return
-                val nmsText = CraftChatMessage.fromJSONOrNull(text) ?: throw IllegalArgumentException("Can't get component")
                 players.sendPackets(ClientboundSetScorePacket(
-                    orderId,
+                    ServerScoreboard.Method.CHANGE,
                     objective.name,
-                    score,
-                    nmsText,
-                    BlankFormat.INSTANCE
+                    orderId,
+                    0
                 ))
             }
 
@@ -483,20 +466,19 @@ object NMS1_20_4: NMS, Listener {
                 objective: Any,
                 players: List<Player>
             ) {
-                val objective = objective as? Objective ?: return
-                players.sendPackets(ClientboundResetScorePacket(text, objective.name))
+                throw UnsupportedFeatureException("Remove sidebar line")
             }
 
             override fun createTeam(scoreboard: Scoreboard, name: String): Any = PlayerTeam((scoreboard as CraftScoreboard).handle, name)
 
             override fun setTeamPrefix(team: Any, prefix: String) {
                 val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
-                Mapping1_20_4.teamSetPrefix.set(team, CraftChatMessage.fromJSONOrNull(prefix))
+                Mapping1_19_3.teamSetPrefix.set(team, CraftChatMessage.fromJSONOrNull(prefix))
             }
 
             override fun setTeamSuffix(team: Any, suffix: String) {
                 val team = team as? PlayerTeam ?: throw IllegalArgumentException("The team passed was not a team.")
-                Mapping1_20_4.teamSetSuffix.set(team, CraftChatMessage.fromJSONOrNull(suffix))
+                Mapping1_19_3.teamSetSuffix.set(team, CraftChatMessage.fromJSONOrNull(suffix))
             }
 
             override fun setTeamSeeFriendlyInvisibles(team: Any, canSee: Boolean) {
@@ -557,7 +539,7 @@ object NMS1_20_4: NMS, Listener {
             override fun setEntityLocation(display: Any, location: Location) {
                 val display = display as? Entity ?: throw IllegalArgumentException("Class passed was not an Display Entity")
                 display.setPos(location.x, location.y, location.z)
-                Mapping1_20_4.entitySetRot.invoke(display, location.yaw, location.pitch)
+                Mapping1_19_3.entitySetRot.invoke(display, location.yaw, location.pitch)
             }
 
             override fun createServerEntity(display: Any, world: World): Any? {
@@ -583,139 +565,8 @@ object NMS1_20_4: NMS, Listener {
             }
         }
     }
-    override val display: NMS.Display by lazy {
-        object : NMS.Display {
-
-            override fun setScale(display: Any, vector3f: Vector3f) {
-                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.entityData.set(Mapping1_20_4.DISPLAY_MAPPING.DATA_SCALE_ID, vector3f)
-            }
-            override fun setLeftRotation(display: Any, quaternionf: Quaternionf) {
-                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.entityData.set(Mapping1_20_4.DISPLAY_MAPPING.DATA_LEFT_ROTATION_ID, quaternionf)
-            }
-            override fun setRightRotation(display: Any, quaternionf: Quaternionf) {
-                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.entityData.set(Mapping1_20_4.DISPLAY_MAPPING.DATA_RIGHT_ROTATION_ID, quaternionf)
-            }
-            override fun setTranslation(display: Any, vector3f: Vector3f) {
-                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.entityData.set(Mapping1_20_4.DISPLAY_MAPPING.DATA_TRANSLATION_ID, vector3f)
-            }
-            override fun setInterpolationDuration(display: Any, duration: Int) {
-                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.transformationInterpolationDuration = duration
-            }
-            override fun setInterpolationDelay(display: Any, duration: Int) {
-                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.transformationInterpolationDelay = duration
-            }
-            override fun setTeleportDuration(display: Any, duration: Int) {
-                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.entityData.set(Display.DATA_POS_ROT_INTERPOLATION_DURATION_ID, duration)
-            }
-            override fun setBillboardRender(display: Any, byte: Byte) {
-                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.entityData.set(Mapping1_20_4.DISPLAY_MAPPING.DATA_BILLBOARD_RENDER_CONSTRAINTS_ID, byte)
-            }
-            override fun setBrightnessOverride(display: Any, int: Int) {
-                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.brightnessOverride = Brightness.unpack(int)
-            }
-            override fun setViewRange(display: Any, view: Float) {
-                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.viewRange = view
-            }
-            override fun setShadowRadius(display: Any, shadowRadius: Float) {
-                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.shadowRadius = shadowRadius
-            }
-            override fun setShadowStrength(display: Any, shadowStrength: Float) {
-                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.shadowStrength = shadowStrength
-            }
-            override fun setWidth(display: Any, width: Float) {
-                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.width = width
-            }
-            override fun setHeight(display: Any, height: Float) {
-                val display = display as? Display ?: throw IllegalArgumentException("Class passed was not an Display Entity")
-                display.height = height
-            }
-
-            override val textDisplay: NMS.Display.TextDisplay by lazy {
-                object : NMS.Display.TextDisplay {
-
-                    override fun createTextDisplay(world: World): Any = Display.TextDisplay(EntityType.TEXT_DISPLAY, (world as CraftWorld).handle)
-
-                    override fun setText(display: Any, json: String) {
-                        val display = display as? Display.TextDisplay ?: throw IllegalArgumentException("Class passed was not an Text Display Entity")
-                        display.text = CraftChatMessage.fromJSONOrNull(json)
-                    }
-
-                    override fun setLineWidth(display: Any, width: Int) {
-                        val display = display as? Display.TextDisplay ?: throw IllegalArgumentException("Class passed was not an Text Display Entity")
-                        display.entityData.set(Display.TextDisplay.DATA_LINE_WIDTH_ID, width)
-                    }
-
-                    override fun setBackgroundColor(display: Any, backgroundID: Int) {
-                        val display = display as? Display.TextDisplay ?: throw IllegalArgumentException("Class passed was not an Text Display Entity")
-                        display.entityData.set(Display.TextDisplay.DATA_BACKGROUND_COLOR_ID, backgroundID)
-                    }
-
-                    override fun setTextOpacity(display: Any, textOpacity: Byte) {
-                        val display = display as? Display.TextDisplay ?: throw IllegalArgumentException("Class passed was not an Text Display Entity")
-                        display.textOpacity = textOpacity
-                    }
-
-                    override fun setStyleFlags(display: Any, styleFlags: Byte) {
-                        val display = display as? Display.TextDisplay ?: throw IllegalArgumentException("Class passed was not an Text Display Entity")
-                        display.flags = styleFlags
-                    }
-
-                    override fun getStyleFlag(display: Any): Byte {
-                        val display = display as? Display.TextDisplay ?: throw IllegalArgumentException("Class passed was not an Text Display Entity")
-                        return display.flags
-                    }
-                }
-            }
-            override val blockDisplay: NMS.Display.BlockDisplay by lazy {
-                object : NMS.Display.BlockDisplay {
-                    override fun createBlockDisplay(world: World): Any = Display.BlockDisplay(EntityType.BLOCK_DISPLAY, (world as CraftWorld).handle)
-
-                    override fun setBlock(display: Any, block: BlockData) {
-                        val display = display as? Display.BlockDisplay ?: throw IllegalArgumentException("Class passed was not an Block Display Entity")
-                        display.blockState = (block as CraftBlockData).state
-                    }
-                }
-            }
-            override val itemDisplay: NMS.Display.ItemDisplay by lazy {
-                object : NMS.Display.ItemDisplay {
-                    override fun createItemDisplay(world: World): Any = Display.ItemDisplay(EntityType.ITEM_DISPLAY, (world as CraftWorld).handle)
-
-                    override fun setItem(display: Any, itemStack: ItemStack) {
-                        val display = display as? Display.ItemDisplay ?: throw IllegalArgumentException("Class passed was not an Item Display Entity")
-                        display.itemStack = CraftItemStack.asNMSCopy(itemStack)
-                    }
-                }
-            }
-            override val interaction: NMS.Display.Interaction by lazy {
-                object : NMS.Display.Interaction {
-                    override fun createInteraction(world: World): Any = Interaction(EntityType.INTERACTION, (world as CraftWorld).handle)
-
-                    override fun setWidth(display: Any, width: Float) {
-                        val interaction = display as? Interaction ?: throw IllegalArgumentException("Class passed was not an Interaction Entity")
-                        interaction.width = width
-                    }
-
-                    override fun setHeight(display: Any, height: Float) {
-                        val interaction = display as? Interaction ?: throw IllegalArgumentException("Class passed was not an Interaction Entity")
-                        interaction.height = height
-                    }
-                }
-            }
-        }
-    }
+    override val display: NMS.Display
+        get() = throw UnsupportedFeatureException("Display Entities")
 }
 
 private fun Player.serverPlayer(): ServerPlayer = (this as CraftPlayer).handle
