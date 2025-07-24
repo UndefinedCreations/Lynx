@@ -10,7 +10,6 @@ import com.undefined.lynx.sidebar.sidebar.sidebar
 import com.undefined.lynx.tab.size.fillTab
 import com.undefined.stellar.StellarCommand
 import com.undefined.stellar.StellarConfig
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player

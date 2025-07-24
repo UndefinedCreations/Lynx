@@ -5,11 +5,7 @@ import com.mojang.authlib.properties.Property
 import com.mojang.datafixers.util.Pair
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.Skin
-import com.undefined.lynx.nms.ClickType
-import com.undefined.lynx.nms.DuplexHandler
-import com.undefined.lynx.nms.EmptyChannel
-import com.undefined.lynx.nms.EntityInteract
-import com.undefined.lynx.nms.NMS
+import com.undefined.lynx.nms.*
 import com.undefined.lynx.npc.Pose
 import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.team.NameTagVisibility

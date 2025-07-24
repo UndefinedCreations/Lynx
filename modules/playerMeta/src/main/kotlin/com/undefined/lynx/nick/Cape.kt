@@ -1,5 +1,10 @@
 package com.undefined.lynx.nick
 
+/**
+ * This is enum class that contains all the cape texture links
+ *
+ * @param texture The capes texture link
+ */
 enum class Cape(val texture: String) {
 
     MIGRATOR("http://textures.minecraft.net/texture/2340c0e03dd24a11b15a8b33c2a7e9e32abb2051b2481d0ba7defd635ca7a933"),

@@ -2,7 +2,6 @@ package com.undefined.lynx.npc
 
 
 import com.undefined.lynx.GameProfile
-import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.nms.EntityInteract
 import com.undefined.lynx.team.NameTagVisibility

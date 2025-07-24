@@ -1,8 +1,8 @@
 package com.undefined.lynx
 
 data class Skin(
-    val texture: String,
-    val signature: String,
+    var texture: String,
+    var signature: String,
 ) {
     override fun equals(other: Any?): Boolean {
         other ?: return super.equals(other)

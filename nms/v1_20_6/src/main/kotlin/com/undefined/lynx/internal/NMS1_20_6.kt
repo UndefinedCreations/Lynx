@@ -5,18 +5,13 @@ import com.mojang.authlib.properties.Property
 import com.mojang.datafixers.util.Pair
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.Skin
-import com.undefined.lynx.nms.ClickType
-import com.undefined.lynx.nms.DuplexHandler
-import com.undefined.lynx.nms.EmptyChannel
-import com.undefined.lynx.nms.EntityInteract
-import com.undefined.lynx.nms.NMS
+import com.undefined.lynx.nms.*
 import com.undefined.lynx.npc.Pose
 import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.team.NameTagVisibility
 import com.undefined.lynx.util.getPrivateMethod
 import net.minecraft.ChatFormatting
 import net.minecraft.network.Connection
-import net.minecraft.network.PacketListener
 import net.minecraft.network.PacketSendListener
 import net.minecraft.network.chat.numbers.BlankFormat
 import net.minecraft.network.protocol.Packet
@@ -25,7 +20,6 @@ import net.minecraft.network.syncher.EntityDataAccessor
 import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ClientInformation
-import net.minecraft.server.level.ServerEntity
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.network.CommonListenerCookie

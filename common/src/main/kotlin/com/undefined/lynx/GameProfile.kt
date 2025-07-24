@@ -1,9 +1,11 @@
 package com.undefined.lynx
 
 data class GameProfile(
-    val name: String,
-    val skin: Skin
+    var name: String,
+    var skin: Skin
 ) {
+
+    fun clone(): GameProfile = GameProfile(name, skin)
 
     override fun equals(other: Any?): Boolean {
         other ?: return super.equals(other)

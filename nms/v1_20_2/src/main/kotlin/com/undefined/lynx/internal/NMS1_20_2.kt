@@ -6,11 +6,7 @@ import com.mojang.datafixers.util.Pair
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.Skin
 import com.undefined.lynx.exception.UnsupportedFeatureException
-import com.undefined.lynx.nms.ClickType
-import com.undefined.lynx.nms.DuplexHandler
-import com.undefined.lynx.nms.EmptyChannel
-import com.undefined.lynx.nms.EntityInteract
-import com.undefined.lynx.nms.NMS
+import com.undefined.lynx.nms.*
 import com.undefined.lynx.npc.Pose
 import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.team.NameTagVisibility
@@ -20,7 +16,6 @@ import net.minecraft.network.Connection
 import net.minecraft.network.PacketListener
 import net.minecraft.network.PacketSendListener
 import net.minecraft.network.protocol.Packet
-import net.minecraft.network.protocol.PacketFlow
 import net.minecraft.network.protocol.game.*
 import net.minecraft.network.syncher.EntityDataAccessor
 import net.minecraft.network.syncher.EntityDataSerializers
@@ -56,10 +51,6 @@ import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.scoreboard.Scoreboard
 import org.joml.Quaternionf
 import org.joml.Vector3f
-import org.reflections.Reflections
-import org.reflections.scanners.Scanners
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import java.net.SocketAddress
 import java.util.*
 

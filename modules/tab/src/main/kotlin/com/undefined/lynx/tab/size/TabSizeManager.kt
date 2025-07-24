@@ -6,8 +6,6 @@ import com.undefined.lynx.tab.DefaultTabSkin
 import com.undefined.lynx.tab.TabLatency
 import com.undefined.lynx.tab.TabManager
 import com.undefined.lynx.tab.runRunnable
-import net.md_5.bungee.api.chat.TextComponent
-import net.md_5.bungee.chat.ComponentSerializer
 import org.bukkit.entity.Player
 
 object TabSizeManager {

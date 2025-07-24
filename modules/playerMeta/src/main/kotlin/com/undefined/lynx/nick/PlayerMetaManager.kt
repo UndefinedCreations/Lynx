@@ -11,16 +11,31 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.util.*
 
+/**
+ * This class is the manager for the players meta.
+ *
+ */
 object PlayerMetaManager : Listener {
 
+    /**
+     * This variable contains all the original game-profiles of the player.
+     * This is used when resting the players game-profile
+     */
     internal val trueGameProfile: HashMap<UUID, GameProfile> = hashMapOf()
+    /**
+     * This variable contains all the modifiable game-profiles of the player.
+     */
+    internal val modifiedGameProfile: HashMap<UUID, GameProfile> = hashMapOf()
+
     init {
         Bukkit.getPluginManager().registerEvents(this, LynxConfig.javaPlugin)
     }
 
     @EventHandler
     fun onJoin(event: PlayerJoinEvent) {
-        trueGameProfile[event.player.uniqueId] = PlayerMetaUtil.getGameProfile(event.player)
+        val gameProfile = GameProfile(event.player.name, NMSManager.nms.nick.getSkin(event.player))
+        trueGameProfile[event.player.uniqueId] = gameProfile
+        modifiedGameProfile[event.player.uniqueId] = gameProfile.clone()
     }
 
     @EventHandler
@@ -28,6 +43,11 @@ object PlayerMetaManager : Listener {
         trueGameProfile.remove(event.player.uniqueId)
     }
 
+    /**
+     * This method will reload the player for the client. It is used to change that player skin for the client
+     *
+     * @param player The client to reload
+     */
     fun reloadPlayerMeta(player: Player) {
         NMSManager.nms.playerMeta.sendClientboundPlayerInfoRemovePacket(listOf(player), listOf(player))
         NMSManager.nms.playerMeta.sendClientboundPlayerInfoAddPacketPlayer(player, listOf(player))
@@ -43,6 +63,11 @@ object PlayerMetaManager : Listener {
         player.updateInventory()
     }
 
+    /**
+     * This method will reload the player meta for all other clients.
+     *
+     * @param changePlayer The player to reload
+     */
     fun reloadPlayerMetaGlobal(changePlayer: Player) {
         for (player in Bukkit.getOnlinePlayers().filter { it.world == changePlayer.world }) {
             player.hidePlayer(LynxConfig.javaPlugin, changePlayer)

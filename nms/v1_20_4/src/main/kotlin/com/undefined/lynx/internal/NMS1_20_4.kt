@@ -6,11 +6,7 @@ import com.mojang.datafixers.util.Pair
 import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.Skin
 import com.undefined.lynx.exception.UnsupportedFeatureException
-import com.undefined.lynx.nms.ClickType
-import com.undefined.lynx.nms.DuplexHandler
-import com.undefined.lynx.nms.EmptyChannel
-import com.undefined.lynx.nms.EntityInteract
-import com.undefined.lynx.nms.NMS
+import com.undefined.lynx.nms.*
 import com.undefined.lynx.npc.Pose
 import com.undefined.lynx.team.CollisionRule
 import com.undefined.lynx.team.NameTagVisibility
@@ -37,7 +33,6 @@ import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
 import net.minecraft.world.scores.criteria.ObjectiveCriteria
 import org.bukkit.*
-import org.bukkit.attribute.Attribute
 import org.bukkit.block.data.BlockData
 import org.bukkit.craftbukkit.v1_20_R3.CraftServer
 import org.bukkit.craftbukkit.v1_20_R3.CraftWorld
