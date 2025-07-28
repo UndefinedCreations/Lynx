@@ -144,8 +144,18 @@ publishing {
     }
     repositories {
         maven {
-            name = "undefined-repo"
+            name = "undefined-releases"
             url = uri("https://repo.undefinedcreations.com/releases")
+            credentials(PasswordCredentials::class) {
+                username = System.getenv("MAVEN_NAME") ?: property("mavenUser").toString()
+                password = System.getenv("MAVEN_SECRET") ?: property("mavenPassword").toString()
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "undefined-snapshots"
+            url = uri("https://repo.undefinedcreations.com/snapshots")
             credentials(PasswordCredentials::class) {
                 username = System.getenv("MAVEN_NAME") ?: property("mavenUser").toString()
                 password = System.getenv("MAVEN_SECRET") ?: property("mavenPassword").toString()
