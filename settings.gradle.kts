@@ -21,6 +21,7 @@ include(
     ":modules:scoreboard",
     ":modules:tab",
     ":modules:display",
+    ":modules:kotlin",
     ":nms:v1_16_5",
     ":nms:v1_17_1",
     ":nms:v1_18_1",
