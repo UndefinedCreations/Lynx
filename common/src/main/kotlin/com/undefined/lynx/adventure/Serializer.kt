@@ -8,14 +8,20 @@ import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.chat.ComponentSerializer
 
 
-private val gson: Gson = ComponentSerializer::class.java.getDeclaredField("gson").apply { isAccessible = true }.get(null) as Gson
+private val gson: Gson? by lazy {
+    try {
+        ComponentSerializer::class.java.getDeclaredField("gson").apply { isAccessible = true }.get(null) as Gson
+    } catch (e: Exception) {
+        null
+    }
+}
 
 fun Component.toJson(): String = JSONComponentSerializer.json().serialize(this)
 fun String.toJson(): String = ComponentSerializer.toString(TextComponent(this)).toString()
 
-fun Component.toLegacyText(): String = JsonParser.parseString(this.toJson()).deserialize().toLegacyText()
+fun Component.toLegacyText(): String = if (gson == null) ComponentSerializer.deserialize(this.toJson()).toLegacyText() else JsonParser.parseString(this.toJson()).deserialize(gson!!).toLegacyText()
 
-fun JsonElement.deserialize(): BaseComponent {
+fun JsonElement.deserialize(gson: Gson): BaseComponent {
     if (this is JsonPrimitive) {
         if (this.isString) {
             return TextComponent(this.asString)

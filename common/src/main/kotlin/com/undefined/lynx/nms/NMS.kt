@@ -9,6 +9,7 @@ import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Player
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.joml.Quaternionf
@@ -74,7 +75,7 @@ interface NMS {
         fun sendClientboundSetEntityDataPacket(serverPlayer: Any, players: List<Player>)
         fun getName(serverPlayer: Any): String
         fun onClick(consumer: EntityInteract.() -> Unit)
-        fun setItem(serverPlayer: Any, slot: Int, itemStack: ItemStack?, players: List<Player>)
+        fun setItem(serverPlayer: Any, slot: EquipmentSlot, itemStack: ItemStack?, players: List<Player>)
         fun getUUID(serverPlayer: Any): UUID
         fun getID(serverPlayer: Any): Int
         fun sendTeleportPacket(serverPlayer: Any, players: List<Player>)

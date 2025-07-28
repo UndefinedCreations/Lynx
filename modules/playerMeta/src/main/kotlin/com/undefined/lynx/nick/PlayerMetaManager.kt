@@ -28,6 +28,11 @@ object PlayerMetaManager : Listener {
     internal val modifiedGameProfile: HashMap<UUID, GameProfile> = hashMapOf()
 
     init {
+        for (player in Bukkit.getOnlinePlayers()) {
+            val gameProfile = GameProfile(player.name, NMSManager.nms.nick.getSkin(player))
+            trueGameProfile[player.uniqueId] = gameProfile
+            modifiedGameProfile[player.uniqueId] = gameProfile.clone()
+        }
         Bukkit.getPluginManager().registerEvents(this, LynxConfig.javaPlugin)
     }
 
@@ -74,5 +79,7 @@ object PlayerMetaManager : Listener {
             player.showPlayer(LynxConfig.javaPlugin, changePlayer)
         }
     }
+
+    fun starUp() {}
 }
 

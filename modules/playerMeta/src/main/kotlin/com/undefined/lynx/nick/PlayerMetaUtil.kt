@@ -7,6 +7,7 @@ import com.undefined.lynx.Skin
 import com.undefined.lynx.nick.events.PlayerCapeChangeEvent
 import com.undefined.lynx.nick.events.PlayerNameChangeEvent
 import com.undefined.lynx.nick.events.PlayerSkinChangeEvent
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.util.*
 
@@ -14,6 +15,13 @@ import java.util.*
  * This class is used to get and modify a player meta
  */
 object PlayerMetaUtil {
+
+
+    init {
+
+        PlayerMetaManager.starUp()
+
+    }
 
     /**
      * Changes the player username
@@ -26,6 +34,7 @@ object PlayerMetaUtil {
     @JvmOverloads
     fun setName(player: Player, name: String, reloadPlayer: Boolean = true) {
         val event = PlayerNameChangeEvent(player, player.name, name)
+        Bukkit.getPluginManager().callEvent(event)
         if (event.isCancelled) return
         NMSManager.nms.nick.setName(player, name)
         PlayerMetaManager.modifiedGameProfile[player.uniqueId]!!.name = name
@@ -46,6 +55,7 @@ object PlayerMetaUtil {
     @JvmOverloads
     fun setSkin(player: Player, skin: Skin, reloadPlayer: Boolean = true) {
         val event = PlayerSkinChangeEvent(player, player.getGameProfile().skin, skin)
+        Bukkit.getPluginManager().callEvent(event)
         if (event.isCancelled) return
         NMSManager.nms.nick.setSkin(player, skin.texture, skin.signature)
         PlayerMetaManager.modifiedGameProfile[player.uniqueId]!!.apply {
@@ -93,7 +103,7 @@ object PlayerMetaUtil {
      * @return The original player name
      */
     @JvmStatic
-    fun getTruePlayerName(player: Player): String = PlayerMetaManager.trueGameProfile[player.uniqueId]?.name ?: player.name
+    fun getOriginalPlayerName(player: Player): String = PlayerMetaManager.trueGameProfile[player.uniqueId]?.name ?: player.name
 
     /**
      * Get the current player skin
@@ -111,18 +121,18 @@ object PlayerMetaUtil {
      * @return The original player skin
      */
     @JvmStatic
-    fun getTruePlayerSkin(player: Player): Skin = PlayerMetaManager.trueGameProfile[player.uniqueId]?.skin ?: getPlayerSkin(player)
+    fun getOriginalPlayerSkin(player: Player): Skin = PlayerMetaManager.trueGameProfile[player.uniqueId]?.skin ?: getPlayerSkin(player)
 
     /**
      * Check if the player name is the original
      */
     @JvmStatic
-    fun isNameNicked(player: Player): Boolean = PlayerMetaManager.trueGameProfile[player.uniqueId]?.name != getTruePlayerName(player)
+    fun isNameModified(player: Player): Boolean = PlayerMetaManager.trueGameProfile[player.uniqueId]?.name != getOriginalPlayerName(player)
     /**
      * Check if the player skin is the original
      */
     @JvmStatic
-    fun isSkinNicked(player: Player): Boolean = PlayerMetaManager.trueGameProfile[player.uniqueId]?.skin != getPlayerSkin(player)
+    fun isSkinModified(player: Player): Boolean = PlayerMetaManager.trueGameProfile[player.uniqueId]?.skin != getPlayerSkin(player)
 
     /**
      * Resets the player name to the original if modified
@@ -153,8 +163,9 @@ object PlayerMetaUtil {
      * @param cape The cape to change to
      */
     @JvmStatic
-    fun setClientSideCape(player: Player, cape: Cape) {
+    fun setCape(player: Player, cape: Cape) {
         val event = PlayerCapeChangeEvent(player, getCape(player), cape)
+        Bukkit.getPluginManager().callEvent(event)
         if (event.isCancelled) return
         val currentSkin = getPlayerSkin(player)
         val json = JsonParser.parseString(String(Base64.getDecoder().decode(currentSkin.texture))).asJsonObject
@@ -180,6 +191,19 @@ object PlayerMetaUtil {
     }
 
     /**
+     * Get the player original client cape
+     *
+     * @param player The player to get the cape from
+     * @return The current cape
+     */
+    @JvmStatic
+    fun getOriginalCape(player: Player): Cape = PlayerMetaManager.trueGameProfile[player.uniqueId]!!.let {
+        val json = JsonParser.parseString(String(Base64.getDecoder().decode(it.skin.texture))).asJsonObject
+        val capeJson = json.get("textures").asJsonObject.get("CAPE").asJsonObject
+        return@let Cape.entries.firstOrNull { it.texture == capeJson.get("url").asString } ?: Cape.NONE
+    }
+
+    /**
      * The current players game profile
      *
      * @param player The player to get the game-profile from
@@ -195,7 +219,7 @@ object PlayerMetaUtil {
      * @return The original game-profile
      */
     @JvmStatic
-    fun getTrueGameProfile(player: Player): GameProfile = PlayerMetaManager.trueGameProfile[player.uniqueId]!!
+    fun getOriginalGameProfile(player: Player): GameProfile = PlayerMetaManager.trueGameProfile[player.uniqueId]!!
 
     /**
      *  Check if the player has a modified game-profile
@@ -221,6 +245,13 @@ object PlayerMetaUtil {
 }
 
 /**
+ * Get the player original client cape
+ *
+ * @return The current cape
+ */
+fun Player.getOriginalCape(): Cape = PlayerMetaUtil.getOriginalCape(this)
+
+/**
  * Get the player client cape
  *
  * @return The current cape
@@ -239,7 +270,7 @@ fun Player.getGameProfile(): GameProfile = PlayerMetaUtil.getGameProfile(this)
  *
  * @return The original game-profile
  */
-fun Player.getTrueGameProfile(): GameProfile = PlayerMetaUtil.getTrueGameProfile(this)
+fun Player.getOriginalGameProfile(): GameProfile = PlayerMetaUtil.getOriginalGameProfile(this)
 
 /**
  *  Check if the player has a modified game-profile
@@ -261,7 +292,7 @@ fun Player.setGameProfile(gameProfile: GameProfile, reloadPlayer: Boolean = true
  *
  * @param cape The cape to change to
  */
-fun Player.setClientCape(cape: Cape) = PlayerMetaUtil.setClientSideCape(this, cape)
+fun Player.setCape(cape: Cape) = PlayerMetaUtil.setCape(this, cape)
 
 /**
  * Changes the player username
@@ -304,7 +335,7 @@ fun Player.reloadPlayerMetaGlobal() = PlayerMetaUtil.reloadPlayerMetaGlobal(this
  *
  * @return The original player name
  */
-fun Player.getTrueName(): String = PlayerMetaUtil.getTruePlayerName(this)
+fun Player.getOriginalName(): String = PlayerMetaUtil.getOriginalPlayerName(this)
 
 /**
  * Get the current player skin
@@ -318,17 +349,17 @@ fun Player.getSkin(): Skin = PlayerMetaUtil.getPlayerSkin(this)
  *
  * @return The original player skin
  */
-fun Player.getTrueSkin(): Skin = PlayerMetaUtil.getTruePlayerSkin(this)
+fun Player.getOriginalSkin(): Skin = PlayerMetaUtil.getOriginalPlayerSkin(this)
 
 /**
  * Check if the player name is the original
  */
-fun Player.isNameNicked(): Boolean = PlayerMetaUtil.isNameNicked(this)
+fun Player.isNameModified(): Boolean = PlayerMetaUtil.isNameModified(this)
 
 /**
  * Check if the player skin is the original
  */
-fun Player.isSkinNicked(): Boolean = PlayerMetaUtil.isSkinNicked(this)
+fun Player.isSkinModified(): Boolean = PlayerMetaUtil.isSkinModified(this)
 
 /**
  * Resets the player name to the original if modified

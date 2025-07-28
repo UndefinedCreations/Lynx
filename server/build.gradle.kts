@@ -36,17 +36,17 @@ dependencies {
 
 tasks {
     compileKotlin {
-        compilerOptions.jvmTarget = JvmTarget.JVM_17
+        compilerOptions.jvmTarget = JvmTarget.JVM_1_8
     }
     compileJava {
-        options.release = 17
+        options.release = 8
     }
     shadowJar {
         archiveFileName = "server.jar"
     }
     runServer {
-        minecraftVersion("1.19.2")
-        serverType(ServerType.PAPERMC)
+        minecraftVersion("1.21.4")
+        serverType(ServerType.SPIGOT)
         acceptMojangEula()
         perVersionFolder(true)
     }

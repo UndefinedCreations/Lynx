@@ -54,13 +54,18 @@ open class AbstractTabLayout(
     fun addPlayer(player: Player) = addPlayers(listOf(player))
 
     fun addPlayers(players: List<Player>) = runRunnable({
-        val players = players.filter { !players.contains(it) }
+        println("1")
+        val players = players.filter { !this.viewers.contains(it) }
+        println(players)
         NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(TabLayoutManager.badTeam, players)
+        println(fakePlayers.values.toList())
         TabManager.addFakePlayers(fakePlayers.values.toList(), players)
         players.forEach { player ->
+            println("Player ruin")
             TabLayoutManager.activeTabLayout.firstOrNull { it.viewers.contains(player) }?.let { removePlayer(player) }
 
             runnable.entries.forEach { map ->
+                println("Run")
                 val team = teams[map.key] ?: return@runRunnable
                 val fakePlayer = fakePlayers[map.key] ?: return@runRunnable
                 map.value.run {
@@ -73,14 +78,14 @@ open class AbstractTabLayout(
             teams.forEach { NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(it.value, listOf(player)) }
         }
         viewers.addAll(players)
-    }, async)!!
+    }, async)
 
     fun removePlayers(players: List<Player>) = runRunnable({
         viewers.removeAll(players)
         NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketRemove(TabLayoutManager.badTeam, players)
         teams.forEach { NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketRemove(it.value, players) }
         fakePlayers.forEach { TabManager.removeFakePlayer(it.value, players) }
-    }, async)!!
+    }, async)
 
     fun removePlayer(player: Player) = removePlayers(listOf(player))
 

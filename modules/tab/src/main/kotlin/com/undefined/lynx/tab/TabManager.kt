@@ -25,6 +25,7 @@ object TabManager {
 
     fun addFakePlayers(players: List<Any>, viewers: List<Player>) {
         for (player in players) {
+            println("Fake Player")
             NMSManager.nms.playerMeta.sendClientboundPlayerInfoAddPacket(player, viewers)
             NMSManager.nms.playerMeta.sendClientboundPlayerInfoUpdateListedPacket(player, viewers)
             NMSManager.nms.playerMeta.sendClientboundPlayerInfoUpdateListedOrderPacket(player, viewers)
@@ -72,7 +73,7 @@ object TabManager {
         NMSManager.nms.playerMeta.sendClientboundPlayerInfoRemovePacketListServerPlayer(listOf(player), viewers)
     }
 
-    fun order(index: Int): String =  "§${(index.toChar().code + 1).toChar()}"
+    fun order(index: Int): String =  "§${(index.toChar().code + 1).toChar()}§${(index.toChar().code + 1).toChar()}"
 
 }
 

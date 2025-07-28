@@ -10,6 +10,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import java.util.*
 import kotlin.math.floor
@@ -24,7 +25,7 @@ open class NPC(
 
     internal var clickActions: MutableList<EntityInteract.() -> Unit> = mutableListOf()
 
-    private val itemStacks: HashMap<Int, ItemStack> = hashMapOf()
+    private val itemStacks: HashMap<EquipmentSlot, ItemStack> = hashMapOf()
 
     private var perPlayerProfile: ReturnBlock<Player, GameProfile>? = null
 
@@ -64,7 +65,7 @@ open class NPC(
     fun clearOnClick() = apply { clickActions.clear() }
 
     @JvmOverloads
-    fun setItem(slot: Int, item: ItemStack, players: List<Player> = players()) = apply {
+    fun setItem(slot: EquipmentSlot, item: ItemStack, players: List<Player> = players()) = apply {
         NMSManager.nms.npc.setItem(serverPlayer, slot, item, players)
         itemStacks[slot] = item
     }
@@ -81,12 +82,14 @@ open class NPC(
         NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players)
     }
 
-    fun setPose(pose: Pose) = apply {
+    @JvmOverloads
+    fun setPose(pose: Pose, players: List<Player> = players()) = apply {
         NMSManager.nms.npc.setPos(serverPlayer, pose)
         NMSManager.nms.entity.updateEntityData(serverPlayer, players())
     }
 
-    fun setGravity(gravity: Boolean) = apply {
+    @JvmOverloads
+    fun setGravity(gravity: Boolean, players: List<Player> = players()) = apply {
         NMSManager.nms.npc.setGravity(serverPlayer, gravity)
         NMSManager.nms.entity.updateEntityData(serverPlayer, players())
     }

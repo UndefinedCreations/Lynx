@@ -241,7 +241,7 @@ object NMS1_21_1: NMS, Listener {
             }
 
             override fun sendClientboundRespawnPacket(player: Player) = player.serverPlayer().run {
-                this.connection.sendPacket(ClientboundRespawnPacket(
+                this.connection.send(ClientboundRespawnPacket(
                     CommonPlayerSpawnInfo(
                         serverLevel().dimensionTypeRegistration(),
                         serverLevel().dimension(),
@@ -331,13 +331,13 @@ object NMS1_21_1: NMS, Listener {
                 clicks.add(consumer)
             }
 
-            override fun setItem(serverPlayer: Any, slot: Int, itemStack: ItemStack?, players: List<Player>) {
+            override fun setItem(serverPlayer: Any, slot: org.bukkit.inventory.EquipmentSlot, itemStack: ItemStack?, players: List<Player>) {
                 val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
                 players.sendPackets(ClientboundSetEquipmentPacket(
                     serverPlayer.id,
                     mutableListOf(
                         Pair(
-                            EquipmentSlot.entries.filter { it.index == slot }.getOrNull(0),
+                            EquipmentSlot.entries.filter { it.name == slot.name }.getOrNull(0),
                             CraftItemStack.asNMSCopy(itemStack ?: ItemStack(Material.AIR))
                         )
                     )

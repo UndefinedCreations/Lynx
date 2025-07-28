@@ -5,7 +5,7 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 
-class LynxEvent @JvmOverloads constructor(async: Boolean = false): Event(async), Cancellable {
+open class LynxEvent @JvmOverloads constructor(async: Boolean = false): Event(async), Cancellable {
 
     private var cancelled = false
 

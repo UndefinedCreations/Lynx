@@ -1,19 +1,33 @@
 package com.undefined.lynx.server
 
 import com.undefined.lynx.LynxConfig
-import com.undefined.lynx.nick.getGameProfile
+import com.undefined.lynx.itembuilder.ItemBuilder
+import com.undefined.lynx.itembuilder.SkullMeta
+import com.undefined.lynx.logger.sendInfo
+import com.undefined.lynx.nick.getOriginalName
+import com.undefined.lynx.nick.resetName
+import com.undefined.lynx.nick.resetSkin
 import com.undefined.lynx.nick.setName
 import com.undefined.lynx.nick.setSkin
 import com.undefined.lynx.npc.spawnNPC
-import com.undefined.lynx.sidebar.sidebar.lines.UpdatablePlayerTimerLine
+import com.undefined.lynx.scheduler.repeatingTask
+import com.undefined.lynx.sidebar.sidebar.lines.BasicLine
+import com.undefined.lynx.sidebar.sidebar.lines.Line
 import com.undefined.lynx.sidebar.sidebar.sidebar
+import com.undefined.lynx.tab.TabLatency
+import com.undefined.lynx.tab.layout.tabLayout
 import com.undefined.lynx.tab.size.fillTab
 import com.undefined.stellar.StellarCommand
 import com.undefined.stellar.StellarConfig
 import org.bukkit.Bukkit
+import org.bukkit.ChatColor
 import org.bukkit.Location
+import org.bukkit.Material
+import org.bukkit.Statistic
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
+import java.time.Instant
+import java.time.format.DateTimeFormatter
 
 class Main : JavaPlugin() {
 
@@ -21,36 +35,117 @@ class Main : JavaPlugin() {
         StellarConfig.setPlugin(this)
         LynxConfig.setPlugin(this)
 
-        val line = UpdatablePlayerTimerLine(20) { "<aqua>Block <gray>: ${it.inventory.itemInMainHand.type.name}" }
-        val side = sidebar("Testing") {
-            addLine(line)
-            addUpdatableLine { "Testing" }
-            addUpdatableLine { "Testing2" }
+        nick()
+        npc()
+        scoreboared()
+
+        tab()
+        customTab()
+
+    }
+
+    fun customTab() {
+        StellarCommand("tab")
+            .addExecution<Player> {
+                tabLayout(async = false) {
+
+                    setPlayer(30, sender)
+
+                    setLatency(40, TabLatency.BAR_3)
+
+                    setPerPlayerStringTextLine(0) { "${ChatColor.AQUA} Ping : ${ChatColor.GRAY}${ping}" }
+
+                }.addPlayer(sender)
+
+
+            }.register()
+    }
+
+    fun tab() {
+        StellarCommand("fillTab")
+            .addExecution<Player> {
+                sender.fillTab()
+            }.register()
+    }
+
+    fun scoreboared() {
+        val mainLevel = StellarCommand("scoreboard")
+
+        mainLevel.addExecution<Player> {
+
+            val sideBar = sidebar("Survival") {
+                addEmptyLine()
+                addUpdatablePlayerLine { "${ChatColor.AQUA}${it.name}" }
+                addUpdatablePlayerTimerLine(20) { "${ChatColor.RED}Kills : ${ChatColor.GRAY}${it.getStatistic(Statistic.PLAYER_KILLS)}" }
+                addUpdatablePlayerTimerLine(20) { "${ChatColor.DARK_PURPLE}Kills : ${ChatColor.GRAY}${it.getStatistic(Statistic.DEATHS)}" }
+                addUpdatablePlayerTimerLine(20) { "${ChatColor.DARK_AQUA}Ping : ${ChatColor.GRAY}${it.ping}" }
+                addEmptyLine()
+                addUpdatablePlayerTimerLine(20) { "${ChatColor.AQUA}Rank : ${ChatColor.GRAY}OWNER" }
+                addUpdatableTimerLine(20) { "${ChatColor.AQUA}Online : ${ChatColor.GRAY}${Bukkit.getOnlinePlayers().size}" }
+                addEmptyLine()
+                addLine(Line("LYNX :D"))
+            }
+
+            sideBar.addViewer(sender)
+
         }
 
-        StellarCommand("test")
+        mainLevel.register()
+    }
+
+    fun npc() {
+        val mainLevel = StellarCommand("npc")
+
+        mainLevel.addExecution<Player> {
+            val npc = sender.location.spawnNPC("Testing")
+
+            var pastLoc: Location? = null
+
+            Bukkit.getScheduler().runTaskTimer(this@Main, Runnable {
+                if (pastLoc == null) {
+                    pastLoc = sender.location
+                    return@Runnable
+                }
+                npc.lookAt(pastLoc!!)
+                pastLoc = sender.location
+            }, 1, 1)
+
+        }
+
+        mainLevel.register()
+    }
+
+    fun nick() {
+        val mainLevel = StellarCommand("disguise");
+
+        mainLevel.addArgument("name")
+            .addStringArgument("newName")
             .addExecution<Player> {
+                val newName: String by args
+                if (newName.length > 16) {
+                    sender.sendMessage("${ChatColor.RED}The passed username isn't a valid name")
+                    return@addExecution
+                }
+                sender.setName(newName)
+            }
 
-                val npc = sender.location.spawnNPC("Testing")
-                npc.hideName(true)
-                npc.setPerPlayerProfile { it.getGameProfile() }
+        mainLevel.addArgument("skin")
+            .addStringArgument("texture")
+            .addStringArgument("signature")
+            .addExecution<Player> {
+                val texture: String by args
+                val signature: String by args
+                sender.setSkin(texture, signature)
+            }
 
+        mainLevel.addArgument("reset")
+            .addExecution<Player> {
+                sender.getOriginalName().sendInfo()
+                sender.resetName()
+                sender.resetSkin()
+            }
 
-
-                var pastLoc: Location? = null
-
-                Bukkit.getScheduler().runTaskTimer(this@Main, Runnable {
-                    if (pastLoc != null) npc.lookAt(pastLoc!!)
-                    pastLoc = sender.location.clone()
-                }, 1, 1)
-
-                sender.setName("Testing")
-                sender.setSkin("ewogICJ0aW1lc3RhbXAiIDogMTczNzExMzI0Mjg0OCwKICAicHJvZmlsZUlkIiA6ICIwNTAzNzZmZjAxY2I0OGVjOTUwM2NhMjhjMWU2MzlkMSIsCiAgInByb2ZpbGVOYW1lIiA6ICJKb25haDU1OTAiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDkyOWVjZmRlMThiYTk4MmNiMGU4YjIxN2ZmYzI5YjBlZDIyODQ0NDc4MWYyNGE3MGViNTVjMGI3MWFkOTEyNSIKICAgIH0KICB9Cn0=", "NUVQR4Oxsm2gt6gm1fP/CHoQwKEqR6BNdDJtHHR1VPF9XTHqQUcEwUW9v9p5jj8ePewvprTmBU0jMrq9hpkHUfUuBoHV0Hkw+gpZf9YMy6caylEeJb0cPQVc0XOopDz8siCRas0D8TX/KVssZwlEujDuQh/cJdO/Zuc1T3m9VoX0NP0cMJvbAk+0DH+5cVOKGYhAA4htdiBje9LDahCo0aXo/uu4C0NNBDLLCl7DUZFxWoDMzP11st5OrE275+4IRG7mugX+Xk/8Qud7N09RNkSBy0SfHvoHI25DLF0iK+3cGZZUbqg0m2wcbVcOruUfK4Sd86PQ5+bLD4wS7MgJsz7dnxu/kgqveupZcD6LAw5H8UjmtiNbnmRmLFdwbRgDB2Y9te8wGWI2Ol36aNYYLaMdmBShH7KnVW1jkEssjsuhHvx1r/cf2jeNLEAYyYb+nScGDJ0ImezDH1BOWIqghkIEn7QE4gdO8QS5eNcU8gc1RkyFePucG2sjlki1N3HzKkDaueqSl4YMX8+fQpdVI/irCK9enmmoGrvxa3HfTvg6lZH+MNyyArcaz0DvWTw7DmhMf6QyFTMXlzK4MHYcjvNkVf4eIf9qSeGukUB4Me+sYf5VeyTrqP5wlLWs0QmW+bl0bYvF38Bz7E/QR7KCW8CMUr5YTHZGz8d1zSSazOY=")
-
-                side.addViewer(sender)
-                sender.fillTab(true)
-            }.register()
-
+        mainLevel.register();
     }
 
 }

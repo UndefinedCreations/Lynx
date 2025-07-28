@@ -119,8 +119,6 @@ class Team @JvmOverloads constructor(
         ScoreboardManager.activeTeams.remove(this)
     }
 
-
-
 }
 
 fun team(

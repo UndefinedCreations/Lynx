@@ -40,7 +40,7 @@ fun Player.fillTab(
 ) = TabSize.fillTab(this, fakePlayerName, fakePlayerLatency, async)
 
 fun Player.fillTab(
-    fakePlayerName: Component = FillTabOption.fakeName.miniMessage(),
+    fakePlayerName: Component,
     fakePlayerLatency: TabLatency = FillTabOption.latency,
     async: Boolean = true
 ) = TabSize.fillTab(this, fakePlayerName.toJson(), fakePlayerLatency, async)
