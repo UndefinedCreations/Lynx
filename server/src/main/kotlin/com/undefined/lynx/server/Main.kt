@@ -9,7 +9,9 @@ import com.undefined.lynx.nick.resetName
 import com.undefined.lynx.nick.resetSkin
 import com.undefined.lynx.nick.setName
 import com.undefined.lynx.nick.setSkin
+import com.undefined.lynx.not
 import com.undefined.lynx.npc.spawnNPC
+import com.undefined.lynx.plus
 import com.undefined.lynx.scheduler.repeatingTask
 import com.undefined.lynx.sidebar.sidebar.lines.BasicLine
 import com.undefined.lynx.sidebar.sidebar.lines.Line
@@ -38,26 +40,18 @@ class Main : JavaPlugin() {
         nick()
         npc()
         scoreboared()
-
         tab()
         customTab()
-
     }
 
     fun customTab() {
         StellarCommand("tab")
             .addExecution<Player> {
                 tabLayout(async = false) {
-
                     setPlayer(30, sender)
-
                     setLatency(40, TabLatency.BAR_3)
-
                     setPerPlayerStringTextLine(0) { "${ChatColor.AQUA} Ping : ${ChatColor.GRAY}${ping}" }
-
                 }.addPlayer(sender)
-
-
             }.register()
     }
 

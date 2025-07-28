@@ -19,7 +19,8 @@ private val submodules: HashMap<String, String> = hashMapOf(
     ":modules:sql" to "sql",
     ":modules:scoreboard" to "scoreboard",
     ":modules:tab" to "tab",
-    ":modules:display" to "display"
+    ":modules:display" to "display",
+    ":modules:kotlin" to "kotlin",
 )
 
 dependencies {
@@ -37,6 +38,7 @@ dependencies {
     api(project(":modules:scoreboard"))
     api(project(":modules:tab"))
     api(project(":modules:display"))
+    api(project(":modules:kotlin"))
 
     dokkaPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:2.0.0")
 }
