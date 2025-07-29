@@ -1,6 +1,3 @@
-import org.gradle.jvm.tasks.Jar
-import org.jetbrains.dokka.gradle.DokkaTask
-
 plugins {
     id("setup")
     id("com.gradleup.shadow")
@@ -27,7 +24,6 @@ dependencies {
     compileOnly(libs.spigot)
 
     api(project(":core"))
-    api(project(":nms:v1_21_4"))
     api(project(":modules:event"))
     api(project(":modules:items"))
     api(project(":modules:logger"))
@@ -39,79 +35,36 @@ dependencies {
     api(project(":modules:tab"))
     api(project(":modules:display"))
     api(project(":modules:kotlin"))
-
-    dokkaPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:2.0.0")
 }
 
-subprojects {
-    apply(plugin = "org.jetbrains.dokka")
-    tasks.withType<DokkaTask>()
-
-    tasks.register<Jar>("sourceJar") {
-        archiveClassifier = "sources"
-        from(sourceSets.main.get().allSource)
-    }
-}
-
-val packageJavadoc by tasks.registering(Jar::class) {
-    group = "lynx"
-    archiveClassifier = "javadoc"
-
-    dependsOn(tasks.dokkaJavadocCollector)
-    from(tasks.dokkaJavadocCollector.flatMap { it.outputDirectory })
-}
-
-val packageSources by tasks.registering(Jar::class) {
-    group = "lynx"
-    archiveClassifier = "sources"
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    from(subprojects.filter { it.subprojects.isEmpty() }.map { it.sourceSets.main.get().allSource })
-}
+//val packageJavadoc by tasks.registering(Jar::class) {
+//    group = "lynx"
+//    archiveClassifier = "javadoc"
+//
+//    dependsOn(tasks.dokkaJavadocCollector)
+//    from(tasks.dokkaJavadocCollector.flatMap { it.outputDirectory })
+//}
+//
+//val packageSources by tasks.registering(Jar::class) {
+//    group = "lynx"
+//    archiveClassifier = "sources"
+//    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+//    println("\n\n\n\n${subprojects.filter { it.subprojects.isEmpty() }}\n\n\n\n")
+//    from(subprojects.filter { !it.subprojects.isEmpty() }.map { it.sourceSets.main.get().allSource })
+//}
 
 publishing {
     publications {
-        create<MavenPublication>("baseJar") {
+        create<MavenPublication>("kotlin") {
             artifactId = rootProject.name
             from(components["shadow"])
+
+//            artifact(packageJavadoc)
+//            artifact(packageSources)
             for (module in submodules)
-                artifact(project(module.key).layout.buildDirectory.dir("libs").get().file("lynx-$version-${module.value}.jar")) {
+                artifact(project(module.key).layout.buildDirectory.dir("libs").get().file("lynx-$version.jar")) {
                     classifier = module.value
                 }
-
-            pom {
-                name = "Lynx"
-                description = "A general purpose API for Java and Kotlin."
-                url = "https://www.github.com/UndefinedCreations/Lynx"
-                licenses {
-                    license {
-                        name = "MIT"
-                        url = "https://mit-license.org/"
-                        distribution = "https://mit-license.org/"
-                    }
-                }
-                developers {
-                    developer {
-                        id = "redmagic"
-                        name = "TheRedMagic"
-                        url = "https://github.com/TheRedMagic/"
-                    }
-                    developer {
-                        id = "lutto"
-                        name = "StillLutto"
-                        url = "https://github.com/StillLutto/"
-                    }
-                }
-                scm {
-                    url = "https://github.com/UndefinedCreations/Lynx/"
-                    connection = "scm:git:git://github.com/UndefinedCreations/Lynx.git"
-                    developerConnection = "scm:git:ssh://git@github.com/UndefinedCreations/Lynx.git"
-                }
-            }
-        }
-        create<MavenPublication>("sources") {
-            artifactId = rootProject.name
-            artifact(packageJavadoc)
-            artifact(packageSources)
 
             pom {
                 name = "Lynx"
@@ -166,11 +119,6 @@ publishing {
     }
 }
 
-java {
-    withSourcesJar()
-    withJavadocJar()
-}
-
 tasks {
     shadowJar {
         minimize {
@@ -179,9 +127,7 @@ tasks {
             exclude("**/jetbrains/**")
         }
         archiveClassifier = ""
-        dependsOn(project(":core").tasks.named("shadowJar"))
 
-        for (module in submodules)
-            dependsOn(project(module.key).tasks.named("shadowJar"))
+        for (module in submodules) dependsOn(project(module.key).tasks.named("shadowJar"))
     }
 }

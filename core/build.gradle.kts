@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("setup")
+    id("shadow-convention")
 }
 
 dependencies {

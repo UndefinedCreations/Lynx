@@ -1,6 +1,6 @@
 plugins {
     id("setup")
-//    //id("publishing-convention")
+    id("shadow-convention")
 }
 
 dependencies {

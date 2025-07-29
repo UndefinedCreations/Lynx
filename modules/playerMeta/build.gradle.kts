@@ -1,5 +1,6 @@
 plugins {
     id("setup")
+    id("shadow-convention")
 }
 
 dependencies {

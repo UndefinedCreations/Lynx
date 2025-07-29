@@ -1,10 +1,8 @@
-import gradle.kotlin.dsl.accessors._4a791aa2679e9704b38336063911027f.shadowJar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     java
     kotlin("jvm")
-    id("com.gradleup.shadow")
 }
 
 group = properties["group"]!!
@@ -33,18 +31,11 @@ tasks {
     compileJava {
         options.release = 8
     }
-    shadowJar {
-        minimize {
-            exclude("**/kotlin/**")
-            exclude("**/intellij/**")
-            exclude("**/jetbrains/**")
-        }
-        archiveClassifier = project.name
-        archiveFileName = "${rootProject.name}-${project.version}-${project.name}.jar"
-    }
 }
 
 java {
+    withJavadocJar()
+    withSourcesJar()
     disableAutoTargetJvm()
 }
 
