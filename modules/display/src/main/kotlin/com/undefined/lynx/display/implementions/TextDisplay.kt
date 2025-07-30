@@ -11,13 +11,11 @@ import org.bukkit.entity.Player
 class TextDisplay @JvmOverloads constructor(
     location: Location,
     visibleTo: MutableList<Player>? = null,
-    autoLoad: Boolean = true,
     kotlinDSL: RunBlock<TextDisplay> = RunBlock{}
 ) : Display(
     display = NMSManager.nms.display.textDisplay.createTextDisplay(location.world!!),
     visibleTo = visibleTo,
-    location = location,
-    autoLoad = autoLoad
+    location = location
 ) {
 
     init {

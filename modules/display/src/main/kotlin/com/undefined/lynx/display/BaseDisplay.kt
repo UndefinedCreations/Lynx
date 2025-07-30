@@ -11,8 +11,7 @@ import java.util.*
 abstract class BaseDisplay(
     val display: Any,
     internal val visibleTo: MutableList<Player>?,
-    internal var location: Location,
-    internal var autoLoad: Boolean
+    internal var location: Location
 ) {
 
     internal val serverEntity: Any?

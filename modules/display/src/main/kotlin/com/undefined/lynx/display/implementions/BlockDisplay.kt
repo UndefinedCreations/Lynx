@@ -10,13 +10,11 @@ import org.bukkit.entity.Player
 class BlockDisplay @JvmOverloads constructor(
     location: Location,
     visibleTo: MutableList<Player>? = null,
-    autoLoad: Boolean = true,
     kotlinDSL: RunBlock<BlockDisplay> = RunBlock {}
 ) : Display(
     NMSManager.nms.display.blockDisplay.createBlockDisplay(location.world!!),
     visibleTo,
-    location,
-    autoLoad
+    location
 ) {
 
     init {

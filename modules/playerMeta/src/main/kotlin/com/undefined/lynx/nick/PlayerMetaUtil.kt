@@ -186,7 +186,9 @@ object PlayerMetaUtil {
     @JvmStatic
     fun getCape(player: Player): Cape = PlayerMetaManager.modifiedGameProfile[player.uniqueId]!!.let {
         val json = JsonParser.parseString(String(Base64.getDecoder().decode(it.skin.texture))).asJsonObject
-        val capeJson = json.get("textures").asJsonObject.get("CAPE").asJsonObject
+        val texture = json.get("textures").asJsonObject
+        if (!texture.has("CAPE")) return@let Cape.NONE
+        val capeJson = texture.get("CAPE").asJsonObject
         return@let Cape.entries.firstOrNull { it.texture == capeJson.get("url").asString } ?: Cape.NONE
     }
 

@@ -10,13 +10,11 @@ import org.bukkit.inventory.ItemStack
 class ItemDisplay @JvmOverloads constructor(
     location: Location,
     visibleTo: MutableList<Player>? = null,
-    autoLoad: Boolean = true,
     kotlinDSL: RunBlock<ItemDisplay> = RunBlock{}
 ) : Display(
     NMSManager.nms.display.itemDisplay.createItemDisplay(location.world!!),
     visibleTo,
-    location,
-    autoLoad
+    location
 ) {
 
     init {

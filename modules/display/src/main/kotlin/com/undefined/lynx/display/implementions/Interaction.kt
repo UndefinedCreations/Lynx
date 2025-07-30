@@ -9,13 +9,11 @@ import org.bukkit.entity.Player
 class Interaction @JvmOverloads constructor(
     location: Location,
     visibleTo: MutableList<Player>? = null,
-    autoLoad: Boolean = true,
     kotlinDSL: RunBlock<Interaction> = RunBlock{}
 ) : BaseDisplay(
     NMSManager.nms.display.interaction.createInteraction(location.world!!),
     visibleTo,
-    location,
-    autoLoad
+    location
 ) {
 
     init {

@@ -1,17 +1,20 @@
 package com.undefined.lynx.server
 
 import com.undefined.lynx.LynxConfig
+import com.undefined.lynx.display.implementions.BlockDisplay
+import com.undefined.lynx.display.implementions.TextDisplay
 import com.undefined.lynx.itembuilder.ItemBuilder
 import com.undefined.lynx.itembuilder.SkullMeta
 import com.undefined.lynx.logger.sendInfo
+import com.undefined.lynx.nick.Cape
 import com.undefined.lynx.nick.getOriginalName
 import com.undefined.lynx.nick.resetName
 import com.undefined.lynx.nick.resetSkin
+import com.undefined.lynx.nick.setCape
 import com.undefined.lynx.nick.setName
 import com.undefined.lynx.nick.setSkin
-import com.undefined.lynx.not
 import com.undefined.lynx.npc.spawnNPC
-import com.undefined.lynx.plus
+import com.undefined.lynx.scheduler.delay
 import com.undefined.lynx.scheduler.repeatingTask
 import com.undefined.lynx.sidebar.sidebar.lines.BasicLine
 import com.undefined.lynx.sidebar.sidebar.lines.Line
@@ -26,7 +29,9 @@ import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.Statistic
+import org.bukkit.entity.Display
 import org.bukkit.entity.Player
+import org.bukkit.permissions.Permission
 import org.bukkit.plugin.java.JavaPlugin
 import java.time.Instant
 import java.time.format.DateTimeFormatter
@@ -37,21 +42,51 @@ class Main : JavaPlugin() {
         StellarConfig.setPlugin(this)
         LynxConfig.setPlugin(this)
 
+        StellarCommand("test")
+            .addExecution<Player> {
+
+
+                sender.setCape(Cape.MOJANG)
+
+                val spawnLocation = sender.eyeLocation.clone().apply {
+                    yaw = 0f
+                    pitch = 0f
+                }
+
+                for (billboard in Display.Billboard.entries) {
+
+                    val display = TextDisplay(spawnLocation.add(10.0, 0.0, 0.0))
+                    display.setText(billboard.name)
+                    display.setBillboard(billboard)
+                }
+
+
+
+            }.register()
+
         nick()
         npc()
         scoreboared()
+
         tab()
         customTab()
+
     }
 
     fun customTab() {
         StellarCommand("tab")
             .addExecution<Player> {
                 tabLayout(async = false) {
+
                     setPlayer(30, sender)
+
                     setLatency(40, TabLatency.BAR_3)
+
                     setPerPlayerStringTextLine(0) { "${ChatColor.AQUA} Ping : ${ChatColor.GRAY}${ping}" }
+
                 }.addPlayer(sender)
+
+
             }.register()
     }
 

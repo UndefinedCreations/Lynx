@@ -5,7 +5,7 @@ import org.bukkit.plugin.java.JavaPlugin
 
 object LynxConfig {
     lateinit var javaPlugin: JavaPlugin
-    var miniMessage: MiniMessage? = null //TODO Option
+    private var miniMessage: MiniMessage? = null //TODO Option
     @JvmStatic
     fun setPlugin(javaPlugin: JavaPlugin) = apply { this.javaPlugin = javaPlugin }
     @JvmStatic
