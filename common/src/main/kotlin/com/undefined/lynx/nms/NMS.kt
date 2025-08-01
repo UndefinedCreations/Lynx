@@ -98,6 +98,7 @@ interface NMS {
             deltaYaw: Byte,
             players: List<Player>
         )
+        fun removeEntityId(serverPlayer: Any)
     }
     interface Scoreboard {
 

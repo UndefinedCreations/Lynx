@@ -1,7 +1,9 @@
 package com.undefined.lynx.nick
 
+import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.undefined.lynx.GameProfile
+import com.undefined.lynx.LynxConfig
 import com.undefined.lynx.NMSManager
 import com.undefined.lynx.Skin
 import com.undefined.lynx.nick.events.PlayerCapeChangeEvent
@@ -18,9 +20,7 @@ object PlayerMetaUtil {
 
 
     init {
-
         PlayerMetaManager.starUp()
-
     }
 
     /**
@@ -163,18 +163,22 @@ object PlayerMetaUtil {
      * @param cape The cape to change to
      */
     @JvmStatic
-    fun setCape(player: Player, cape: Cape) {
+    @JvmOverloads
+    fun setCape(player: Player, cape: Cape, reloadPlayer: Boolean = true) {
         val event = PlayerCapeChangeEvent(player, getCape(player), cape)
         Bukkit.getPluginManager().callEvent(event)
         if (event.isCancelled) return
         val currentSkin = getPlayerSkin(player)
         val json = JsonParser.parseString(String(Base64.getDecoder().decode(currentSkin.texture))).asJsonObject
-        val capeJson = json.get("textures").asJsonObject.get("CAPE").asJsonObject
+        val capeJson = json.get("textures").asJsonObject.get("CAPE")?.asJsonObject ?: JsonObject()
         val modifiedJson = capeJson.apply { addProperty("url", cape.texture) }
         val modifiedTextureJson = json.get("textures").asJsonObject.apply { add("CAPE", modifiedJson) }
         val finalJson = json.apply { add("textures", modifiedTextureJson) }
-        setSkin(player, Base64.getEncoder().encodeToString(finalJson.toString().toByteArray()), currentSkin.signature, false)
-        reloadPlayerMeta(player)
+        NMSManager.nms.nick.setSkin(player, Base64.getEncoder().encodeToString(finalJson.toString().toByteArray()), currentSkin.signature)
+        if (reloadPlayer) reloadPlayerMeta(player)
+        PlayerMetaManager.modifiedGameProfile[player.uniqueId]?.let {
+            NMSManager.nms.nick.setSkin(player, it.skin.texture, it.skin.signature)
+        }
     }
 
     /**
@@ -294,7 +298,7 @@ fun Player.setGameProfile(gameProfile: GameProfile, reloadPlayer: Boolean = true
  *
  * @param cape The cape to change to
  */
-fun Player.setCape(cape: Cape) = PlayerMetaUtil.setCape(this, cape)
+fun Player.setCape(cape: Cape, reloadPlayer: Boolean = true) = PlayerMetaUtil.setCape(this, cape, reloadPlayer)
 
 /**
  * Changes the player username

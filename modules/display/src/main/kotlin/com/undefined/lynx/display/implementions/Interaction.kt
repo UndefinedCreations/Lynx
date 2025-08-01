@@ -21,7 +21,7 @@ class Interaction @JvmOverloads constructor(
     }
 
     @JvmOverloads
-    fun setWidth(width: Float, update: Boolean = false) = apply {
+    fun setWidth(width: Float, update: Boolean = true) = apply {
         NMSManager.nms.display.interaction.setWidth(display, width)
         if (update) sendMetaDataUpdate()
     }

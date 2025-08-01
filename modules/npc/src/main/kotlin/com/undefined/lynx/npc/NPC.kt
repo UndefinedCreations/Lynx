@@ -100,6 +100,7 @@ open class NPC(
         visibleTo?.clear()
         NPCManager.autoLoadNPCS.remove(this)
         NPCManager.spawnedNPC.remove(this)
+        NMSManager.nms.npc.removeEntityId(serverPlayer)
     }
 
     fun addViewer(player: Player) = addViewers(listOf(player))

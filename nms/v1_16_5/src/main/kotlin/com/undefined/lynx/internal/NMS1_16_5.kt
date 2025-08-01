@@ -71,7 +71,6 @@ import java.util.*
 object NMS1_16_5: NMS, Listener {
 
     private var idMap: HashMap<UUID, UUID> = hashMapOf()
-    private var cooldownMap: MutableList<Int> = mutableListOf()
 
     private val clicks: MutableList<EntityInteract.() -> Unit> = mutableListOf()
 
@@ -92,6 +91,7 @@ object NMS1_16_5: NMS, Listener {
 
     private fun startPacketListener(player: Player) {
         idMap[player.uniqueId] = UUID.randomUUID()
+        val cooldownMap: MutableList<Int> = mutableListOf()
         val serverPlayer = player.serverPlayer()
         val connection = Mapping1_16_5.connection.get(serverPlayer.playerConnection) as NetworkManager
         val channel = connection.channel
@@ -287,6 +287,7 @@ object NMS1_16_5: NMS, Listener {
         }
 
         object : NMS.NPC {
+            override fun removeEntityId(serverPlayer: Any) {}
             override fun getName(serverPlayer: Any): String  {
                 val serverPlayer = serverPlayer as? EntityPlayer ?: throw IllegalArgumentException("Class passed was not an EntityPlayer")
                 return serverPlayer.profile.name

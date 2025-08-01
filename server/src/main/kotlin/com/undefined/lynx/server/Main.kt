@@ -1,16 +1,23 @@
 package com.undefined.lynx.server
 
+import com.google.gson.JsonParser
 import com.undefined.lynx.LynxConfig
+import com.undefined.lynx.Skin
 import com.undefined.lynx.display.implementions.BlockDisplay
+import com.undefined.lynx.display.implementions.Interaction
 import com.undefined.lynx.display.implementions.TextDisplay
 import com.undefined.lynx.itembuilder.ItemBuilder
 import com.undefined.lynx.itembuilder.SkullMeta
 import com.undefined.lynx.logger.sendInfo
 import com.undefined.lynx.nick.Cape
+import com.undefined.lynx.nick.getGameProfile
 import com.undefined.lynx.nick.getOriginalName
+import com.undefined.lynx.nick.reloadPlayerMeta
+import com.undefined.lynx.nick.reloadPlayerMetaGlobal
 import com.undefined.lynx.nick.resetName
 import com.undefined.lynx.nick.resetSkin
 import com.undefined.lynx.nick.setCape
+import com.undefined.lynx.nick.setGameProfile
 import com.undefined.lynx.nick.setName
 import com.undefined.lynx.nick.setSkin
 import com.undefined.lynx.npc.spawnNPC
@@ -33,6 +40,8 @@ import org.bukkit.entity.Display
 import org.bukkit.entity.Player
 import org.bukkit.permissions.Permission
 import org.bukkit.plugin.java.JavaPlugin
+import java.io.InputStreamReader
+import java.net.URI
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 
@@ -45,21 +54,10 @@ class Main : JavaPlugin() {
         StellarCommand("test")
             .addExecution<Player> {
 
-
-                sender.setCape(Cape.MOJANG)
-
-                val spawnLocation = sender.eyeLocation.clone().apply {
+                CustomGUIExample.create(sender.location.apply {
                     yaw = 0f
                     pitch = 0f
-                }
-
-                for (billboard in Display.Billboard.entries) {
-
-                    val display = TextDisplay(spawnLocation.add(10.0, 0.0, 0.0))
-                    display.setText(billboard.name)
-                    display.setBillboard(billboard)
-                }
-
+                })
 
 
             }.register()
@@ -128,6 +126,10 @@ class Main : JavaPlugin() {
         mainLevel.addExecution<Player> {
             val npc = sender.location.spawnNPC("Testing")
 
+            npc.onClick {
+                sender.sendMessage(clickType.name)
+            }
+
             var pastLoc: Location? = null
 
             Bukkit.getScheduler().runTaskTimer(this@Main, Runnable {
@@ -175,6 +177,23 @@ class Main : JavaPlugin() {
             }
 
         mainLevel.register();
+    }
+
+    fun getSkinTexture(name: String): Skin {
+        val url = URI("https://api.mojang.com/users/profiles/minecraft/$name").toURL()
+        url.openStream().use { inputStream ->
+            InputStreamReader(inputStream).use { reader ->
+                val uuid = JsonParser.parseReader(reader).asJsonObject["id"].asString
+
+                val url1 = URI("https://sessionserver.mojang.com/session/minecraft/profile/$uuid?unsigned=false").toURL()
+                url1.openStream().use { inputStream1 ->
+                    InputStreamReader(inputStream1).use { reader1 ->
+                        val textureProperty = JsonParser.parseReader(reader1).asJsonObject.get("properties").asJsonArray.get(0).asJsonObject
+                        return Skin(textureProperty["value"].asString, textureProperty["signature"].asString)
+                    }
+                }
+            }
+        }
     }
 
 }

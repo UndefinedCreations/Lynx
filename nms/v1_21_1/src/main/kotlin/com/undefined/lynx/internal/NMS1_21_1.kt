@@ -59,7 +59,7 @@ import java.util.*
 object NMS1_21_1: NMS, Listener {
 
     private var idMap: HashMap<UUID, UUID> = hashMapOf()
-    private var cooldownMap: MutableList<Int> = mutableListOf()
+    private val activeNPCId: MutableSet<Int> = mutableSetOf()
 
     private val clicks: MutableList<EntityInteract.() -> Unit> = mutableListOf()
 
@@ -80,6 +80,7 @@ object NMS1_21_1: NMS, Listener {
 
     private fun startPacketListener(player: Player) {
         idMap[player.uniqueId] = UUID.randomUUID()
+        val cooldownMap: MutableList<Int> = mutableListOf()
         val serverPlayer = player.serverPlayer()
         val connection = Mapping1_21_1.connection.get(serverPlayer.connection) as Connection
         val channel = connection.channel
@@ -98,7 +99,7 @@ object NMS1_21_1: NMS, Listener {
                                 cooldownMap.remove(entityID)
                                 return@DuplexHandler
                             }
-                            cooldownMap.add(entityID)
+                            if (activeNPCId.contains(entityID)) cooldownMap.add(entityID)
                             for (run in clicks) run(EntityInteract(entityID, ClickType.RIGHT, player))
                         }
                     }
@@ -281,6 +282,10 @@ object NMS1_21_1: NMS, Listener {
         }
 
         object : NMS.NPC {
+            override fun removeEntityId(serverPlayer: Any) {
+                val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
+                activeNPCId.remove(serverPlayer.id)
+            }
             override fun createServerPlayer(name: String, texture: String, signature: String): Any {
                 val gameProfile = GameProfile(UUID.randomUUID(), name)
                 gameProfile.properties.put("textures", Property("textures", texture, signature))
@@ -313,6 +318,7 @@ object NMS1_21_1: NMS, Listener {
             ) {
                 val serverPlayer = serverPlayer as? ServerPlayer ?: throw IllegalArgumentException("Class passed was not an ServerPlayer")
                 players.sendPackets(ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, serverPlayer))
+                activeNPCId.add(serverPlayer.id)
             }
 
             override fun sendClientboundSetEntityDataPacket(

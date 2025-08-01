@@ -21,6 +21,7 @@ class TextDisplay @JvmOverloads constructor(
     init {
         kotlinDSL.run(this)
     }
+
     @JvmOverloads
     fun setText(string: String, update: Boolean = true) = apply {
         NMSManager.nms.display.textDisplay.setText(display, string.toJson())

@@ -76,8 +76,12 @@ object PlayerMetaManager : Listener {
     fun reloadPlayerMetaGlobal(changePlayer: Player) {
         for (player in Bukkit.getOnlinePlayers().filter { it.world == changePlayer.world }) {
             player.hidePlayer(LynxConfig.javaPlugin, changePlayer)
-            player.showPlayer(LynxConfig.javaPlugin, changePlayer)
         }
+        Bukkit.getScheduler().runTaskLater(LynxConfig.javaPlugin, Runnable {
+            for (player in Bukkit.getOnlinePlayers().filter { it.world == changePlayer.world }) {
+                player.showPlayer(LynxConfig.javaPlugin, changePlayer)
+            }
+        }, 2)
     }
 
     fun starUp() {}

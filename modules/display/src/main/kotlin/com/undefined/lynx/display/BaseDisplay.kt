@@ -29,6 +29,10 @@ abstract class BaseDisplay(
         clicks.add(run)
     }
 
+    fun onClick(run: EntityInteract.() -> Unit) = apply {
+        clicks.add(run)
+    }
+
     fun clearOnClick() = apply {
         clicks.clear()
     }
