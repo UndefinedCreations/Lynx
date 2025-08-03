@@ -5,15 +5,7 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 
-open class LynxEvent @JvmOverloads constructor(async: Boolean = false): Event(async), Cancellable {
-
-    private var cancelled = false
-
-    override fun isCancelled() = cancelled
-
-    override fun setCancelled(cancel: Boolean) {
-        cancelled = cancel
-    }
+open class LynxEvent @JvmOverloads constructor(async: Boolean = false): Event(async) {
 
     companion object {
         val HANDLERS = HandlerList()
