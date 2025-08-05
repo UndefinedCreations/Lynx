@@ -17,7 +17,6 @@ include(
     ":modules:event",
     ":modules:logger",
     ":modules:scheduler",
-    ":modules:sql",
     ":modules:scoreboard",
     ":modules:tab",
     ":modules:display",

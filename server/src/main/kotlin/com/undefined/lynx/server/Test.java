@@ -4,38 +4,22 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.undefined.lynx.Skin;
-import com.undefined.lynx.display.DisplayManager;
 import com.undefined.lynx.display.implementions.BlockDisplay;
-import com.undefined.lynx.display.implementions.TextDisplay;
-import com.undefined.lynx.event.Events;
 import com.undefined.lynx.itembuilder.ItemBuilder;
 import com.undefined.lynx.itembuilder.SkullMeta;
 import com.undefined.lynx.nick.PlayerMetaUtil;
-import com.undefined.lynx.nick.events.PlayerGameProfileChangeEvent;
 import com.undefined.lynx.scheduler.Scheduler;
 import com.undefined.lynx.sidebar.sidebar.lines.UpdatableLine;
-import com.undefined.stellar.BaseStellarCommand;
 import com.undefined.stellar.StellarCommand;
-import org.bukkit.Bukkit;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.inventory.meta.ArmorMeta;
-import org.bukkit.inventory.meta.trim.ArmorTrim;
-import org.bukkit.inventory.meta.trim.TrimMaterial;
-import org.bukkit.inventory.meta.trim.TrimPattern;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class Test {
 
@@ -54,9 +38,13 @@ public class Test {
         });
 
 
-        Scheduler.repeatingTask(10, 10, TimeUnit.MINUTES, task -> {
+        Player player = null;
 
-        });
+        Scheduler.repeatingTask(10,
+                () -> { return player.isOp(); },
+                bukkitRunnable -> {
+                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText("You are an operator"));
+                });
 
         StellarCommand mainLevel = new StellarCommand("disguise");
 
