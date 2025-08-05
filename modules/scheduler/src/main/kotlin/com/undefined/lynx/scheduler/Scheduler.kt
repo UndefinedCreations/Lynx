@@ -122,7 +122,7 @@ fun repeatingTask(ticks: Int, period: Int = 0, unit: TimeUnit? = null, async: Bo
 
 private fun TimeUnit?.toTicks(amount: Int): Long {
     if (this == null) return amount.toLong()
-    return floor((this.convert(amount.toLong(), TimeUnit.SECONDS) * 20.0)).toLong()
+    return this.toSeconds(amount.toLong()) * 20
 }
 
 private fun createRunnable(runnable: Consumer<BukkitRunnable>): BukkitRunnable {

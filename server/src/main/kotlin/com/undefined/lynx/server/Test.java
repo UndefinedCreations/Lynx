@@ -12,6 +12,7 @@ import com.undefined.lynx.itembuilder.ItemBuilder;
 import com.undefined.lynx.itembuilder.SkullMeta;
 import com.undefined.lynx.nick.PlayerMetaUtil;
 import com.undefined.lynx.nick.events.PlayerGameProfileChangeEvent;
+import com.undefined.lynx.scheduler.Scheduler;
 import com.undefined.lynx.sidebar.sidebar.lines.UpdatableLine;
 import com.undefined.stellar.BaseStellarCommand;
 import com.undefined.stellar.StellarCommand;
@@ -34,6 +35,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class Test {
 
@@ -51,6 +53,10 @@ public class Test {
            event.getPlayer().sendMessage(event.getClickType().name());
         });
 
+
+        Scheduler.repeatingTask(10, 10, TimeUnit.MINUTES, task -> {
+
+        });
 
         StellarCommand mainLevel = new StellarCommand("disguise");
 

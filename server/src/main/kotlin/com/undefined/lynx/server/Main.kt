@@ -69,14 +69,6 @@ class Main : JavaPlugin() {
         tab()
         customTab()
 
-        repeatingTask(20,
-            supplier = {
-
-                false
-            }, runnable =  {
-
-            })
-
     }
 
 

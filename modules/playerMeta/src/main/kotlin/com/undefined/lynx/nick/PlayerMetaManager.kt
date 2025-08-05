@@ -15,7 +15,7 @@ import java.util.*
  * This class is the manager for the players meta.
  *
  */
-object PlayerMetaManager : Listener {
+class PlayerMetaManager : Listener {
 
     /**
      * This variable contains all the original game-profiles of the player.

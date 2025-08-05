@@ -18,10 +18,7 @@ import java.util.*
  */
 object PlayerMetaUtil {
 
-
-    init {
-        PlayerMetaManager.starUp()
-    }
+    private val manager = PlayerMetaManager()
 
     /**
      * Changes the player username
@@ -37,10 +34,10 @@ object PlayerMetaUtil {
         Bukkit.getPluginManager().callEvent(event)
         if (event.isCancelled) return
         NMSManager.nms.nick.setName(player, name)
-        PlayerMetaManager.modifiedGameProfile[player.uniqueId]!!.name = name
+        manager.modifiedGameProfile[player.uniqueId]!!.name = name
         if (reloadPlayer) {
-            PlayerMetaManager.reloadPlayerMeta(player)
-            PlayerMetaManager.reloadPlayerMetaGlobal(player)
+            manager.reloadPlayerMeta(player)
+            manager.reloadPlayerMetaGlobal(player)
         }
     }
 
@@ -58,13 +55,13 @@ object PlayerMetaUtil {
         Bukkit.getPluginManager().callEvent(event)
         if (event.isCancelled) return
         NMSManager.nms.nick.setSkin(player, skin.texture, skin.signature)
-        PlayerMetaManager.modifiedGameProfile[player.uniqueId]!!.apply {
+        manager.modifiedGameProfile[player.uniqueId]!!.apply {
             this.skin.texture = skin.texture
             this.skin.signature = skin.signature
         }
         if (reloadPlayer) {
-            PlayerMetaManager.reloadPlayerMeta(player)
-            PlayerMetaManager.reloadPlayerMetaGlobal(player)
+            manager.reloadPlayerMeta(player)
+            manager.reloadPlayerMetaGlobal(player)
         }
     }
 
@@ -86,7 +83,7 @@ object PlayerMetaUtil {
      * @param player The client to reload
      */
     @JvmStatic
-    fun reloadPlayerMeta(player: Player) = PlayerMetaManager.reloadPlayerMeta(player)
+    fun reloadPlayerMeta(player: Player) = manager.reloadPlayerMeta(player)
 
     /**
      * Reload the player meta for all other clients.
@@ -94,7 +91,7 @@ object PlayerMetaUtil {
      * @param player The player to reload
      */
     @JvmStatic
-    fun reloadPlayerMetaGlobal(player: Player) = PlayerMetaManager.reloadPlayerMetaGlobal(player)
+    fun reloadPlayerMetaGlobal(player: Player) = manager.reloadPlayerMetaGlobal(player)
 
     /**
      * Get the original name of the player
@@ -103,7 +100,7 @@ object PlayerMetaUtil {
      * @return The original player name
      */
     @JvmStatic
-    fun getOriginalPlayerName(player: Player): String = PlayerMetaManager.trueGameProfile[player.uniqueId]?.name ?: player.name
+    fun getOriginalPlayerName(player: Player): String = manager.trueGameProfile[player.uniqueId]?.name ?: player.name
 
     /**
      * Get the current player skin
@@ -121,18 +118,18 @@ object PlayerMetaUtil {
      * @return The original player skin
      */
     @JvmStatic
-    fun getOriginalPlayerSkin(player: Player): Skin = PlayerMetaManager.trueGameProfile[player.uniqueId]?.skin ?: getPlayerSkin(player)
+    fun getOriginalPlayerSkin(player: Player): Skin = manager.trueGameProfile[player.uniqueId]?.skin ?: getPlayerSkin(player)
 
     /**
      * Check if the player name is the original
      */
     @JvmStatic
-    fun isNameModified(player: Player): Boolean = PlayerMetaManager.trueGameProfile[player.uniqueId]?.name != getOriginalPlayerName(player)
+    fun isNameModified(player: Player): Boolean = manager.trueGameProfile[player.uniqueId]?.name != getOriginalPlayerName(player)
     /**
      * Check if the player skin is the original
      */
     @JvmStatic
-    fun isSkinModified(player: Player): Boolean = PlayerMetaManager.trueGameProfile[player.uniqueId]?.skin != getPlayerSkin(player)
+    fun isSkinModified(player: Player): Boolean = manager.trueGameProfile[player.uniqueId]?.skin != getPlayerSkin(player)
 
     /**
      * Resets the player name to the original if modified
@@ -142,7 +139,7 @@ object PlayerMetaUtil {
      */
     @JvmStatic
     @JvmOverloads
-    fun resetName(player: Player, reloadPlayer: Boolean = true) = PlayerMetaManager.trueGameProfile[player.uniqueId]?.let { setName(player, it.name, reloadPlayer) }
+    fun resetName(player: Player, reloadPlayer: Boolean = true) = manager.trueGameProfile[player.uniqueId]?.let { setName(player, it.name, reloadPlayer) }
 
     /**
      * Resets the player skin to the original if modified
@@ -152,7 +149,7 @@ object PlayerMetaUtil {
      */
     @JvmStatic
     @JvmOverloads
-    fun resetSkin(player: Player, reloadPlayer: Boolean = true) = PlayerMetaManager.trueGameProfile[player.uniqueId]?.let { setSkin(player, it.skin, reloadPlayer) }
+    fun resetSkin(player: Player, reloadPlayer: Boolean = true) = manager.trueGameProfile[player.uniqueId]?.let { setSkin(player, it.skin, reloadPlayer) }
 
     /**
      * Changes the player client cape
@@ -176,7 +173,7 @@ object PlayerMetaUtil {
         val finalJson = json.apply { add("textures", modifiedTextureJson) }
         NMSManager.nms.nick.setSkin(player, Base64.getEncoder().encodeToString(finalJson.toString().toByteArray()), currentSkin.signature)
         if (reloadPlayer) reloadPlayerMeta(player)
-        PlayerMetaManager.modifiedGameProfile[player.uniqueId]?.let {
+        manager.modifiedGameProfile[player.uniqueId]?.let {
             NMSManager.nms.nick.setSkin(player, it.skin.texture, it.skin.signature)
         }
     }
@@ -188,7 +185,7 @@ object PlayerMetaUtil {
      * @return The current cape
      */
     @JvmStatic
-    fun getCape(player: Player): Cape = PlayerMetaManager.modifiedGameProfile[player.uniqueId]!!.let {
+    fun getCape(player: Player): Cape = manager.modifiedGameProfile[player.uniqueId]!!.let {
         val json = JsonParser.parseString(String(Base64.getDecoder().decode(it.skin.texture))).asJsonObject
         val texture = json.get("textures").asJsonObject
         if (!texture.has("CAPE")) return@let Cape.NONE
@@ -203,7 +200,7 @@ object PlayerMetaUtil {
      * @return The current cape
      */
     @JvmStatic
-    fun getOriginalCape(player: Player): Cape = PlayerMetaManager.trueGameProfile[player.uniqueId]!!.let {
+    fun getOriginalCape(player: Player): Cape = manager.trueGameProfile[player.uniqueId]!!.let {
         val json = JsonParser.parseString(String(Base64.getDecoder().decode(it.skin.texture))).asJsonObject
         val capeJson = json.get("textures").asJsonObject.get("CAPE").asJsonObject
         return@let Cape.entries.firstOrNull { it.texture == capeJson.get("url").asString } ?: Cape.NONE
@@ -216,7 +213,7 @@ object PlayerMetaUtil {
      * @return The current game-profile
      */
     @JvmStatic
-    fun getGameProfile(player: Player): GameProfile = PlayerMetaManager.modifiedGameProfile[player.uniqueId]!!
+    fun getGameProfile(player: Player): GameProfile = manager.modifiedGameProfile[player.uniqueId]!!
 
     /**
      * The original players game profile
@@ -225,7 +222,7 @@ object PlayerMetaUtil {
      * @return The original game-profile
      */
     @JvmStatic
-    fun getOriginalGameProfile(player: Player): GameProfile = PlayerMetaManager.trueGameProfile[player.uniqueId]!!
+    fun getOriginalGameProfile(player: Player): GameProfile = manager.trueGameProfile[player.uniqueId]!!
 
     /**
      *  Check if the player has a modified game-profile
@@ -233,7 +230,7 @@ object PlayerMetaUtil {
      *  @param player That player to check
      */
     @JvmStatic
-    fun hasModifiedGameProfile(player: Player): Boolean = PlayerMetaManager.trueGameProfile[player.uniqueId] == PlayerMetaManager.modifiedGameProfile[player.uniqueId]
+    fun hasModifiedGameProfile(player: Player): Boolean = manager.trueGameProfile[player.uniqueId] == manager.modifiedGameProfile[player.uniqueId]
 
     /**
      * Sets the player game-profile
