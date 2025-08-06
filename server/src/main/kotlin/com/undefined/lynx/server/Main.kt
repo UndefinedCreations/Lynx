@@ -26,6 +26,7 @@ import com.undefined.lynx.scheduler.repeatingTask
 import com.undefined.lynx.sidebar.sidebar.lines.BasicLine
 import com.undefined.lynx.sidebar.sidebar.lines.Line
 import com.undefined.lynx.sidebar.sidebar.sidebar
+import com.undefined.lynx.sidebar.team.team
 import com.undefined.lynx.tab.DefaultTabSkin
 import com.undefined.lynx.tab.TabLatency
 import com.undefined.lynx.tab.TabManager
@@ -55,14 +56,11 @@ class Main : JavaPlugin() {
 
         StellarCommand("test")
             .addExecution<Player> {
-                sender.setSkin(DefaultTabSkin.SKIN)
+                team {
+                    setPrefix("Sexy ")
+                    addTrackEntry(sender)
+                }
             }.register()
-
-        StellarCommand("test1")
-            .addExecution<Player> {
-                sender.resetSkin()
-            }.register()
-
         nick()
         npc()
         scoreboared()

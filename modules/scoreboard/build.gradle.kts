@@ -7,4 +7,5 @@ dependencies {
     compileOnly(libs.spigot)
     compileOnly(project(":core"))
     compileOnly(project(":common"))
+    compileOnly(project(":modules:playerMeta"))
 }

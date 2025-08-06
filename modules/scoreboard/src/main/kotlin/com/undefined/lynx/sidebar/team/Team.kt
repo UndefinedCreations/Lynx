@@ -67,6 +67,39 @@ class Team @JvmOverloads constructor(
         NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players())
     }
 
+    fun removeEntry(player: Player) = removeEntries(listOf(player.name))
+
+    fun removeEntries(players: Set<Player>) = removeEntries(players.map { it.name })
+
+    fun removeEntry(name: String) = removeEntries(listOf(name))
+
+    fun removeEntries(names: List<String>) = checkAsyncAndApply(async) {
+        names.forEach { NMSManager.nms.scoreboard.removeTeamEntry(team, it) }
+        NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players())
+    }
+
+    fun addTrackEntry(player: Player) = addTrackEntries(setOf(player))
+
+    fun addTrackEntries(players: Set<Player>) = checkAsyncAndApply(async) {
+        for (player in players) {
+            ScoreboardManager.trackEntryMap.getOrPut(player.uniqueId) { mutableSetOf() }.add(this)
+            NMSManager.nms.scoreboard.addTeamEntry(team, player.name)
+        }
+        NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players())
+    }
+
+    fun removeTrackEntry(player: Player) = removeTrackEntries(setOf(player))
+
+    fun removeTrackEntries(players: Set<Player>) = checkAsyncAndApply(async) {
+        for (player in players) {
+            ScoreboardManager.trackEntryMap[player.uniqueId]?.let {
+                it.remove(this)
+                if (it.isEmpty()) ScoreboardManager.trackEntryMap.remove(player.uniqueId)
+            }
+            NMSManager.nms.scoreboard.removeTeamEntry(team, player.name)
+        }
+        NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, players())
+    }
 
     fun setPrefix(prefix: String) = checkAsyncAndApply(async) {
         setPrefixJson(prefix.toJson())
