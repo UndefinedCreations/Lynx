@@ -5,19 +5,19 @@ import com.undefined.lynx.NMSManager
 import com.undefined.lynx.adventure.toJson
 import com.undefined.lynx.sidebar.sidebar.Sidebar
 import com.undefined.lynx.sidebar.sidebar.interfaces.TimerLine
-import com.undefined.lynx.util.ReturnBlock
 import com.undefined.lynx.util.toMiniMessageOrDefault
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitRunnable
+import java.util.function.Function
 
 class UpdatablePlayerTimerLine @JvmOverloads constructor(
     private val ticks: Int,
     private val async: Boolean = false,
-    run: ReturnBlock<Player, String> = ReturnBlock { "" }
+    run: Function<Player, String> = Function { "" }
 ): BasicLine(), TimerLine<UpdatablePlayerTimerLine> {
 
-    private var jsonRun: ReturnBlock<Player, String> = ReturnBlock<Player, String> { run.run(it).toMiniMessageOrDefault().toJson() }
+    private var jsonRun: Function<Player, String> = Function<Player, String> { run.apply(it).toMiniMessageOrDefault().toJson() }
     private var bukkitTask = object : BukkitRunnable() {
         override fun run() {
             update()
@@ -26,12 +26,12 @@ class UpdatablePlayerTimerLine @JvmOverloads constructor(
 
     private var isRunning: Boolean = false
 
-    fun setUpdatable(run: ReturnBlock<Player, String>) = apply {
-        jsonRun = ReturnBlock { run.run(it).toMiniMessageOrDefault().toJson() }
+    fun setUpdatable(run: Function<Player, String>) = apply {
+        jsonRun = Function { run.apply(it).toMiniMessageOrDefault().toJson() }
     }
 
-    fun setComponentUpdatable(run: ReturnBlock<Player, Component>) = apply {
-        jsonRun = ReturnBlock { run.run(it).toJson() }
+    fun setComponentUpdatable(run: Function<Player, Component>) = apply {
+        jsonRun = Function { run.apply(it).toJson() }
     }
 
     override fun stop(): UpdatablePlayerTimerLine = apply {
@@ -61,14 +61,14 @@ class UpdatablePlayerTimerLine @JvmOverloads constructor(
     override fun addPlayers(players: List<Player>) {
         super.addPlayers(players)
         for (player in this.sideBar.players) {
-            NMSManager.nms.scoreboard.setTeamPrefix(team, jsonRun.run(player))
+            NMSManager.nms.scoreboard.setTeamPrefix(team, jsonRun.apply(player))
             NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, listOf(player))
         }
     }
 
     override fun update(): UpdatablePlayerTimerLine = apply {
         for (player in this.sideBar.players) {
-            NMSManager.nms.scoreboard.setTeamPrefix(team, jsonRun.run(player))
+            NMSManager.nms.scoreboard.setTeamPrefix(team, jsonRun.apply(player))
             NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, listOf(player))
         }
     }

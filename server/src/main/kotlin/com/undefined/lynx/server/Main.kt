@@ -26,7 +26,9 @@ import com.undefined.lynx.scheduler.repeatingTask
 import com.undefined.lynx.sidebar.sidebar.lines.BasicLine
 import com.undefined.lynx.sidebar.sidebar.lines.Line
 import com.undefined.lynx.sidebar.sidebar.sidebar
+import com.undefined.lynx.tab.DefaultTabSkin
 import com.undefined.lynx.tab.TabLatency
+import com.undefined.lynx.tab.TabManager
 import com.undefined.lynx.tab.layout.tabLayout
 import com.undefined.lynx.tab.size.fillTab
 import com.undefined.stellar.StellarCommand
@@ -53,13 +55,12 @@ class Main : JavaPlugin() {
 
         StellarCommand("test")
             .addExecution<Player> {
+                sender.setSkin(DefaultTabSkin.SKIN)
+            }.register()
 
-                CustomGUIExample.create(sender.location.apply {
-                    yaw = 0f
-                    pitch = 0f
-                })
-
-
+        StellarCommand("test1")
+            .addExecution<Player> {
+                sender.resetSkin()
             }.register()
 
         nick()

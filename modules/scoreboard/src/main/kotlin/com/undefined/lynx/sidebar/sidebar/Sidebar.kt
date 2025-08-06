@@ -6,18 +6,18 @@ import com.undefined.lynx.adventure.toLegacyText
 import com.undefined.lynx.sidebar.ScoreboardManager
 import com.undefined.lynx.sidebar.order
 import com.undefined.lynx.sidebar.sidebar.lines.*
-import com.undefined.lynx.util.ReturnBlock
-import com.undefined.lynx.util.RunBlock
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Scoreboard
+import java.util.function.Consumer
+import java.util.function.Function
 
 @Suppress("UNUSED")
 class Sidebar @JvmOverloads constructor(
     title: String,
-    internal val scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
-    block: RunBlock<Sidebar> = RunBlock {}
+    block: Consumer<Sidebar> = Consumer {},
+    internal val scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
 ) {
 
     internal val players: MutableList<Player> = mutableListOf()
@@ -25,10 +25,10 @@ class Sidebar @JvmOverloads constructor(
 
     internal val lines: MutableList<BasicLine> = mutableListOf()
 
-    @JvmOverloads constructor(title: Component, scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard, block: RunBlock<Sidebar> = RunBlock {}): this(title.toLegacyText(), scoreboard, block)
+    @JvmOverloads constructor(title: Component, block: Consumer<Sidebar> = Consumer {}, scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard): this(title.toLegacyText(), block, scoreboard)
 
     init {
-        block.run(this)
+        block.accept(this)
         ScoreboardManager.activeSidebars.add(this)
     }
 
@@ -50,13 +50,18 @@ class Sidebar @JvmOverloads constructor(
         line.setUpLine(this)
         lines.add(line)
     }
+
+    fun addLine(text: String) = Line(text).apply { addLine(this) }
+
+    fun addLine(text: Component) = Line(text).apply { addLine(this) }
+
     fun addUpdatableLine(run: () -> String) = UpdatableLine(run).apply { addLine(this) }
     fun addComponentUpdatableLine(run: () -> Component) = UpdatableLine().apply {
         setComponentUpdatable(run)
         addLine(this)
     }
-    fun addUpdatablePlayerLine(run: ReturnBlock<Player, String>) = UpdatablePlayerLine(run).apply { addLine(this) }
-    fun addComponentUpdatablePlayerLine(run: ReturnBlock<Player, Component>) = UpdatablePlayerLine().apply {
+    fun addUpdatablePlayerLine(run: Function<Player, String>) = UpdatablePlayerLine(run).apply { addLine(this) }
+    fun addComponentUpdatablePlayerLine(run: Function<Player, Component>) = UpdatablePlayerLine().apply {
         setComponentUpdatable(run)
         addLine(this)
     }
@@ -64,13 +69,13 @@ class Sidebar @JvmOverloads constructor(
     fun addUpdatablePlayerTimerLine(
         ticks: Int,
         async: Boolean = false,
-        run: ReturnBlock<Player, String>
+        run: Function<Player, String>
     ) = UpdatablePlayerTimerLine(ticks, async, run).apply { addLine(this) }
     @JvmOverloads
     fun addComponentUpdatablePlayerTimerLine(
         ticks: Int,
         async: Boolean = false,
-        run: ReturnBlock<Player, Component>
+        run: Function<Player, Component>
     ) = UpdatablePlayerTimerLine(ticks, async).apply {
         setComponentUpdatable(run)
         addLine(this)
@@ -120,10 +125,10 @@ fun sidebar(
     title: String,
     scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
     block: Sidebar.() -> Unit = {}
-) = Sidebar(title, scoreboard, block)
+) = Sidebar(title, block, scoreboard)
 
 fun sidebar(
     title: Component,
     scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
     block: Sidebar.() -> Unit = {}
-) = sidebar(title.toLegacyText(), scoreboard, block)
+) = Sidebar(title, block, scoreboard)

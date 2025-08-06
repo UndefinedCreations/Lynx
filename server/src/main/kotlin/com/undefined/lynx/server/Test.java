@@ -9,6 +9,7 @@ import com.undefined.lynx.itembuilder.ItemBuilder;
 import com.undefined.lynx.itembuilder.SkullMeta;
 import com.undefined.lynx.nick.PlayerMetaUtil;
 import com.undefined.lynx.scheduler.Scheduler;
+import com.undefined.lynx.sidebar.sidebar.Sidebar;
 import com.undefined.lynx.sidebar.sidebar.lines.UpdatableLine;
 import com.undefined.stellar.StellarCommand;
 import net.md_5.bungee.api.ChatMessageType;
@@ -45,6 +46,10 @@ public class Test {
                 bukkitRunnable -> {
                     player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText("You are an operator"));
                 });
+
+        new Sidebar("test", sidebar -> {
+
+        });
 
         StellarCommand mainLevel = new StellarCommand("disguise");
 

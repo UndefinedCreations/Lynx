@@ -11,6 +11,8 @@ class Line(text: String) : BasicLine() {
 
     private var text: String = text.toJson()
 
+    constructor(text: Component) : this(text.toJson())
+
     override fun setUpLine(sidebar: Sidebar) {
         super.setUpLine(sidebar)
         NMSManager.nms.scoreboard.setTeamPrefix(team, text)

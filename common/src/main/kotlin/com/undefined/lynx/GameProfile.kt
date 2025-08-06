@@ -5,7 +5,7 @@ data class GameProfile(
     var skin: Skin
 ) {
 
-    fun clone(): GameProfile = GameProfile(name, skin)
+    fun clone(): GameProfile = GameProfile(name, Skin(skin.texture, skin.signature))
 
     override fun equals(other: Any?): Boolean {
         other ?: return super.equals(other)

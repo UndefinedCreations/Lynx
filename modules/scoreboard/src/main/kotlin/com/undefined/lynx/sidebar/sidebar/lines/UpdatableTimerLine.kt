@@ -8,14 +8,15 @@ import com.undefined.lynx.sidebar.sidebar.interfaces.TimerLine
 import com.undefined.lynx.util.toMiniMessageOrDefault
 import net.kyori.adventure.text.Component
 import org.bukkit.scheduler.BukkitRunnable
+import java.util.function.Supplier
 
 class UpdatableTimerLine @JvmOverloads constructor(
     private val ticks: Int,
     private val async: Boolean = false,
-    run: () -> String = { "" }
+    run: Supplier<String> = Supplier { "" }
 ): BasicLine(), TimerLine<UpdatableTimerLine> {
 
-    private var jsonRun: () -> String = { run.invoke().toMiniMessageOrDefault().toJson() }
+    private var jsonRun: Supplier<String> = Supplier { run.get().toMiniMessageOrDefault().toJson() }
     private var bukkitTask = object : BukkitRunnable() {
         override fun run() {
             update()
@@ -24,13 +25,13 @@ class UpdatableTimerLine @JvmOverloads constructor(
 
     private var isRunning: Boolean = false
 
-    fun setUpdatable(run: () -> String) = apply {
-        jsonRun = { run.invoke().toMiniMessageOrDefault().toJson() }
+    fun setUpdatable(run: Supplier<String>) = apply {
+        jsonRun = Supplier { run.get().toMiniMessageOrDefault().toJson() }
     }
 
-    fun setComponentUpdatable(run: () -> Component) = apply {
-        jsonRun = { run.invoke().toJson() }
-    }
+    fun setComponentUpdatable(run: Supplier<Component>) = apply {
+        jsonRun = Supplier { run.get().toJson() }
+    } 
 
     override fun setUpLine(sidebar: Sidebar) {
         super.setUpLine(sidebar)
@@ -57,7 +58,7 @@ class UpdatableTimerLine @JvmOverloads constructor(
     }
 
     override fun update(): UpdatableTimerLine = apply {
-        NMSManager.nms.scoreboard.setTeamPrefix(team, jsonRun.invoke())
+        NMSManager.nms.scoreboard.setTeamPrefix(team, jsonRun.get())
         NMSManager.nms.scoreboard.sendClientboundSetPlayerTeamPacketAddOrModify(team, this.sideBar.players)
     }
 }

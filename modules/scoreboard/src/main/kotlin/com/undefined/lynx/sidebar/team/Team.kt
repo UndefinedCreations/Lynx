@@ -16,9 +16,9 @@ import org.bukkit.scoreboard.Scoreboard
 @Suppress("UNUSED")
 class Team @JvmOverloads constructor(
     override val autoLoad: Boolean = true,
-    scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
     private val async: Boolean = false,
     order: Int = 1,
+    scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
     block: RunBlock<Team> = RunBlock {}
 ): AbstractTeam(autoLoad, scoreboard, async, order) {
 
@@ -68,19 +68,19 @@ class Team @JvmOverloads constructor(
     }
 
 
-    fun setPrefixString(prefix: String) = checkAsyncAndApply(async) {
+    fun setPrefix(prefix: String) = checkAsyncAndApply(async) {
         setPrefixJson(prefix.toJson())
     }
 
-    fun setSuffixString(suffix: String) = checkAsyncAndApply(async) {
+    fun setSuffix(suffix: String) = checkAsyncAndApply(async) {
         setSuffixJson(suffix.toJson())
     }
 
-    fun setPrefix(prefix: Component) = checkAsyncAndApply(async) {
+    fun setPrefixComponent(prefix: Component) = checkAsyncAndApply(async) {
         setPrefixJson(prefix.toJson())
     }
 
-    fun setSuffix(suffix: Component) = checkAsyncAndApply(async) {
+    fun setSuffixComponent(suffix: Component) = checkAsyncAndApply(async) {
         setSuffixJson(suffix.toJson())
     }
 
@@ -123,8 +123,8 @@ class Team @JvmOverloads constructor(
 
 fun team(
     autoLoad: Boolean = true,
-    scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
     async: Boolean = false,
     order: Int = 1,
+    scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard,
     kotlinDSL: Team.() -> Unit
-) = Team(autoLoad, scoreboard, async, order, kotlinDSL)
+) = Team(autoLoad, async, order, scoreboard, kotlinDSL)

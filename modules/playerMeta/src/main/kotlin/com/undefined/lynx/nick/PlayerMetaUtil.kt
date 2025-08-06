@@ -33,8 +33,8 @@ object PlayerMetaUtil {
         val event = PlayerNameChangeEvent(player, player.name, name)
         Bukkit.getPluginManager().callEvent(event)
         if (event.isCancelled) return
-        NMSManager.nms.nick.setName(player, name)
         manager.modifiedGameProfile[player.uniqueId]!!.name = name
+        NMSManager.nms.nick.setName(player, name)
         if (reloadPlayer) {
             manager.reloadPlayerMeta(player)
             manager.reloadPlayerMetaGlobal(player)
@@ -54,11 +54,11 @@ object PlayerMetaUtil {
         val event = PlayerSkinChangeEvent(player, player.getGameProfile().skin, skin)
         Bukkit.getPluginManager().callEvent(event)
         if (event.isCancelled) return
-        NMSManager.nms.nick.setSkin(player, skin.texture, skin.signature)
         manager.modifiedGameProfile[player.uniqueId]!!.apply {
             this.skin.texture = skin.texture
             this.skin.signature = skin.signature
         }
+        NMSManager.nms.nick.setSkin(player, skin.texture, skin.signature)
         if (reloadPlayer) {
             manager.reloadPlayerMeta(player)
             manager.reloadPlayerMetaGlobal(player)
@@ -311,7 +311,7 @@ fun Player.setName(name: String, reloadPlayer: Boolean = true) = PlayerMetaUtil.
  * @param skin The new skin
  * @param reloadPlayer If it should reload the player from all clients
  */
-fun Player.setSkin(skin: Skin, reloadPlayer: Boolean = true) = setSkin(skin.texture, skin.signature, reloadPlayer)
+fun Player.setSkin(skin: Skin, reloadPlayer: Boolean = true) = PlayerMetaUtil.setSkin(this, skin, reloadPlayer)
 
 /**
  * Changes the player skin
